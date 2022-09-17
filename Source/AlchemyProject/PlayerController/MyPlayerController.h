@@ -21,6 +21,7 @@ public:
 	void SetInventoryVisibility(bool bVisible);
 	void SetInventoryGrid(int32 NumberOfSlots);
 	void UpdateInventory(const int32 Index);
+	void ToggleAlchemyOverlay();
 
 protected:
 

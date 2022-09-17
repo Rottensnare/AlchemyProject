@@ -5,6 +5,7 @@
 
 #include "AlchemyProject/InventoryComponent.h"
 #include "AlchemyProject/PlayerCharacter.h"
+#include "AlchemyProject/PlayerController/MyPlayerController.h"
 #include "Components/BoxComponent.h"
 
 AAlchemyTable::AAlchemyTable()
@@ -37,6 +38,11 @@ void AAlchemyTable::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 	if(TempCharacter)
 	{
 		CurrentCharacter = TempCharacter;
+		AMyPlayerController* TempController = Cast<AMyPlayerController>(TempCharacter->Controller);
+		if(TempController)
+		{
+			TempController->ToggleAlchemyOverlay();
+		}
 	}
 }
 
@@ -46,6 +52,11 @@ void AAlchemyTable::OnBoxEndOverlap(UPrimitiveComponent* OverlappedComponent, AA
 	if(TempCharacter)
 	{
 		CurrentCharacter = nullptr;
+		AMyPlayerController* TempController = Cast<AMyPlayerController>(TempCharacter->Controller);
+		if(TempController)
+		{
+			TempController->ToggleAlchemyOverlay();
+		}
 	}
 }
 

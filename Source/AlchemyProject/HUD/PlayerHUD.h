@@ -28,7 +28,10 @@ public:
 
 	//Overlay for the alchemy table user interface
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<class UAlchemyOverlay> AlchemyOverlay;
+	TSubclassOf<class UAlchemyOverlay> AlchemyOverlayClass;
+
+	UPROPERTY()
+	UAlchemyOverlay* AlchemyOverlay;
 
 	UPROPERTY()
 	class UInventoryWidget* InventoryWidget;

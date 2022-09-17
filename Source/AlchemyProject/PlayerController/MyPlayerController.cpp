@@ -3,6 +3,7 @@
 
 #include "MyPlayerController.h"
 
+#include "AlchemyProject/Alchemy/AlchemyOverlay.h"
 #include "AlchemyProject/HUD/InfoBox.h"
 #include "AlchemyProject/HUD/InventorySlot.h"
 #include "AlchemyProject/HUD/InventoryWidget.h"
@@ -92,6 +93,30 @@ void AMyPlayerController::UpdateInventory(const int32 Index)
 	if(PlayerHUD && PlayerHUD->PlayerOverlay && PlayerHUD->PlayerOverlay->InventoryWidget)
 	{
 		PlayerHUD->PlayerOverlay->InventoryWidget->UpdateSlotFromInventory(Index);
+	}
+}
+
+void AMyPlayerController::ToggleAlchemyOverlay()
+{
+	PlayerHUD = PlayerHUD == nullptr ? Cast<APlayerHUD>(GetHUD()) : PlayerHUD;
+	if(PlayerHUD && PlayerHUD->AlchemyOverlay && PlayerHUD->PlayerOverlay)
+	{
+		if(PlayerHUD->AlchemyOverlay->GetVisibility() == ESlateVisibility::Collapsed)
+		{
+			PlayerHUD->AlchemyOverlay->SetVisibility(ESlateVisibility::Visible);
+			PlayerHUD->PlayerOverlay->SetVisibility(ESlateVisibility::Collapsed);
+			FInputModeGameAndUI InputModeGameAndUI;
+			SetInputMode(InputModeGameAndUI);
+			SetShowMouseCursor(true);
+		}
+		else
+		{
+			PlayerHUD->AlchemyOverlay->SetVisibility(ESlateVisibility::Collapsed);
+			PlayerHUD->PlayerOverlay->SetVisibility(ESlateVisibility::Visible);
+			FInputModeGameOnly InputModeGameOnly;
+			SetInputMode(InputModeGameOnly);
+			SetShowMouseCursor(false);
+		}
 	}
 }
 

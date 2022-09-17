@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AlchemyProject/InventoryComponent.h"
+#include "AlchemyProject/Enums/IngredientType.h"
 #include "Blueprint/UserWidget.h"
 #include "InventorySlot.generated.h"
 
@@ -39,6 +40,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Items , meta = (BindWidget))
 	class UComboBoxString* ComboBox;
 
+	UPROPERTY(EditAnywhere)
+	EItemType ItemType{EItemType::EIT_All};
+
+	UPROPERTY(EditAnywhere)
+	EIngredientType IngredientType{EIngredientType::EIT_All};
 	
 	
 };
