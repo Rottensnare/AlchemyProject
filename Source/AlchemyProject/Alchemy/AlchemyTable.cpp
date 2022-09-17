@@ -4,6 +4,7 @@
 #include "AlchemyTable.h"
 
 #include "AlchemyProject/InventoryComponent.h"
+#include "AlchemyProject/PlayerCharacter.h"
 #include "Components/BoxComponent.h"
 
 AAlchemyTable::AAlchemyTable()
@@ -23,7 +24,29 @@ AAlchemyTable::AAlchemyTable()
 void AAlchemyTable::BeginPlay()
 {
 	Super::BeginPlay();
+
+	BoxCollision->OnComponentBeginOverlap.AddDynamic(this, &AAlchemyTable::OnBoxOverlap);
+	BoxCollision->OnComponentEndOverlap.AddDynamic(this, &AAlchemyTable::OnBoxEndOverlap);
 	
+}
+
+void AAlchemyTable::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	APlayerCharacter* TempCharacter = Cast<APlayerCharacter>(OtherActor);
+	if(TempCharacter)
+	{
+		CurrentCharacter = TempCharacter;
+	}
+}
+
+void AAlchemyTable::OnBoxEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	APlayerCharacter* TempCharacter = Cast<APlayerCharacter>(OtherActor);
+	if(TempCharacter)
+	{
+		CurrentCharacter = nullptr;
+	}
 }
 
 

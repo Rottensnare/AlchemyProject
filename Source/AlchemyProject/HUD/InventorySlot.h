@@ -38,5 +38,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Items , meta = (BindWidget))
 	class UComboBoxString* ComboBox;
+
+	
 	
 };
