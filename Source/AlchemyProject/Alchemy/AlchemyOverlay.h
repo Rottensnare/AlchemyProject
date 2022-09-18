@@ -42,5 +42,7 @@ public:
 	//Clears ingredients from the alchemy inventory
 	UPROPERTY(meta = (BindWidget))
 	UButton* ClearButton;
+
+	virtual void NativeOnInitialized() override;
 	
 };

@@ -25,6 +25,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Items, meta = (BindWidget))
 	class UImage* SlotIcon;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Items, meta = (BindWidget))
+	UImage* BackgroundImage;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Items , meta = (BindWidget))
 	class UTextBlock* AmountText;
 
@@ -40,11 +43,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Items , meta = (BindWidget))
 	class UComboBoxString* ComboBox;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	EItemType ItemType{EItemType::EIT_All};
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	EIngredientType IngredientType{EIngredientType::EIT_All};
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TMap<EIngredientType, FLinearColor> IngredientTypeColors;
+
+protected:
+	virtual void NativeOnInitialized() override;
+	void InitIngredientTypeColors();
 	
 };

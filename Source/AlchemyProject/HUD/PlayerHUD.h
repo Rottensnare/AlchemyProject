@@ -38,9 +38,7 @@ public:
 
 	UPROPERTY()
 	class UScrollableInventoryWidget* ScrollableInventoryWidget;
-
 	
-
 	void AddCharacterOverlay();
 
 	

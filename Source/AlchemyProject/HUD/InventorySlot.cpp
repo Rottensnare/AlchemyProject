@@ -3,3 +3,21 @@
 
 #include "InventorySlot.h"
 
+void UInventorySlot::NativeOnInitialized()
+{
+	Super::NativeOnInitialized();
+
+	InitIngredientTypeColors();
+}
+
+void UInventorySlot::InitIngredientTypeColors()
+{
+
+	IngredientTypeColors.Emplace(EIngredientType::EIT_Substance, FLinearColor::Green);
+	IngredientTypeColors.Emplace(EIngredientType::EIT_Container, FLinearColor::Gray);
+	IngredientTypeColors.Emplace(EIngredientType::EIT_Catalyst, FLinearColor::Red);
+	IngredientTypeColors.Emplace(EIngredientType::EIT_Special, FLinearColor::Blue);
+	IngredientTypeColors.Emplace(EIngredientType::EIT_All, FLinearColor::Transparent);
+	IngredientTypeColors.Emplace(EIngredientType::EIT_Base, FLinearColor::Yellow);
+	
+}

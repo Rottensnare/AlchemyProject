@@ -36,6 +36,7 @@ void UInventoryComponent::BeginPlay()
 		InventorySlot.ItemClass = nullptr;
 		InventorySlot.ItemIcon = nullptr;
 		InventorySlot.ItemType = EItemType::EIT_MAX;
+		
 		InventorySlots.Add(InventorySlot);
 	}
 

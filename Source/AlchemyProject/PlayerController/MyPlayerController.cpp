@@ -70,7 +70,8 @@ void AMyPlayerController::SetInventoryGrid(int32 NumberOfSlots)
 	PlayerHUD = PlayerHUD == nullptr ? Cast<APlayerHUD>(GetHUD()) : PlayerHUD;
 	if(PlayerHUD == nullptr) return;
 
-	bool bIsHUDValid =	PlayerHUD->PlayerOverlay &&
+	bool bIsHUDValid =	PlayerHUD->AlchemyOverlay &&
+						PlayerHUD->PlayerOverlay &&
 						PlayerHUD->PlayerOverlay->InventoryWidget &&
 						PlayerHUD->PlayerOverlay->ScrollableInventoryWidget;
 	if(bIsHUDValid)
@@ -82,6 +83,7 @@ void AMyPlayerController::SetInventoryGrid(int32 NumberOfSlots)
 		else
 		{
 			PlayerHUD->PlayerOverlay->InventoryWidget->CreateInventoryGrid(NumberOfSlots);
+			PlayerHUD->AlchemyOverlay->CharacterInventory->CreateInventoryGrid(NumberOfSlots);
 		}
 		
 	}
@@ -90,16 +92,17 @@ void AMyPlayerController::SetInventoryGrid(int32 NumberOfSlots)
 void AMyPlayerController::UpdateInventory(const int32 Index)
 {
 	PlayerHUD = PlayerHUD == nullptr ? Cast<APlayerHUD>(GetHUD()) : PlayerHUD;
-	if(PlayerHUD && PlayerHUD->PlayerOverlay && PlayerHUD->PlayerOverlay->InventoryWidget)
+	if(PlayerHUD && PlayerHUD->PlayerOverlay && PlayerHUD->PlayerOverlay->InventoryWidget && PlayerHUD->AlchemyOverlay && PlayerHUD->AlchemyOverlay->CharacterInventory)
 	{
 		PlayerHUD->PlayerOverlay->InventoryWidget->UpdateSlotFromInventory(Index);
+		
 	}
 }
 
 void AMyPlayerController::ToggleAlchemyOverlay()
 {
 	PlayerHUD = PlayerHUD == nullptr ? Cast<APlayerHUD>(GetHUD()) : PlayerHUD;
-	if(PlayerHUD && PlayerHUD->AlchemyOverlay && PlayerHUD->PlayerOverlay)
+	if(PlayerHUD && PlayerHUD->AlchemyOverlay && PlayerHUD->AlchemyOverlay->CharacterInventory && PlayerHUD->PlayerOverlay)
 	{
 		if(PlayerHUD->AlchemyOverlay->GetVisibility() == ESlateVisibility::Collapsed)
 		{
@@ -108,6 +111,8 @@ void AMyPlayerController::ToggleAlchemyOverlay()
 			FInputModeGameAndUI InputModeGameAndUI;
 			SetInputMode(InputModeGameAndUI);
 			SetShowMouseCursor(true);
+			PlayerHUD->AlchemyOverlay->CharacterInventory->UpdateAllSlots();
+			
 		}
 		else
 		{
@@ -130,9 +135,6 @@ void AMyPlayerController::BeginPlay()
 	{
 		PlayerHUD->AddCharacterOverlay();
 	}
-
-	
-	
 }
 
 

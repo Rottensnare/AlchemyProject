@@ -64,6 +64,46 @@ void UInventoryWidget::CreateInventoryGrid(const int32 NumberOfElements)
 	}
 }
 
+void UInventoryWidget::CreateContainerGrid(const int32 NumberOfElements)
+{
+	if(InventorySlotClass)
+	{
+		for(int i = 0; i < NumberOfElements; i++)
+		{
+			UInventorySlot* TempSlot = CreateWidget<UInventorySlot>(this, InventorySlotClass);
+			TempSlot->InventoryWidget = this;
+			TempSlot->ComboBox->SetVisibility(ESlateVisibility::Collapsed);
+			TempSlot->ComboBox->SetIsEnabled(false);
+			if(i < 4)
+			{
+				TempSlot->IngredientType = EIngredientType::EIT_Substance;
+			}
+			else if(i == 4)
+			{
+				TempSlot->IngredientType = EIngredientType::EIT_Special;
+			}
+			else if(i == 5)
+			{
+				TempSlot->IngredientType = EIngredientType::EIT_Base;
+			}
+			else if(i == 6)
+			{
+				TempSlot->IngredientType = EIngredientType::EIT_Catalyst;
+			}
+			else if(i == 7)
+			{
+				TempSlot->IngredientType = EIngredientType::EIT_Container;
+			}
+			else
+			{
+				TempSlot->IngredientType = EIngredientType::EIT_All;
+			}
+			InventorySlots.Add(TempSlot);
+			InventoryGrid->AddChildToUniformGrid(TempSlot, 0, i);
+		}	
+	}
+}
+
 void UInventoryWidget::UpdateInventorySlot(const int32 Index)
 {
 	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetOwningPlayerPawn());
@@ -143,4 +183,26 @@ void UInventoryWidget::UpdateSlotFromInventory(const int32 Index)
 		InventorySlots[Index]->ComboBox->AddOption("Show Description");
 	}
 	
+}
+
+void UInventoryWidget::UpdateAllSlots()
+{
+	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetOwningPlayerPawn());
+	if(PlayerCharacter == nullptr || PlayerCharacter->GetInventoryComponent() == nullptr) return;
+	int32 Index = 0;
+	for(auto Slut : InventorySlots)
+	{
+		Slut->AmountText->SetText(FText::FromString(FString::Printf(TEXT("%d"), PlayerCharacter->GetInventoryComponent()->GetInventory()[Index].ItemAmount)));
+		Slut->SlotIcon->SetBrushFromTexture(PlayerCharacter->GetInventoryComponent()->GetInventory()[Index].ItemIcon);
+		Slut->ComboBox->ClearOptions();
+		if(PlayerCharacter->GetInventoryComponent()->GetInventory()[Index].ItemType == EItemType::EIT_Ingredient)
+		{
+			Slut->ComboBox->AddOption("Transfer_NI");
+			Slut->ComboBox->AddOption("Taste_NI");
+		}
+		Slut->ComboBox->AddOption("Description");
+		Slut->ComboBox->AddOption("Drop");
+		Slut->ComboBox->SetVisibility(ESlateVisibility::Collapsed);
+		Index++;
+	}
 }
