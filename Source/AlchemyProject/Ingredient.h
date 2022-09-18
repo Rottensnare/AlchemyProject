@@ -11,7 +11,10 @@ UINTERFACE(MinimalAPI)
 class UIngredient : public UInterface
 {
 	GENERATED_BODY()
+	
 };
+
+
 
 /**
  * 
@@ -19,5 +22,11 @@ class UIngredient : public UInterface
 class ALCHEMYPROJECT_API IIngredient
 {
 	GENERATED_BODY()
+	
+public:
+
+	class UIngredientData* IngredientData;
+
+	
 	
 };
