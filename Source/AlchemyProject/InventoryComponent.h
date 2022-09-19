@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Item.h"
+#include "Alchemy/FIngredientInfo.h"
 #include "Components/ActorComponent.h"
 #include "InventoryComponent.generated.h"
 
@@ -32,6 +33,9 @@ struct FInventoriSlot
 
 	UPROPERTY(BlueprintReadOnly)
 	EItemType ItemType;
+
+	UPROPERTY(BlueprintReadOnly)
+	FIngredientInfo IngredientInfo;
 	
 };
 

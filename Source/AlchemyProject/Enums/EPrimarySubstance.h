@@ -16,6 +16,7 @@ enum class EPrimarySubstance : uint8
 	EPS_Kappa UMETA(DisplayName = "Substance Kappa"),
 	EPS_Lambda UMETA(DisplayName = "Substance Lambda"),
 	EPS_Mu UMETA(DisplayName = "Substance Mu"),
+	EPS_None UMETA(DisplayName = "No Substance"),
 	
-	EPS_MAX UMETA(DisplayName = "DefaultMAX"),
+	EPS_MAX UMETA(DisplayName = "DefaultMax"),
 };

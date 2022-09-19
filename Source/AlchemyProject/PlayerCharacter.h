@@ -19,6 +19,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void UpdateInventorySlotAmount(const int32 Index, const int32 Amount);
 
+	UPROPERTY(BlueprintReadWrite)
+	bool bIsDoingAlchemy{false};
+
 protected:
 
 	virtual void BeginPlay() override;
@@ -70,6 +73,11 @@ private:
 	AActor* TracedActor;
 	
 	TSubclassOf<class AItem> ItemClass;
+
+	UPROPERTY(EditAnywhere)
+	float SweepRadius{200.f};
+
+	
 
 public:
 	

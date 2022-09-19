@@ -3,7 +3,10 @@
 
 #include "MyPlayerController.h"
 
+#include "AlchemyProject/Ingredient.h"
+#include "AlchemyProject/PlayerCharacter.h"
 #include "AlchemyProject/Alchemy/AlchemyOverlay.h"
+#include "AlchemyProject/Alchemy/IngredientData.h"
 #include "AlchemyProject/HUD/InfoBox.h"
 #include "AlchemyProject/HUD/InventorySlot.h"
 #include "AlchemyProject/HUD/InventoryWidget.h"
@@ -101,8 +104,9 @@ void AMyPlayerController::UpdateInventory(const int32 Index)
 
 void AMyPlayerController::ToggleAlchemyOverlay()
 {
+	CurrentCharacter = CurrentCharacter == nullptr ? Cast<APlayerCharacter>(GetCharacter()) : CurrentCharacter;
 	PlayerHUD = PlayerHUD == nullptr ? Cast<APlayerHUD>(GetHUD()) : PlayerHUD;
-	if(PlayerHUD && PlayerHUD->AlchemyOverlay && PlayerHUD->AlchemyOverlay->CharacterInventory && PlayerHUD->PlayerOverlay)
+	if(PlayerHUD && PlayerHUD->AlchemyOverlay && PlayerHUD->AlchemyOverlay->CharacterInventory && PlayerHUD->PlayerOverlay && CurrentCharacter)
 	{
 		if(PlayerHUD->AlchemyOverlay->GetVisibility() == ESlateVisibility::Collapsed)
 		{
@@ -112,7 +116,8 @@ void AMyPlayerController::ToggleAlchemyOverlay()
 			SetInputMode(InputModeGameAndUI);
 			SetShowMouseCursor(true);
 			PlayerHUD->AlchemyOverlay->CharacterInventory->UpdateAllSlots();
-			
+			CurrentCharacter->bIsDoingAlchemy = true;
+			SelectAlchemyIngredient(0);
 		}
 		else
 		{
@@ -121,6 +126,22 @@ void AMyPlayerController::ToggleAlchemyOverlay()
 			FInputModeGameOnly InputModeGameOnly;
 			SetInputMode(InputModeGameOnly);
 			SetShowMouseCursor(false);
+			CurrentCharacter->bIsDoingAlchemy = false;
+		}
+	}
+}
+
+void AMyPlayerController::SelectAlchemyIngredient(const int32 SelectedSlot)
+{
+	CurrentCharacter = CurrentCharacter == nullptr ? Cast<APlayerCharacter>(GetCharacter()) : CurrentCharacter;
+	PlayerHUD = PlayerHUD == nullptr ? Cast<APlayerHUD>(GetHUD()) : PlayerHUD;
+	if(PlayerHUD && PlayerHUD->AlchemyOverlay && PlayerHUD->AlchemyOverlay->CharacterInventory && PlayerHUD->PlayerOverlay && CurrentCharacter)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("BBBB"))
+		
+		if(CurrentCharacter->GetInventoryComponent()->GetInventory()[SelectedSlot].ItemClass->ImplementsInterface(UIngredient::StaticClass())) //If item is an ingredient
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Primary Substance: %s"), *UEnum::GetDisplayValueAsText(CurrentCharacter->GetInventoryComponent()->GetInventory()[SelectedSlot].IngredientInfo.PrimarySubstance).ToString());
 		}
 	}
 }

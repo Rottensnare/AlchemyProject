@@ -8,6 +8,7 @@ enum class ETertiarySubstance : uint8
 	ETS_Rai UMETA(DisplayName = "Substance Rai"),	//Lightning
 	ETS_Do UMETA(DisplayName = "Substance Do"),		//Earth
 	ETS_Fuu UMETA(DisplayName = "Substance Fuu"),	//Wind
+	ETS_None UMETA(DisplayName = "No Substance"),	//None
 	
 	ETS_MAX UMETA(DisplayName = "DefaultMax")
 };

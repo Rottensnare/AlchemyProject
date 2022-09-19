@@ -37,7 +37,7 @@ public:
 	
 protected:
 
-	
+	void UpdateInfoBox();
 
 
 private:

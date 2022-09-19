@@ -128,6 +128,41 @@ void APlayerCharacter::InteractButtonPressed()
 
 void APlayerCharacter::SweepInteractButtonPressed()
 {
+	if(TracedActor == nullptr) return;
+	if(TracedActor->Implements<UPickable>())
+	{
+		TArray<FHitResult> HitResults;
+		UKismetSystemLibrary::SphereTraceMulti(
+			this,
+			GetActorLocation(),
+			GetActorLocation() + FVector(0.f, 0.f, 0.1f),
+			SweepRadius,
+			 UEngineTypes::ConvertToTraceType(ECC_Visibility),
+			 false,
+			 TArray<AActor*>(),
+			 EDrawDebugTrace::Persistent,
+			 HitResults,
+			 true);
+
+		TArray<AItem*> Items;
+		for(auto HitResult : HitResults)
+		{
+			if(HitResult.GetActor()->GetClass() == TracedActor->GetClass())
+			{
+				AItem* TempItem = Cast<AItem>(HitResult.GetActor());
+				if(TempItem)
+				{
+					Items.AddUnique(TempItem);
+				}
+			}
+		}
+		if(Items.Num() > 0)
+		{
+			InventoryComponent->AddToInventory(Items[0], Items.Num());
+		}
+		TracedActor = nullptr;
+		
+	}
 	
 }
 

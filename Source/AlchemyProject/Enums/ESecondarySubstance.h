@@ -8,7 +8,7 @@ enum class ESecondarySubstance : uint8
 	ESS_Nigredo UMETA(DisplayName = "Substance Nigredo"),
 	ESS_Citrinitas UMETA(DisplayName = "Substance Citrinitas"),
 	ESS_Rubedo UMETA(DisplayName = "Substance Rubedo"),
-
+	ESS_None UMETA(DisplayName = "No Substance"),
 	
-	EPS_MAX UMETA(DisplayName = "DefaultMax"),
+	EPS_MAX UMETA(DisplayName = "DefaultMax")
 };

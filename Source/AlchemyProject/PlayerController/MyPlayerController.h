@@ -22,6 +22,7 @@ public:
 	void SetInventoryGrid(int32 NumberOfSlots);
 	void UpdateInventory(const int32 Index);
 	void ToggleAlchemyOverlay();
+	void SelectAlchemyIngredient(const int32 SelectedSlot);
 
 protected:
 
@@ -36,6 +37,9 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	bool bUseScrollableInventory{true};
+
+	UPROPERTY()
+	class APlayerCharacter* CurrentCharacter;
 
 	
 	
