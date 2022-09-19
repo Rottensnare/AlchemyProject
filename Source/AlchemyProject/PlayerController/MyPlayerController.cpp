@@ -13,8 +13,10 @@
 #include "AlchemyProject/HUD/PlayerHUD.h"
 #include "AlchemyProject/HUD/PlayerOverlay.h"
 #include "AlchemyProject/HUD/ScrollableInventoryWidget.h"
+#include "Components/Image.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
+#include "Components/UniformGridPanel.h"
 
 void AMyPlayerController::SetHUDHealth(float Health, float MaxHealth)
 {
@@ -117,7 +119,7 @@ void AMyPlayerController::ToggleAlchemyOverlay()
 			SetShowMouseCursor(true);
 			PlayerHUD->AlchemyOverlay->CharacterInventory->UpdateAllSlots();
 			CurrentCharacter->bIsDoingAlchemy = true;
-			SelectAlchemyIngredient(0);
+			
 		}
 		else
 		{
@@ -127,6 +129,8 @@ void AMyPlayerController::ToggleAlchemyOverlay()
 			SetInputMode(InputModeGameOnly);
 			SetShowMouseCursor(false);
 			CurrentCharacter->bIsDoingAlchemy = false;
+			ClearAlchemySelection();
+			
 		}
 	}
 }
@@ -135,15 +139,61 @@ void AMyPlayerController::SelectAlchemyIngredient(const int32 SelectedSlot)
 {
 	CurrentCharacter = CurrentCharacter == nullptr ? Cast<APlayerCharacter>(GetCharacter()) : CurrentCharacter;
 	PlayerHUD = PlayerHUD == nullptr ? Cast<APlayerHUD>(GetHUD()) : PlayerHUD;
-	if(PlayerHUD && PlayerHUD->AlchemyOverlay && PlayerHUD->AlchemyOverlay->CharacterInventory && PlayerHUD->PlayerOverlay && CurrentCharacter)
+	if(!PlayerHUD || !PlayerHUD->AlchemyOverlay || !PlayerHUD->AlchemyOverlay->CharacterInventory || !PlayerHUD->PlayerOverlay || !CurrentCharacter) return;
+
+	if(CurrentCharacter->GetInventoryComponent()->GetInventory()[SelectedSlot].ItemClass->ImplementsInterface(UIngredient::StaticClass())) //If item is an ingredient
 	{
-		UE_LOG(LogTemp, Warning, TEXT("BBBB"))
-		
-		if(CurrentCharacter->GetInventoryComponent()->GetInventory()[SelectedSlot].ItemClass->ImplementsInterface(UIngredient::StaticClass())) //If item is an ingredient
+		UE_LOG(LogTemp, Warning, TEXT("Primary Substance: %s"), *UEnum::GetDisplayValueAsText(CurrentCharacter->GetInventoryComponent()->GetInventory()[SelectedSlot].IngredientInfo.PrimarySubstance).ToString());
+		if(CurrentCharacter->GetInventoryComponent()->GetInventory()[SelectedSlot].IngredientInfo.IngredientType == EIngredientType::EIT_Substance)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Primary Substance: %s"), *UEnum::GetDisplayValueAsText(CurrentCharacter->GetInventoryComponent()->GetInventory()[SelectedSlot].IngredientInfo.PrimarySubstance).ToString());
+			for(int i = 0; i < 4; i++)
+			{
+				UInventorySlot* TempSlot = Cast<UInventorySlot>(PlayerHUD->AlchemyOverlay->TableInventory->GetInventoryGrid()->GetChildAt(i));
+				if(TempSlot && TempSlot->bEmpty)
+				{
+					TempSlot->InventoryIndex = SelectedSlot;
+					TempSlot->SlotIcon->SetBrushFromTexture(CurrentCharacter->GetInventoryComponent()->GetInventory()[SelectedSlot].ItemIcon);
+					TempSlot->SlotIcon->SetOpacity(AlchemyItemIconOpacity);
+					TempSlot->bEmpty = false;
+					TempSlot->BackgroundImage->SetOpacity(AlchemyItemBGOpacity);
+					break;
+				}
+			}
 		}
 	}
+
+}
+
+void AMyPlayerController::ClearAlchemySelection(const int32 Index)
+{
+	if(Index == -1)
+	{
+		for(int i = 0; i < 9; i++)
+		{
+			UInventorySlot* TempSlot = Cast<UInventorySlot>(PlayerHUD->AlchemyOverlay->TableInventory->GetInventoryGrid()->GetChildAt(i));
+			if(TempSlot)
+			{
+				TempSlot->InventoryIndex = -1;
+				TempSlot->bEmpty = true;
+				TempSlot->SlotIcon->SetBrush(FSlateBrush());
+				TempSlot->SlotIcon->SetOpacity(0.f);
+				TempSlot->BackgroundImage->SetOpacity(1.f);
+			}
+		}
+	}
+	else
+	{
+		UInventorySlot* TempSlot = Cast<UInventorySlot>(PlayerHUD->AlchemyOverlay->TableInventory->GetInventoryGrid()->GetChildAt(Index));
+		if(TempSlot)
+		{
+			TempSlot->InventoryIndex = -1;
+			TempSlot->bEmpty = true;
+			TempSlot->SlotIcon->SetBrush(FSlateBrush());
+			TempSlot->SlotIcon->SetOpacity(0.f);
+			TempSlot->BackgroundImage->SetOpacity(1.f);
+		}
+	}
+	
 }
 
 

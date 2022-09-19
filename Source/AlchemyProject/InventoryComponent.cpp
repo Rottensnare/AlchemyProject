@@ -233,6 +233,7 @@ void UInventoryComponent::AddToInventory(AItem* InItem, int32 InAmount) //TODO: 
 					Slot.IngredientInfo.PrimarySubstance = TempAlchemyItem->IngredientData.PrimarySubstance;
 					Slot.IngredientInfo.SecondarySubstance = TempAlchemyItem->IngredientData.SecondarySubstance;
 					Slot.IngredientInfo.TertiarySubstance = TempAlchemyItem->IngredientData.TertiarySubstance;
+					Slot.IngredientInfo.IngredientType = TempAlchemyItem->IngredientData.IngredientType;
 				}
 			}
 				

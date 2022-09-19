@@ -52,6 +52,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TMap<EIngredientType, FLinearColor> IngredientTypeColors;
 
+	bool bEmpty{true};
+
+	UPROPERTY(BlueprintReadWrite)
+	int32 InventoryIndex;
+
 protected:
 	virtual void NativeOnInitialized() override;
 	void InitIngredientTypeColors();

@@ -140,9 +140,12 @@ void APlayerCharacter::SweepInteractButtonPressed()
 			 UEngineTypes::ConvertToTraceType(ECC_Visibility),
 			 false,
 			 TArray<AActor*>(),
-			 EDrawDebugTrace::Persistent,
+			 EDrawDebugTrace::ForDuration,
 			 HitResults,
-			 true);
+			 true,
+			 FLinearColor::Green,
+			 FLinearColor::Red,
+			 3.f);
 
 		TArray<AItem*> Items;
 		for(auto HitResult : HitResults)
@@ -159,6 +162,10 @@ void APlayerCharacter::SweepInteractButtonPressed()
 		if(Items.Num() > 0)
 		{
 			InventoryComponent->AddToInventory(Items[0], Items.Num());
+			for(auto TempItem : Items)
+			{
+				TempItem->Destroy();
+			}
 		}
 		TracedActor = nullptr;
 		

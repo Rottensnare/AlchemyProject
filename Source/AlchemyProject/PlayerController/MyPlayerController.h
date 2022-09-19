@@ -23,6 +23,8 @@ public:
 	void UpdateInventory(const int32 Index);
 	void ToggleAlchemyOverlay();
 	void SelectAlchemyIngredient(const int32 SelectedSlot);
+	UFUNCTION(BlueprintCallable)
+	void ClearAlchemySelection(const int32 Index = -1);
 
 protected:
 
@@ -41,6 +43,11 @@ private:
 	UPROPERTY()
 	class APlayerCharacter* CurrentCharacter;
 
-	
+	//UI PARAMS
+
+	UPROPERTY(EditAnywhere)
+	float AlchemyItemBGOpacity{0.1f};
+	UPROPERTY(EditAnywhere)
+	float AlchemyItemIconOpacity{0.9f};
 	
 };

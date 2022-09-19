@@ -7,6 +7,7 @@
 #include "AlchemyProject/Enums/EPrimarySubstance.h"
 #include "AlchemyProject/Enums/ESecondarySubstance.h"
 #include "AlchemyProject/Enums/ETertiarySubstance.h"
+#include "AlchemyProject/Enums/IngredientType.h"
 
 #include "FIngredientInfo.generated.h"
 
@@ -29,4 +30,6 @@ struct FIngredientInfo
 	ETertiarySubstance TertiarySubstance{ETertiarySubstance::ETS_MAX};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UTexture2D* IngredientIcon;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EIngredientType IngredientType;
 };
