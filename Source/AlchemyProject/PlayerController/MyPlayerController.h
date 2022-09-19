@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AlchemyProject/Alchemy/FIngredientInfo.h"
 #include "AlchemyProject/Enums/EPrimarySubstance.h"
 #include "GameFramework/PlayerController.h"
 #include "MyPlayerController.generated.h"
@@ -47,6 +48,7 @@ private:
 	class APlayerCharacter* CurrentCharacter;
 
 	TArray<EPrimarySubstance> SelectedSubstances;
+	TArray<FIngredientInfo> IngredientInfos;
 
 	//UI PARAMS
 

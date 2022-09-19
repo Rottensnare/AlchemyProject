@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "FIngredientInfo.h"
 
 #include "Blueprint/UserWidget.h"
 #include "AlchemyOverlay.generated.h"
@@ -44,5 +45,7 @@ public:
 	UButton* ClearButton;
 
 	virtual void NativeOnInitialized() override;
+
+	void UpdateInfoBox(TArray<FIngredientInfo>& IngredientInfos);
 	
 };

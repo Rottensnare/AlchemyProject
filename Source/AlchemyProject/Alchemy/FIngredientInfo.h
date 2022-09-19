@@ -32,4 +32,10 @@ struct FIngredientInfo
 	class UTexture2D* IngredientIcon;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EIngredientType IngredientType;
+
+	FORCEINLINE bool operator==(const FIngredientInfo& Sub) const
+	{
+		if(PrimarySubstance == Sub.PrimarySubstance) return true;
+		else return false;
+	}
 };
