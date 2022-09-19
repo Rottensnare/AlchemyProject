@@ -158,7 +158,7 @@ void UInventoryWidget::HandleComboSelection(FString SelectedItem, ESelectInfo::T
 			InfoBox->bCollapsed = true;
 			InfoBox->DescriptionTextBox->SetText(FText());
 		}
-	}else if(SelectedItem == "Transfer_NI")
+	}else if(SelectedItem == "Transfer")
 	{
 		AMyPlayerController* TempController = Cast<AMyPlayerController>(PlayerCharacter->GetController());
 		if(TempController)
@@ -201,14 +201,14 @@ void UInventoryWidget::UpdateAllSlots()
 	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetOwningPlayerPawn());
 	if(PlayerCharacter == nullptr || PlayerCharacter->GetInventoryComponent() == nullptr) return;
 	int32 Index = 0;
-	for(auto Slut : InventorySlots)
+	for(auto& Slut : InventorySlots)
 	{
 		Slut->AmountText->SetText(FText::FromString(FString::Printf(TEXT("%d"), PlayerCharacter->GetInventoryComponent()->GetInventory()[Index].ItemAmount)));
 		Slut->SlotIcon->SetBrushFromTexture(PlayerCharacter->GetInventoryComponent()->GetInventory()[Index].ItemIcon);
 		Slut->ComboBox->ClearOptions();
 		if(PlayerCharacter->GetInventoryComponent()->GetInventory()[Index].ItemType == EItemType::EIT_Ingredient)
 		{
-			Slut->ComboBox->AddOption("Transfer_NI");
+			Slut->ComboBox->AddOption("Transfer");
 			Slut->ComboBox->AddOption("Taste_NI");
 		}
 		Slut->ComboBox->AddOption("Description");

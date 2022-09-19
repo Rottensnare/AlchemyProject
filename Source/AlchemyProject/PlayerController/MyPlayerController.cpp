@@ -17,6 +17,7 @@
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "Components/UniformGridPanel.h"
+#include "Kismet/KismetArrayLibrary.h"
 
 void AMyPlayerController::SetHUDHealth(float Health, float MaxHealth)
 {
@@ -141,27 +142,29 @@ void AMyPlayerController::SelectAlchemyIngredient(const int32 SelectedSlot)
 	PlayerHUD = PlayerHUD == nullptr ? Cast<APlayerHUD>(GetHUD()) : PlayerHUD;
 	if(!PlayerHUD || !PlayerHUD->AlchemyOverlay || !PlayerHUD->AlchemyOverlay->CharacterInventory || !PlayerHUD->PlayerOverlay || !CurrentCharacter) return;
 
-	if(CurrentCharacter->GetInventoryComponent()->GetInventory()[SelectedSlot].ItemClass->ImplementsInterface(UIngredient::StaticClass())) //If item is an ingredient
+#define INVENTORY(x) CurrentCharacter->GetInventoryComponent()->GetInventory()[x]
+	
+	if(INVENTORY(SelectedSlot).ItemClass->ImplementsInterface(UIngredient::StaticClass())) //If item is an ingredient
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Primary Substance: %s"), *UEnum::GetDisplayValueAsText(CurrentCharacter->GetInventoryComponent()->GetInventory()[SelectedSlot].IngredientInfo.PrimarySubstance).ToString());
-		if(CurrentCharacter->GetInventoryComponent()->GetInventory()[SelectedSlot].IngredientInfo.IngredientType == EIngredientType::EIT_Substance)
+		UE_LOG(LogTemp, Warning, TEXT("Primary Substance: %s"), *UEnum::GetDisplayValueAsText(INVENTORY(SelectedSlot).IngredientInfo.PrimarySubstance).ToString());
+		if(INVENTORY(SelectedSlot).IngredientInfo.IngredientType == EIngredientType::EIT_Substance)
 		{
 			for(int i = 0; i < 4; i++)
 			{
 				UInventorySlot* TempSlot = Cast<UInventorySlot>(PlayerHUD->AlchemyOverlay->TableInventory->GetInventoryGrid()->GetChildAt(i));
-				if(TempSlot && TempSlot->bEmpty)
+				if(TempSlot && TempSlot->bEmpty && !SelectedSubstances.Contains(INVENTORY(SelectedSlot).IngredientInfo.PrimarySubstance)) //No duplicate primary substances allowed
 				{
 					TempSlot->InventoryIndex = SelectedSlot;
-					TempSlot->SlotIcon->SetBrushFromTexture(CurrentCharacter->GetInventoryComponent()->GetInventory()[SelectedSlot].ItemIcon);
+					TempSlot->SlotIcon->SetBrushFromTexture(INVENTORY(SelectedSlot).ItemIcon);
 					TempSlot->SlotIcon->SetOpacity(AlchemyItemIconOpacity);
 					TempSlot->bEmpty = false;
 					TempSlot->BackgroundImage->SetOpacity(AlchemyItemBGOpacity);
+					SelectedSubstances.AddUnique(INVENTORY(SelectedSlot).IngredientInfo.PrimarySubstance);
 					break;
 				}
 			}
 		}
 	}
-
 }
 
 void AMyPlayerController::ClearAlchemySelection(const int32 Index)
@@ -177,20 +180,22 @@ void AMyPlayerController::ClearAlchemySelection(const int32 Index)
 				TempSlot->bEmpty = true;
 				TempSlot->SlotIcon->SetBrush(FSlateBrush());
 				TempSlot->SlotIcon->SetOpacity(0.f);
-				TempSlot->BackgroundImage->SetOpacity(1.f);
+				TempSlot->BackgroundImage->SetOpacity(0.25f);
 			}
 		}
+		SelectedSubstances.Empty();
 	}
 	else
 	{
 		UInventorySlot* TempSlot = Cast<UInventorySlot>(PlayerHUD->AlchemyOverlay->TableInventory->GetInventoryGrid()->GetChildAt(Index));
 		if(TempSlot)
 		{
+			if(CurrentCharacter->GetInventoryComponent()->GetInventory().Num() > TempSlot->InventoryIndex && TempSlot->InventoryIndex >= 0) SelectedSubstances.Remove(INVENTORY(TempSlot->InventoryIndex).IngredientInfo.PrimarySubstance);
 			TempSlot->InventoryIndex = -1;
 			TempSlot->bEmpty = true;
 			TempSlot->SlotIcon->SetBrush(FSlateBrush());
 			TempSlot->SlotIcon->SetOpacity(0.f);
-			TempSlot->BackgroundImage->SetOpacity(1.f);
+			TempSlot->BackgroundImage->SetOpacity(0.25f);
 		}
 	}
 	

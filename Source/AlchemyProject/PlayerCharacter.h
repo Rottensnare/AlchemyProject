@@ -41,6 +41,8 @@ private:
 	class UHealthComponent* HealthComponent;
 	UPROPERTY(VisibleAnywhere)
 	class UInventoryComponent* InventoryComponent;
+	UPROPERTY(VisibleAnywhere)
+	class UAlchemyComponent* AlchemyComponent;
 
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	class USpringArmComponent* CameraBoom;

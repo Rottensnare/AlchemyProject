@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AlchemyProject/Enums/EPrimarySubstance.h"
 #include "GameFramework/PlayerController.h"
 #include "MyPlayerController.generated.h"
 
@@ -22,6 +23,8 @@ public:
 	void SetInventoryGrid(int32 NumberOfSlots);
 	void UpdateInventory(const int32 Index);
 	void ToggleAlchemyOverlay();
+	
+	UFUNCTION(BlueprintCallable)
 	void SelectAlchemyIngredient(const int32 SelectedSlot);
 	UFUNCTION(BlueprintCallable)
 	void ClearAlchemySelection(const int32 Index = -1);
@@ -43,11 +46,15 @@ private:
 	UPROPERTY()
 	class APlayerCharacter* CurrentCharacter;
 
+	TArray<EPrimarySubstance> SelectedSubstances;
+
 	//UI PARAMS
 
 	UPROPERTY(EditAnywhere)
 	float AlchemyItemBGOpacity{0.1f};
 	UPROPERTY(EditAnywhere)
 	float AlchemyItemIconOpacity{0.9f};
+
+	
 	
 };
