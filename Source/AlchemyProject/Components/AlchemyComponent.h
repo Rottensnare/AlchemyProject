@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AlchemyProject/Alchemy/FAlchemyPackage.h"
 #include "Components/ActorComponent.h"
 #include "AlchemyComponent.generated.h"
 
@@ -22,7 +23,11 @@ protected:
 
 private:
 	
-	
+	UFUNCTION(BlueprintCallable)
+	void CreateAlchemyProduct(const FAlchemyPackage& AlchemyPackage);
 
-		
+	TArray<FRecipe> KnownRecipes;
+
+	UFUNCTION(BlueprintCallable)
+	FAlchemyPackage CreateAlchemyPackage(const TArray<FIngredientInfo>& InIngredientInfos, AAlchemyBase* InAlchemyBase);
 };

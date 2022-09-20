@@ -41,7 +41,7 @@ private:
 	class UHealthComponent* HealthComponent;
 	UPROPERTY(VisibleAnywhere)
 	class UInventoryComponent* InventoryComponent;
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Components, meta = (AllowPrivateAccess = "true"))
 	class UAlchemyComponent* AlchemyComponent;
 
 	UPROPERTY(VisibleAnywhere, Category = Camera)

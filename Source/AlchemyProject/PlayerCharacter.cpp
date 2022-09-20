@@ -7,6 +7,7 @@
 #include "InventoryComponent.h"
 #include "Item.h"
 #include "Camera/CameraComponent.h"
+#include "Components/AlchemyComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Interfaces/Pickable.h"
 #include "Kismet/GameplayStatics.h"
@@ -21,6 +22,7 @@ APlayerCharacter::APlayerCharacter()
 
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
+	AlchemyComponent = CreateDefaultSubobject<UAlchemyComponent>(TEXT("AlchemyComponent"));
 
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(GetMesh());

@@ -12,3 +12,15 @@ enum class EIngredientType : uint8
 
 	EIT_MAX UMETA(DisplayName = "DefaultMax")
 };
+
+UENUM(BlueprintType)
+enum class EBaseType : uint8
+{
+	EBT_Water UMETA(DisplayName = "Water"),
+	EBT_Alcohol UMETA(DisplayName = "Alcohol"),
+	EBT_Oil UMETA(DisplayName = "Oil"),
+	EBT_Powder UMETA(DisplayName = "Powder"),
+	EBT_Gas UMETA(DisplayName = "Gas"),
+
+	EBT_MAX UMETA(DisplayName = "DefaultMax"),
+};

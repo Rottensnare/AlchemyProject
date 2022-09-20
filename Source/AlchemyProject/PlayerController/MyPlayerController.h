@@ -47,7 +47,9 @@ private:
 	UPROPERTY()
 	class APlayerCharacter* CurrentCharacter;
 
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TArray<EPrimarySubstance> SelectedSubstances;
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TArray<FIngredientInfo> IngredientInfos;
 
 	//UI PARAMS
