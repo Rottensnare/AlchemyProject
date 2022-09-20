@@ -3,12 +3,13 @@
 UENUM(BlueprintType)
 enum class ETertiarySubstance : uint8
 {
-	ETS_Hi UMETA(DisplayName = "Substance Hi"),		//Fire
-	ETS_Koo UMETA(DisplayName = "Substance Koo"),   //Ice
-	ETS_Rai UMETA(DisplayName = "Substance Rai"),	//Lightning
-	ETS_Do UMETA(DisplayName = "Substance Do"),		//Earth
-	ETS_Fuu UMETA(DisplayName = "Substance Fuu"),	//Wind
-	ETS_None UMETA(DisplayName = "No Substance"),	//None
+	//Fire
+	ETS_Hi UMETA(DisplayName = "Hi"),		//Ice
+	ETS_Koo UMETA(DisplayName = "Koo"),   //Lightning
+	ETS_Rai UMETA(DisplayName = "Rai"),	//Earth
+	ETS_Do UMETA(DisplayName = "Do"),		//Wind
+	ETS_Fuu UMETA(DisplayName = "Fuu"),	//None
+	ETS_None UMETA(DisplayName = "No Tertiary Substance"),	
 	
 	ETS_MAX UMETA(DisplayName = "DefaultMax")
 };

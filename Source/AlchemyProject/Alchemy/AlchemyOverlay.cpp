@@ -17,6 +17,14 @@ void UAlchemyOverlay::NativeOnInitialized()
 
 void UAlchemyOverlay::UpdateInfoBox(TArray<FIngredientInfo>& IngredientInfos)
 {
+	TMap<ESecondarySubstance, int32> SecondarySubstanceAmountMap;
+	for(auto& InInfo : IngredientInfos)
+	{
+		if(!SecondarySubstanceAmountMap.Contains(InInfo.SecondarySubstance)) SecondarySubstanceAmountMap.Emplace(InInfo.SecondarySubstance, 1);
+		else SecondarySubstanceAmountMap[InInfo.SecondarySubstance]++;
+	}
+	
+	
 	FString DescriptionString{"Primary: \n"};
 	for(auto& InInfo : IngredientInfos)
 	{
@@ -26,11 +34,11 @@ void UAlchemyOverlay::UpdateInfoBox(TArray<FIngredientInfo>& IngredientInfos)
 		}
 	}
 	DescriptionString.Append("Secondary: \n");
-	for(auto& InInfo : IngredientInfos)
+	for(auto& InInfo : SecondarySubstanceAmountMap)
 	{
-		if(InInfo.SecondarySubstance != ESecondarySubstance::ESS_None)
+		if(InInfo.Key != ESecondarySubstance::ESS_None)
 		{
-			DescriptionString.Append(FString::Printf(TEXT("%s \n"), *UEnum::GetDisplayValueAsText(InInfo.SecondarySubstance).ToString()));
+			DescriptionString.Append(FString::Printf(TEXT("%s  X%d\n"), *UEnum::GetDisplayValueAsText(InInfo.Key).ToString(), InInfo.Value));
 		}
 	}
 	ProductInfoBox->DescriptionTextBox->SetText(FText::FromString(DescriptionString));

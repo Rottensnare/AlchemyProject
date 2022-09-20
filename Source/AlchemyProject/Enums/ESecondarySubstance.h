@@ -4,11 +4,11 @@
 UENUM(BlueprintType)
 enum class ESecondarySubstance : uint8
 {
-	ESS_Albedo UMETA(DisplayName = "Substance Albedo"),
-	ESS_Nigredo UMETA(DisplayName = "Substance Nigredo"),
-	ESS_Citrinitas UMETA(DisplayName = "Substance Citrinitas"),
-	ESS_Rubedo UMETA(DisplayName = "Substance Rubedo"),
-	ESS_None UMETA(DisplayName = "No Substance"),
+	ESS_Albedo UMETA(DisplayName = "Albedo"),
+	ESS_Nigredo UMETA(DisplayName = "Nigredo"),
+	ESS_Citrinitas UMETA(DisplayName = "Citrinitas"),
+	ESS_Rubedo UMETA(DisplayName = "Rubedo"),
+	ESS_None UMETA(DisplayName = "No Secondary Substance"),
 	
 	EPS_MAX UMETA(DisplayName = "DefaultMax")
 };
