@@ -42,4 +42,11 @@ private:
 	UPROPERTY(EditAnywhere)
 	class UBoxComponent* BoxCollision;
 
+	UPROPERTY(EditAnywhere)
+	USceneComponent* PotionSpawnPoint;
+
+public:
+
+	FORCEINLINE USceneComponent* GetPotionSpawnPoint() const {return PotionSpawnPoint;}
+
 };

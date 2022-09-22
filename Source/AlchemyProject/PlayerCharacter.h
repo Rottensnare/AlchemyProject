@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Alchemy/AlchemyItem.h"
 #include "GameFramework/Character.h"
 #include "PlayerCharacter.generated.h"
 
@@ -79,11 +80,13 @@ private:
 	UPROPERTY(EditAnywhere)
 	float SweepRadius{200.f};
 
-	
+	UPROPERTY(VisibleAnywhere)
+	class AAlchemyTable* CurrentAlchemyTable;
 
 public:
 	
 	FORCEINLINE UInventoryComponent* GetInventoryComponent() const {return InventoryComponent;}
-
+	FORCEINLINE void SetAlchemyTable(AAlchemyTable* InTable) {CurrentAlchemyTable = InTable;}
+	FORCEINLINE AAlchemyTable* GetAlchemyTable() const {return CurrentAlchemyTable;}
 	
 };

@@ -42,11 +42,9 @@ void APlayerCharacter::BeginPlay()
 
 	MyPlayerController = Cast<AMyPlayerController>(Controller);
 
-	if(InventoryComponent)
-	{
-		InventoryComponent->Character = this;
-	}
-
+	if(InventoryComponent) InventoryComponent->Character = this;
+	if(AlchemyComponent) AlchemyComponent->Character = this;
+	
 	GetWorldTimerManager().SetTimer(HUDInitTimer, this, &APlayerCharacter::HUDInitTimerFinished, HUDInitTime);
 	
 }

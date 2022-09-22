@@ -11,7 +11,6 @@
 #include "HUD/PlayerHUD.h"
 #include "HUD/ScrollableInventoryWidget.h"
 #include "Kismet/GameplayStatics.h"
-#include "Kismet/KismetArrayLibrary.h"
 #include "PlayerController/MyPlayerController.h"
 
 // Sets default values for this component's properties
@@ -167,10 +166,8 @@ void UInventoryComponent::AddToInventory(AItem* InItem, int32 InAmount) //TODO: 
 	int32 ItemIndex{-1};
 	UE_LOG(LogTemp, Warning, TEXT("AddToInventory: Class Name: %s"),  *InItem->GetClass()->GetName());
 	
-
 	for(auto& Slot : InventorySlots)
 	{
-		
 		if(Slot.ItemClass == InItem->GetClass() && Slot.ItemAmount < InItem->GetMaxStackSize())
 		{
 			if(Slot.ItemAmount + InAmount <= InItem->GetMaxStackSize())

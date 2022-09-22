@@ -18,6 +18,9 @@ AAlchemyTable::AAlchemyTable()
 	BoxCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollision"));
 	BoxCollision->SetupAttachment(RootComponent);
 
+	PotionSpawnPoint = CreateDefaultSubobject<USceneComponent>(TEXT("PotionSpawnPoint"));
+	PotionSpawnPoint->SetupAttachment(RootComponent);
+
 	AlchemyInventory = CreateDefaultSubobject<UInventoryComponent>(TEXT("AlchemyInventory"));
 
 }
@@ -38,6 +41,7 @@ void AAlchemyTable::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 	if(TempCharacter)
 	{
 		CurrentCharacter = TempCharacter;
+		TempCharacter->SetAlchemyTable(this);
 		AMyPlayerController* TempController = Cast<AMyPlayerController>(TempCharacter->Controller);
 		if(TempController)
 		{
@@ -52,6 +56,7 @@ void AAlchemyTable::OnBoxEndOverlap(UPrimitiveComponent* OverlappedComponent, AA
 	if(TempCharacter)
 	{
 		CurrentCharacter = nullptr;
+		TempCharacter->SetAlchemyTable(nullptr);
 		AMyPlayerController* TempController = Cast<AMyPlayerController>(TempCharacter->Controller);
 		if(TempController)
 		{

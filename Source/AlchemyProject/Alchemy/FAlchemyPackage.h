@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "FIngredientInfo.h"
+#include "Engine/DataTable.h"
 #include "FAlchemyPackage.generated.h"
 
 USTRUCT(BlueprintType)
@@ -14,20 +15,52 @@ struct FAlchemyPackage
 	class AAlchemyBase* AlchemyBase;
 };
 
-USTRUCT()
-struct FRecipe
+USTRUCT(BlueprintType)
+struct FRecipeTable : public FTableRowBase
 {
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere)
-	TArray<EPrimarySubstance> RequiredSubstances;
+	TMap<EPrimarySubstance, int32> AmountPerSubstanceMap;
 
 	UPROPERTY(EditAnywhere)
 	AAlchemyBase* RequiredBase;
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<class APotion> PotionClass;
+	TSubclassOf<class AAlchemyProduct> AlchemyClass;
 
 	UPROPERTY(EditAnywhere)
 	float BaseSuccessChance{1.f};
+	
 };
+
+USTRUCT(BlueprintType)
+struct FRecipe
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere)
+	TMap<EPrimarySubstance, int32> AmountPerSubstanceMap;
+
+	UPROPERTY(EditAnywhere)
+	AAlchemyBase* RequiredBase;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AAlchemyProduct> AlchemyClass;
+
+	UPROPERTY(EditAnywhere)
+	float BaseSuccessChance{1.f};
+	
+	FORCEINLINE bool operator ==(const FRecipe& Recipe) const
+	{
+		for(const auto& Subs : Recipe.AmountPerSubstanceMap)
+		{
+			if(!AmountPerSubstanceMap.Contains(Subs.Key))
+			{
+				return false;
+			}
+		}
+		return Recipe.RequiredBase != RequiredBase ?  false : true;
+	}
+};
+

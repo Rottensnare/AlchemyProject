@@ -9,6 +9,7 @@
 #include "InventoryComponent.generated.h"
 
 //BUG: Not really a bug, but this component probably needs to be attached to the player controller because if the character dies, it loses the inventory, probably...
+//TODO: Make the inventory more like Skyrim inventory, otherwise this alchemy system isn't going to work that well. 
 
 USTRUCT(BlueprintType)
 struct FInventoriSlot
@@ -19,7 +20,7 @@ struct FInventoriSlot
 	UPROPERTY(BlueprintReadOnly)
 	int32 SlotId;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadOnly)
 	int32 ItemAmount;
 
 	//UPROPERTY(BlueprintReadWrite)
