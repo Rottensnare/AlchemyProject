@@ -8,6 +8,7 @@
 #include "AlchemyProject/Alchemy/AlchemyBase.h"
 #include "AlchemyProject/Alchemy/AlchemyProduct.h"
 #include "AlchemyProject/Alchemy/AlchemyTable.h"
+#include "AlchemyProject/PlayerController/MyPlayerController.h"
 #include "Components/CapsuleComponent.h"
 
 
@@ -74,14 +75,19 @@ void UAlchemyComponent::CreateAlchemyProduct(const FAlchemyPackage& AlchemyPacka
 				}
 			}
 			if(!bAllSubstancesMatch) continue;
+			
 			//Recipe was found
-			UE_LOG(LogTemp, Warning, TEXT("Compatible recipe: %s"), *RecipeDataRow->AlchemyClass->GetName())
+			if(RecipeDataRow->AlchemyClass) UE_LOG(LogTemp, Warning, TEXT("Compatible recipe: %s"), *RecipeDataRow->AlchemyClass->GetName())
 			//TODO: Create a spawn point for potions inside the Alchemy Table Class
+			
 			Character = Character == nullptr ? Cast<APlayerCharacter>(GetOwner()) : Character;
+			if(Character == nullptr) return;
 			
 			Aitem = GetWorld()->SpawnActor<AAlchemyProduct>(RecipeDataRow->AlchemyClass, Character->GetActorLocation() + Character->GetActorForwardVector() * 25.f, Character->GetActorRotation());
 			Aitem->OnInitialized.AddDynamic(this, &UAlchemyComponent::AddAitemToInventory);
 			Aitem->InitProperties(Recipe);
+			AMyPlayerController* TempController = Cast<AMyPlayerController>(Character->GetController());
+			if(TempController) TempController->PlaySound(FName("PotionCreated"));
 		}
 	}
 

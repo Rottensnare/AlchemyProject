@@ -9,6 +9,7 @@
 #include "AlchemyProject/Alchemy/IngredientData.h"
 #include "AlchemyProject/Alchemy/UI/AlchemyScrollBox.h"
 #include "AlchemyProject/Components/AlchemyComponent.h"
+#include "AlchemyProject/Enums/CustomDataTables.h"
 #include "AlchemyProject/HUD/InventorySlot.h"
 #include "AlchemyProject/HUD/InventoryWidget.h"
 #include "AlchemyProject/HUD/PlayerHUD.h"
@@ -18,7 +19,9 @@
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "Components/UniformGridPanel.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetArrayLibrary.h"
+#include "Sound/SoundCue.h"
 
 void AMyPlayerController::SetHUDHealth(float Health, float MaxHealth)
 {
@@ -239,6 +242,19 @@ void AMyPlayerController::FindIngredients(const FName& RecipeName)
 			}
 		}
 	}
+}
+
+void AMyPlayerController::PlaySound(const FName& SFXName)
+{
+	FString SFXDataTablePath(TEXT("DataTable'/Game/Assets/Datatables/SoundFXDataTable.SoundFXDataTable'"));
+	UDataTable* SFXTableObject = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, *SFXDataTablePath));
+	if(!SFXTableObject) return;
+	
+	FSoundEffectTable* SFXDataRow = nullptr;
+	SFXDataRow = SFXTableObject->FindRow<FSoundEffectTable>(SFXName, TEXT(""));
+	
+	if(SFXDataRow && SFXDataRow->SFX) UGameplayStatics::PlaySound2D(this, SFXDataRow->SFX);
+	
 }
 
 

@@ -32,6 +32,8 @@ public:
 
 	void FindIngredients(const FName& RecipeName);
 
+	void PlaySound(const FName& SFXName);
+
 protected:
 
 	virtual void BeginPlay() override;
