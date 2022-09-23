@@ -32,6 +32,9 @@ void UAlchemyComponent::BeginPlay()
 void UAlchemyComponent::CreateAlchemyProduct(const FAlchemyPackage& AlchemyPackage)
 {
 	//Checking which substances are selected
+
+	if(AlchemyPackage.IngredientInfos.Num() < 2) return; //No potion exists that can be made with less than 2 different substances
+	
 	FString TempString{""};
 	TArray<EPrimarySubstance> PrimarySubstances;
 	TMap<ESecondarySubstance, int32> SecondarySubstances;
@@ -54,16 +57,17 @@ void UAlchemyComponent::CreateAlchemyProduct(const FAlchemyPackage& AlchemyPacka
 	if(!RecipeTableObject) return;
 	
 	FRecipeTable* RecipeDataRow = nullptr;
-	bool bAllSubstancesMatch{true};
+	
 	
 	for(const auto& Recipe : KnownRecipeNames)
 	{
+		bool bAllSubstancesMatch{true};
 		RecipeDataRow = RecipeTableObject->FindRow<FRecipeTable>(Recipe, TEXT(""));
 		if(RecipeDataRow)
 		{
-			for(const auto& Substance : PrimarySubstances)
+			for(const auto& SubstanceMapRow : RecipeDataRow->AmountPerSubstanceMap)
 			{
-				if(!RecipeDataRow->AmountPerSubstanceMap.Contains(Substance))
+				if(!PrimarySubstances.Contains(SubstanceMapRow.Key))
 				{
 					bAllSubstancesMatch = false;
 					break;
@@ -75,7 +79,7 @@ void UAlchemyComponent::CreateAlchemyProduct(const FAlchemyPackage& AlchemyPacka
 			//TODO: Create a spawn point for potions inside the Alchemy Table Class
 			Character = Character == nullptr ? Cast<APlayerCharacter>(GetOwner()) : Character;
 			
-			Aitem = GetWorld()->SpawnActor<AAlchemyProduct>(RecipeDataRow->AlchemyClass, FVector(2500.f, 1500.f, 100.f), Character->GetActorRotation());
+			Aitem = GetWorld()->SpawnActor<AAlchemyProduct>(RecipeDataRow->AlchemyClass, Character->GetActorLocation() + Character->GetActorForwardVector() * 25.f, Character->GetActorRotation());
 			Aitem->OnInitialized.AddDynamic(this, &UAlchemyComponent::AddAitemToInventory);
 			Aitem->InitProperties(Recipe);
 		}
