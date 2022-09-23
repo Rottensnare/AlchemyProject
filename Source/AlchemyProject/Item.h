@@ -39,8 +39,6 @@ protected:
 
 	virtual void BeginPlay() override;
 
-private:
-
 	UPROPERTY(EditAnywhere)
 	class UTexture2D* ImageInSlot;
 
@@ -60,6 +58,10 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	EItemType ItemType{EItemType::EIT_Misc};
+
+private:
+
+
 
 public:
 

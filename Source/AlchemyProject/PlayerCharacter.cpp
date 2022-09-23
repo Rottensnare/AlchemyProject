@@ -7,6 +7,7 @@
 #include "InventoryComponent.h"
 #include "Item.h"
 #include "Camera/CameraComponent.h"
+#include "Components/AlchemyComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Interfaces/Pickable.h"
 #include "Kismet/GameplayStatics.h"
@@ -21,6 +22,7 @@ APlayerCharacter::APlayerCharacter()
 
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
+	AlchemyComponent = CreateDefaultSubobject<UAlchemyComponent>(TEXT("AlchemyComponent"));
 
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(GetMesh());
@@ -40,11 +42,9 @@ void APlayerCharacter::BeginPlay()
 
 	MyPlayerController = Cast<AMyPlayerController>(Controller);
 
-	if(InventoryComponent)
-	{
-		InventoryComponent->Character = this;
-	}
-
+	if(InventoryComponent) InventoryComponent->Character = this;
+	if(AlchemyComponent) AlchemyComponent->Character = this;
+	
 	GetWorldTimerManager().SetTimer(HUDInitTimer, this, &APlayerCharacter::HUDInitTimerFinished, HUDInitTime);
 	
 }
@@ -128,6 +128,48 @@ void APlayerCharacter::InteractButtonPressed()
 
 void APlayerCharacter::SweepInteractButtonPressed()
 {
+	if(TracedActor == nullptr) return;
+	if(TracedActor->Implements<UPickable>())
+	{
+		TArray<FHitResult> HitResults;
+		UKismetSystemLibrary::SphereTraceMulti(
+			this,
+			GetActorLocation(),
+			GetActorLocation() + FVector(0.f, 0.f, 0.1f),
+			SweepRadius,
+			 UEngineTypes::ConvertToTraceType(ECC_Visibility),
+			 false,
+			 TArray<AActor*>(),
+			 EDrawDebugTrace::ForDuration,
+			 HitResults,
+			 true,
+			 FLinearColor::Green,
+			 FLinearColor::Red,
+			 3.f);
+
+		TArray<AItem*> Items;
+		for(auto HitResult : HitResults)
+		{
+			if(HitResult.GetActor()->GetClass() == TracedActor->GetClass())
+			{
+				AItem* TempItem = Cast<AItem>(HitResult.GetActor());
+				if(TempItem)
+				{
+					Items.AddUnique(TempItem);
+				}
+			}
+		}
+		if(Items.Num() > 0)
+		{
+			InventoryComponent->AddToInventory(Items[0], Items.Num());
+			for(auto TempItem : Items)
+			{
+				TempItem->Destroy();
+			}
+		}
+		TracedActor = nullptr;
+		
+	}
 	
 }
 

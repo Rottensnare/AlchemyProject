@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Alchemy/FIngredientInfo.h"
 #include "UObject/Interface.h"
 #include "Ingredient.generated.h"
 
@@ -11,7 +12,10 @@ UINTERFACE(MinimalAPI)
 class UIngredient : public UInterface
 {
 	GENERATED_BODY()
+	
 };
+
+
 
 /**
  * 
@@ -19,5 +23,9 @@ class UIngredient : public UInterface
 class ALCHEMYPROJECT_API IIngredient
 {
 	GENERATED_BODY()
+
+public:
+	
+	//FIngredientInfo IngredientInfo;
 	
 };

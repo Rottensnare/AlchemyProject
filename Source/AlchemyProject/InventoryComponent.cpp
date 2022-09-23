@@ -3,13 +3,14 @@
 
 #include "InventoryComponent.h"
 
+#include "Ingredient.h"
 #include "Item.h"
 #include "PlayerCharacter.h"
+#include "Alchemy/AlchemyItem.h"
 #include "HUD/InventoryWidget.h"
 #include "HUD/PlayerHUD.h"
 #include "HUD/ScrollableInventoryWidget.h"
 #include "Kismet/GameplayStatics.h"
-#include "Kismet/KismetArrayLibrary.h"
 #include "PlayerController/MyPlayerController.h"
 
 // Sets default values for this component's properties
@@ -36,6 +37,7 @@ void UInventoryComponent::BeginPlay()
 		InventorySlot.ItemClass = nullptr;
 		InventorySlot.ItemIcon = nullptr;
 		InventorySlot.ItemType = EItemType::EIT_MAX;
+		
 		InventorySlots.Add(InventorySlot);
 	}
 
@@ -161,14 +163,11 @@ void UInventoryComponent::ShowInventory(bool bVisible)
 
 void UInventoryComponent::AddToInventory(AItem* InItem, int32 InAmount) //TODO: Might need to make this into several smaller functions
 {
-	
 	int32 ItemIndex{-1};
 	UE_LOG(LogTemp, Warning, TEXT("AddToInventory: Class Name: %s"),  *InItem->GetClass()->GetName());
 	
-
 	for(auto& Slot : InventorySlots)
 	{
-		
 		if(Slot.ItemClass == InItem->GetClass() && Slot.ItemAmount < InItem->GetMaxStackSize())
 		{
 			if(Slot.ItemAmount + InAmount <= InItem->GetMaxStackSize())
@@ -220,6 +219,21 @@ void UInventoryComponent::AddToInventory(AItem* InItem, int32 InAmount) //TODO: 
 			Slot.ItemAmount = InAmount;
 			Slot.ItemIcon = InItem->GetSlotImage();
 			Slot.ItemType = InItem->GetItemType();
+			if(Slot.ItemClass->ImplementsInterface(UIngredient::StaticClass()))
+			{
+				AAlchemyItem* TempAlchemyItem = Cast<AAlchemyItem>(InItem);
+				if(TempAlchemyItem)
+				{
+					Slot.IngredientInfo.IngredientIcon = TempAlchemyItem->GetSlotImage();
+					Slot.IngredientInfo.IngredientQuality = TempAlchemyItem->IngredientData.IngredientQuality;
+					Slot.IngredientInfo.IngredientQuantityValue = TempAlchemyItem->IngredientData.IngredientQuantityValue;
+					Slot.IngredientInfo.PrimarySubstance = TempAlchemyItem->IngredientData.PrimarySubstance;
+					Slot.IngredientInfo.SecondarySubstance = TempAlchemyItem->IngredientData.SecondarySubstance;
+					Slot.IngredientInfo.TertiarySubstance = TempAlchemyItem->IngredientData.TertiarySubstance;
+					Slot.IngredientInfo.IngredientType = TempAlchemyItem->IngredientData.IngredientType;
+				}
+			}
+				
 			if(ItemTotalAmountMap.Contains(Slot.ItemClass))
 			{
 				ItemTotalAmountMap[Slot.ItemClass] += InAmount;
@@ -248,6 +262,5 @@ void UInventoryComponent::AddToInventory(AItem* InItem, int32 InAmount) //TODO: 
 	//UE_LOG(LogTemp, Warning, TEXT("AddToInventory: Amount in slot 0: %d"), InventorySlots[0].ItemAmount)
 	//UE_LOG(LogTemp, Warning, TEXT("AddToInventory: Amount in slot 1: %d"), InventorySlots[1].ItemAmount)
 	//UE_LOG(LogTemp, Warning, TEXT("AddToInventory: Total Item Amount: %d"), ItemTotalAmountMap[InItem->GetClass()])
-	
 }
 

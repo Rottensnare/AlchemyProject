@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Alchemy/AlchemyItem.h"
 #include "GameFramework/Character.h"
 #include "PlayerCharacter.generated.h"
 
@@ -18,6 +19,9 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	UFUNCTION(BlueprintCallable)
 	void UpdateInventorySlotAmount(const int32 Index, const int32 Amount);
+
+	UPROPERTY(BlueprintReadWrite)
+	bool bIsDoingAlchemy{false};
 
 protected:
 
@@ -38,6 +42,8 @@ private:
 	class UHealthComponent* HealthComponent;
 	UPROPERTY(VisibleAnywhere)
 	class UInventoryComponent* InventoryComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Components, meta = (AllowPrivateAccess = "true"))
+	class UAlchemyComponent* AlchemyComponent;
 
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	class USpringArmComponent* CameraBoom;
@@ -71,9 +77,16 @@ private:
 	
 	TSubclassOf<class AItem> ItemClass;
 
+	UPROPERTY(EditAnywhere)
+	float SweepRadius{200.f};
+
+	UPROPERTY(VisibleAnywhere)
+	class AAlchemyTable* CurrentAlchemyTable;
+
 public:
 	
 	FORCEINLINE UInventoryComponent* GetInventoryComponent() const {return InventoryComponent;}
-
+	FORCEINLINE void SetAlchemyTable(AAlchemyTable* InTable) {CurrentAlchemyTable = InTable;}
+	FORCEINLINE AAlchemyTable* GetAlchemyTable() const {return CurrentAlchemyTable;}
 	
 };

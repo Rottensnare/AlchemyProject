@@ -20,6 +20,9 @@ public:
 	void CreateInventoryGrid(const int32 NumberOfElements);
 
 	UFUNCTION(BlueprintCallable)
+	void CreateContainerGrid(const int32 NumberOfElements);
+
+	UFUNCTION(BlueprintCallable)
 	void UpdateInventorySlot(const int32 Index);
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
@@ -29,10 +32,12 @@ public:
 	void HandleComboSelection(FString SelectedItem, ESelectInfo::Type SelectionType);
 
 	void UpdateSlotFromInventory(const int32 Index);
+
+	void UpdateAllSlots();
 	
 protected:
 
-	
+	void UpdateInfoBox();
 
 
 private:
@@ -69,6 +74,7 @@ public:
 
 	FORCEINLINE void SetSelectedSlotIndex(const int32 Index) {SelectedSlotIndex = Index;}
 	FORCEINLINE UInfoBox* GetInfoBox() const {return InfoBox;}
+	FORCEINLINE UUniformGridPanel* GetInventoryGrid() const {return InventoryGrid;}
 
 
 	

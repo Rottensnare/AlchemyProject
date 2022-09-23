@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AlchemyProject/InventoryComponent.h"
+#include "AlchemyProject/Enums/IngredientType.h"
 #include "Blueprint/UserWidget.h"
 #include "InventorySlot.generated.h"
 
@@ -24,6 +25,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Items, meta = (BindWidget))
 	class UImage* SlotIcon;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Items, meta = (BindWidget))
+	UImage* BackgroundImage;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Items , meta = (BindWidget))
 	class UTextBlock* AmountText;
 
@@ -38,5 +42,23 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Items , meta = (BindWidget))
 	class UComboBoxString* ComboBox;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	EItemType ItemType{EItemType::EIT_All};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	EIngredientType IngredientType{EIngredientType::EIT_All};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TMap<EIngredientType, FLinearColor> IngredientTypeColors;
+
+	bool bEmpty{true};
+
+	UPROPERTY(BlueprintReadWrite)
+	int32 InventoryIndex;
+
+protected:
+	virtual void NativeOnInitialized() override;
+	void InitIngredientTypeColors();
 	
 };

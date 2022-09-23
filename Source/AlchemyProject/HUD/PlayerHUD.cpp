@@ -3,8 +3,8 @@
 
 #include "PlayerHUD.h"
 
-#include "InventoryWidget.h"
 #include "PlayerOverlay.h"
+#include "AlchemyProject/Alchemy/AlchemyOverlay.h"
 #include "AlchemyProject/PlayerController/MyPlayerController.h"
 #include "Blueprint/UserWidget.h"
 
@@ -15,6 +15,12 @@ void APlayerHUD::AddCharacterOverlay()
 	{
 		PlayerOverlay = CreateWidget<UPlayerOverlay>(PlayerController, OverlayClass);
 		PlayerOverlay->AddToViewport();
+	}
+	if(PlayerController && AlchemyOverlayClass)
+	{
+		AlchemyOverlay = CreateWidget<UAlchemyOverlay>(PlayerController, AlchemyOverlayClass);
+		AlchemyOverlay->AddToViewport();
+		AlchemyOverlay->SetVisibility(ESlateVisibility::Collapsed);
 	}
 }
 

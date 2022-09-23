@@ -7,6 +7,7 @@ enum class EIngredientQuality : uint8
 	EIQ_Medium UMETA(DisplayName = "Medium Quality"),
 	EIQ_High UMETA(DisplayName = "High Quality"),
 	EIQ_Pure UMETA(DisplayName = "Pure Quality"),
+	EIQ_None UMETA(DisplayName = "No Substance"),
 
-	EIQ_MAX UMETA(DisplayName = "DefaultMAX")
+	EIQ_MAX UMETA(DisplayName = "DefaultMax")
 };

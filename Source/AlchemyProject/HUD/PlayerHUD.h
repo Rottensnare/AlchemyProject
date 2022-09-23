@@ -26,14 +26,19 @@ public:
 	UPROPERTY()
 	class UPlayerOverlay* PlayerOverlay;
 
+	//Overlay for the alchemy table user interface
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UAlchemyOverlay> AlchemyOverlayClass;
+
+	UPROPERTY()
+	UAlchemyOverlay* AlchemyOverlay;
+
 	UPROPERTY()
 	class UInventoryWidget* InventoryWidget;
 
 	UPROPERTY()
 	class UScrollableInventoryWidget* ScrollableInventoryWidget;
-
 	
-
 	void AddCharacterOverlay();
 
 	
