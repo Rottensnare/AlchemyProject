@@ -30,6 +30,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ClearAlchemySelection(const int32 Index = -1);
 
+	void FindIngredients(const FName& RecipeName);
+
 protected:
 
 	virtual void BeginPlay() override;

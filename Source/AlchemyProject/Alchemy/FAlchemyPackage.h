@@ -50,7 +50,8 @@ struct FRecipe
 
 	UPROPERTY(EditAnywhere)
 	float BaseSuccessChance{1.f};
-	
+
+	//Inline functions shouldn't have looping, but compiler didn't give me an error, so let it be for now.
 	FORCEINLINE bool operator ==(const FRecipe& Recipe) const
 	{
 		for(const auto& Subs : Recipe.AmountPerSubstanceMap)

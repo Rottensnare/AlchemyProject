@@ -42,5 +42,9 @@ private:
 
 	UFUNCTION()
 	void AddAitemToInventory();
+
+public:
+
+	FORCEINLINE TArray<FName>& GetKnownRecipes() {return KnownRecipeNames;}
 };
 

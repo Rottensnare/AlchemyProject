@@ -58,6 +58,7 @@ public:
 	void SpawnItemFromInventory(const int32 InIndex, const int32 InAmount);
 
 
+
 protected:
 
 	virtual void BeginPlay() override;
@@ -91,5 +92,6 @@ private:
 public:
 	
 	TArray<FInventoriSlot>& GetInventory() {return InventorySlots;}
+	
 	
 };

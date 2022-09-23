@@ -86,6 +86,7 @@ private:
 public:
 	
 	FORCEINLINE UInventoryComponent* GetInventoryComponent() const {return InventoryComponent;}
+	FORCEINLINE UAlchemyComponent* GetAlchemyComponent() const {return AlchemyComponent;}
 	FORCEINLINE void SetAlchemyTable(AAlchemyTable* InTable) {CurrentAlchemyTable = InTable;}
 	FORCEINLINE AAlchemyTable* GetAlchemyTable() const {return CurrentAlchemyTable;}
 	

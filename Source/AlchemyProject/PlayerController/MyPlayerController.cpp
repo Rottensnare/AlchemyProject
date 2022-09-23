@@ -7,7 +7,8 @@
 #include "AlchemyProject/PlayerCharacter.h"
 #include "AlchemyProject/Alchemy/AlchemyOverlay.h"
 #include "AlchemyProject/Alchemy/IngredientData.h"
-#include "AlchemyProject/HUD/InfoBox.h"
+#include "AlchemyProject/Alchemy/UI/AlchemyScrollBox.h"
+#include "AlchemyProject/Components/AlchemyComponent.h"
 #include "AlchemyProject/HUD/InventorySlot.h"
 #include "AlchemyProject/HUD/InventoryWidget.h"
 #include "AlchemyProject/HUD/PlayerHUD.h"
@@ -119,6 +120,7 @@ void AMyPlayerController::ToggleAlchemyOverlay()
 			SetInputMode(InputModeGameAndUI);
 			SetShowMouseCursor(true);
 			PlayerHUD->AlchemyOverlay->CharacterInventory->UpdateAllSlots();
+			PlayerHUD->AlchemyOverlay->AlchemyScrollBox->UpdateInfo(CurrentCharacter->GetAlchemyComponent()->GetKnownRecipes());
 			CurrentCharacter->bIsDoingAlchemy = true;
 			
 		}
@@ -209,7 +211,34 @@ void AMyPlayerController::ClearAlchemySelection(const int32 Index)
 			TempSlot->BackgroundImage->SetOpacity(0.25f);
 		}
 	}
+}
+
+void AMyPlayerController::FindIngredients(const FName& RecipeName)
+{
+	CurrentCharacter = CurrentCharacter == nullptr ? Cast<APlayerCharacter>(GetCharacter()) : CurrentCharacter;
+	if(CurrentCharacter == nullptr) return;
+
+	ClearAlchemySelection();
 	
+	FString RecipeDataTablePath(TEXT("DataTable'/Game/Assets/Datatables/RecipeDataTable.RecipeDataTable'"));
+	UDataTable* RecipeTableObject = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, *RecipeDataTablePath));
+	if(!RecipeTableObject) return;
+	
+	FRecipeTable* RecipeDataRow = nullptr;
+	RecipeDataRow = RecipeTableObject->FindRow<FRecipeTable>(RecipeName, TEXT(""));
+	if(RecipeDataRow)
+	{
+		for(const auto& ItemSlot : CurrentCharacter->GetInventoryComponent()->GetInventory())
+		{
+			for(const auto& Subs : RecipeDataRow->AmountPerSubstanceMap)
+			{
+				if(Subs.Key == ItemSlot.IngredientInfo.PrimarySubstance)
+				{
+					SelectAlchemyIngredient(ItemSlot.SlotId);
+				}
+			}
+		}
+	}
 }
 
 
