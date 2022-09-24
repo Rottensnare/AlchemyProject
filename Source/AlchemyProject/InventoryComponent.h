@@ -22,10 +22,7 @@ struct FInventoriSlot
 
 	UPROPERTY(BlueprintReadOnly)
 	int32 ItemAmount;
-
-	//UPROPERTY(BlueprintReadWrite)
-	//class AItem* ItemInSlot;
-
+	
 	UPROPERTY(BlueprintReadOnly)
 	TSubclassOf<AItem> ItemClass;
 

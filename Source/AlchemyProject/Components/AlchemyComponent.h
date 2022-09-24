@@ -22,6 +22,7 @@ public:
 protected:
 	
 	virtual void BeginPlay() override;
+	void FailedPotionCreation();
 
 private:
 	
@@ -36,6 +37,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	class APlayerCharacter* Character;
+
+	UPROPERTY()
+	class AMyPlayerController* MyPlayerController;
 
 	UPROPERTY()
 	class AAlchemyProduct* Aitem;

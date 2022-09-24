@@ -59,9 +59,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	EItemType ItemType{EItemType::EIT_Misc};
 
+	
+
 private:
 
-
+	
 
 public:
 

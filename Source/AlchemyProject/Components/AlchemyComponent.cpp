@@ -13,7 +13,6 @@
 #include "AlchemyProject/HUD/PlayerHUD.h"
 #include "AlchemyProject/HUD/PlayerOverlay.h"
 #include "AlchemyProject/PlayerController/MyPlayerController.h"
-#include "Components/CapsuleComponent.h"
 
 
 UAlchemyComponent::UAlchemyComponent()
@@ -34,12 +33,25 @@ void UAlchemyComponent::BeginPlay()
 	
 }
 
+void UAlchemyComponent::FailedPotionCreation()
+{
+	MyPlayerController = MyPlayerController == nullptr ? Cast<AMyPlayerController>(Character->GetController()) : MyPlayerController;
+	if(MyPlayerController)
+	{
+		MyPlayerController->PlaySound(FName("FailedCreation"));
+	}
+}
+
 //TODO: Divide this function to several smaller functions
 void UAlchemyComponent::CreateAlchemyProduct(const FAlchemyPackage& AlchemyPackage)
 {
 	//Checking which substances are selected
 
-	if(AlchemyPackage.IngredientInfos.Num() < 2) return; //No potion exists that can be made with less than 2 different substances
+	if(AlchemyPackage.IngredientInfos.Num() < 2)
+	{
+		FailedPotionCreation();
+		return; //No potion exists that can be made with less than 2 different substances
+	}
 	
 	FString TempString{""};
 	TArray<EPrimarySubstance> PrimarySubstances;
@@ -99,6 +111,12 @@ void UAlchemyComponent::CreateAlchemyProduct(const FAlchemyPackage& AlchemyPacka
 					
 					if(Slut.ItemClass == InInfo.IngredientClass)
 					{
+						//BUG: Causes a crash when selecting ingredients manually that and no recipe is found corresponding to the selected ingredients
+						if(!RecipeDataRow->AmountPerSubstanceMap.Contains(Slut.IngredientInfo.PrimarySubstance))
+						{
+							TempMap.Emplace(EPrimarySubstance::EPS_MAX, false);
+							break;
+						}
 						if(Slut.ItemAmount >= RecipeDataRow->AmountPerSubstanceMap[Slut.IngredientInfo.PrimarySubstance] * QuantityValue::GetQuantityValueInt(Slut.IngredientInfo.IngredientQuantityValue))
 						{
 							DecreasePerIndexMap.Emplace(Slut.SlotId, RecipeDataRow->AmountPerSubstanceMap[Slut.IngredientInfo.PrimarySubstance] * QuantityValue::GetQuantityValueInt(Slut.IngredientInfo.IngredientQuantityValue));
@@ -119,6 +137,7 @@ void UAlchemyComponent::CreateAlchemyProduct(const FAlchemyPackage& AlchemyPacka
 				if(!Sub.Value)
 				{
 					UE_LOG(LogTemp, Error, TEXT("Not enough %s"), *UEnum::GetDisplayValueAsText(Sub.Key).ToString())
+					FailedPotionCreation();
 					return;
 				}
 			}
@@ -126,6 +145,16 @@ void UAlchemyComponent::CreateAlchemyProduct(const FAlchemyPackage& AlchemyPacka
 			for(const auto& Slut : DecreasePerIndexMap)
 			{
 				Character->GetInventoryComponent()->GetInventory()[Slut.Key].ItemAmount -= Slut.Value;
+				if(Character->GetInventoryComponent()->GetInventory()[Slut.Key].ItemAmount <= 0) //Drop item if amount is 0 or less
+				{
+					Character->GetInventoryComponent()->DropItem(Slut.Key);
+					MyPlayerController = MyPlayerController == nullptr ? Cast<AMyPlayerController>(Character->GetController()) : MyPlayerController;
+					if(MyPlayerController)
+					{
+						MyPlayerController->ClearAlchemySelection();
+					}
+					
+				}
 			}
 			
 			Aitem = GetWorld()->SpawnActor<AAlchemyProduct>(RecipeDataRow->AlchemyClass, Character->GetActorLocation() + Character->GetActorForwardVector() * 25.f, Character->GetActorRotation());
@@ -138,21 +167,21 @@ void UAlchemyComponent::CreateAlchemyProduct(const FAlchemyPackage& AlchemyPacka
 			
 			Aitem->InitProperties(Recipe);
 			
-			AMyPlayerController* TempController = Cast<AMyPlayerController>(Character->GetController());
-			if(TempController)
+			MyPlayerController = MyPlayerController == nullptr ? Cast<AMyPlayerController>(Character->GetController()) : MyPlayerController;
+			if(MyPlayerController)
 			{
-				TempController->PlaySound(FName("PotionCreated"));
-				if(TempController->GetPlayerHUD() && TempController->GetPlayerHUD()->AlchemyOverlay && TempController->GetPlayerHUD()->AlchemyOverlay->CharacterInventory)
+				MyPlayerController->PlaySound(FName("PotionCreated"));
+				if(MyPlayerController->GetPlayerHUD() && MyPlayerController->GetPlayerHUD()->AlchemyOverlay && MyPlayerController->GetPlayerHUD()->AlchemyOverlay->CharacterInventory)
 				{
-					TempController->GetPlayerHUD()->AlchemyOverlay->CharacterInventory->UpdateAllSlots();
-					TempController->GetPlayerHUD()->PlayerOverlay->InventoryWidget->UpdateAllSlots();
+					MyPlayerController->GetPlayerHUD()->AlchemyOverlay->CharacterInventory->UpdateAllSlots();
+					MyPlayerController->GetPlayerHUD()->PlayerOverlay->InventoryWidget->UpdateAllSlots();
 				}
 			}
+			return;
 		}
 	}
 
-	
-	
+	FailedPotionCreation();
 	//TODO: Check if player has enough inventory space, if not spawn the potion next to player anyway
 }
 

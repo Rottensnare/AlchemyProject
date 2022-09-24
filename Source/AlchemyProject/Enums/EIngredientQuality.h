@@ -33,7 +33,7 @@ namespace ProductQuality
 		{
 			TempValue += (uint8)Quality;
 		}
-		TempValue /= IngredientQualities.Num();
+		if(IngredientQualities.Num() > 0) TempValue /= IngredientQualities.Num();
 		switch (TempValue)
 		{
 		case 1:
