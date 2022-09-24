@@ -66,5 +66,7 @@ private:
 	float AlchemyItemIconOpacity{0.9f};
 
 	
-	
+public:
+
+	FORCEINLINE APlayerHUD* GetPlayerHUD() const {return PlayerHUD;}
 };

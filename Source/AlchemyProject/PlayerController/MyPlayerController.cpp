@@ -123,6 +123,7 @@ void AMyPlayerController::ToggleAlchemyOverlay()
 			SetInputMode(InputModeGameAndUI);
 			SetShowMouseCursor(true);
 			PlayerHUD->AlchemyOverlay->CharacterInventory->UpdateAllSlots();
+			PlayerHUD->PlayerOverlay->InventoryWidget->UpdateAllSlots();
 			PlayerHUD->AlchemyOverlay->AlchemyScrollBox->UpdateInfo(CurrentCharacter->GetAlchemyComponent()->GetKnownRecipes());
 			CurrentCharacter->bIsDoingAlchemy = true;
 			
@@ -131,6 +132,8 @@ void AMyPlayerController::ToggleAlchemyOverlay()
 		{
 			PlayerHUD->AlchemyOverlay->SetVisibility(ESlateVisibility::Collapsed);
 			PlayerHUD->PlayerOverlay->SetVisibility(ESlateVisibility::Visible);
+			PlayerHUD->PlayerOverlay->InventoryWidget->UpdateAllSlots();
+			PlayerHUD->AlchemyOverlay->CharacterInventory->UpdateAllSlots();
 			FInputModeGameOnly InputModeGameOnly;
 			SetInputMode(InputModeGameOnly);
 			SetShowMouseCursor(false);

@@ -69,6 +69,7 @@ public:
 	FORCEINLINE UTexture2D* GetSlotImage() const {return ImageInSlot;}
 	FORCEINLINE int32 GetMaxStackSize() const {return MaxStack;}
 	FORCEINLINE void SetItemState(EItemState InState) {ItemState = InState;}
+	FORCEINLINE EItemState GetItemState() const {return ItemState;}
 	FORCEINLINE UStaticMeshComponent* GetItemMesh() const {return ItemMesh;}
 	FORCEINLINE EItemType GetItemType() const {return ItemType;}
 	

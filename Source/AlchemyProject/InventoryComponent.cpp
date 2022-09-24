@@ -160,6 +160,7 @@ void UInventoryComponent::ShowInventory(bool bVisible)
 	}
 }
 
+//Function that's over 150 lines of code. This is a mess and this system doesn't work well with the alchemy system, needs a thorough rework!
 void UInventoryComponent::AddToInventory(AItem* InItem, int32 InAmount) //TODO: Might need to make this into several smaller functions
 {
 	int32 ItemIndex{-1};
@@ -169,16 +170,51 @@ void UInventoryComponent::AddToInventory(AItem* InItem, int32 InAmount) //TODO: 
 	{
 		if(Slot.ItemClass == InItem->GetClass() && Slot.ItemAmount < InItem->GetMaxStackSize())
 		{
-			if(Slot.ItemAmount + InAmount <= InItem->GetMaxStackSize())
+			if(Slot.ItemAmount + InAmount <= InItem->GetMaxStackSize()) //Fucken 'ell, this ain't working with the current system chief. Gotta make it more like Skairim
 			{
-				Slot.ItemAmount += InAmount;
+				//Slot.ItemAmount += InAmount;
 				if(ItemTotalAmountMap.Contains(Slot.ItemClass))
 				{
-					ItemTotalAmountMap[Slot.ItemClass] += InAmount;
+					if(const AAlchemyItem* TempItem = Cast<AAlchemyItem>(InItem))
+					{
+						if(InItem->GetItemState() == EItemState::EIS_Initial)
+						{
+							ItemTotalAmountMap[Slot.ItemClass] += InAmount * TempItem->IngredientData.IngredientAmountPerHarvest;
+							Slot.ItemAmount += InAmount * TempItem->IngredientData.IngredientAmountPerHarvest;
+						}
+						else
+						{
+							ItemTotalAmountMap[Slot.ItemClass] += InAmount;
+							Slot.ItemAmount += InAmount;
+						}
+					}
+					else
+					{
+						ItemTotalAmountMap[Slot.ItemClass] += InAmount;
+						Slot.ItemAmount += InAmount;
+					}
 				}
 				else
 				{
-					ItemTotalAmountMap.Emplace(Slot.ItemClass, InAmount);
+					if(const AAlchemyItem* TempItem = Cast<AAlchemyItem>(InItem))
+					{
+						if(InItem->GetItemState() == EItemState::EIS_Initial)
+						{
+							ItemTotalAmountMap.Emplace(Slot.ItemClass, InAmount * TempItem->IngredientData.IngredientAmountPerHarvest);
+							Slot.ItemAmount += InAmount * TempItem->IngredientData.IngredientAmountPerHarvest;
+						}
+						else
+						{
+							ItemTotalAmountMap.Emplace(Slot.ItemClass, InAmount);
+							Slot.ItemAmount += InAmount;
+						}
+					}
+					else
+					{
+						ItemTotalAmountMap.Emplace(Slot.ItemClass, InAmount);
+						Slot.ItemAmount += InAmount;
+					}
+					//ItemTotalAmountMap.Emplace(Slot.ItemClass, InAmount);
 				}
 				InItem->Destroy();
 				Character = Character == nullptr ? Cast<APlayerCharacter>(GetOwner()) : Character;
@@ -215,7 +251,15 @@ void UInventoryComponent::AddToInventory(AItem* InItem, int32 InAmount) //TODO: 
 		if(Slot.ItemClass == nullptr)
 		{
 			Slot.ItemClass = InItem->GetClass();
-			Slot.ItemAmount = InAmount;
+			if(const AAlchemyItem* TempItem = Cast<AAlchemyItem>(InItem))
+			{
+				if(InItem->GetItemState() == EItemState::EIS_Initial) Slot.ItemAmount = InAmount * TempItem->IngredientData.IngredientAmountPerHarvest;
+				else Slot.ItemAmount = InAmount;
+			}
+			else
+			{
+				Slot.ItemAmount = InAmount;
+			}
 			Slot.ItemIcon = InItem->GetSlotImage();
 			Slot.ItemType = InItem->GetItemType();
 			if(Slot.ItemClass->ImplementsInterface(UIngredient::StaticClass()))
@@ -236,11 +280,28 @@ void UInventoryComponent::AddToInventory(AItem* InItem, int32 InAmount) //TODO: 
 				
 			if(ItemTotalAmountMap.Contains(Slot.ItemClass))
 			{
-				ItemTotalAmountMap[Slot.ItemClass] += InAmount;
+				if(const AAlchemyItem* TempItem = Cast<AAlchemyItem>(InItem))
+				{
+					if(InItem->GetItemState() == EItemState::EIS_Initial) ItemTotalAmountMap[Slot.ItemClass] += InAmount * TempItem->IngredientData.IngredientAmountPerHarvest;
+					else ItemTotalAmountMap[Slot.ItemClass] += InAmount;
+				}
+				else
+				{
+					ItemTotalAmountMap[Slot.ItemClass] += InAmount;
+				}
+				//ItemTotalAmountMap[Slot.ItemClass] += InAmount;
 			}
 			else
 			{
-				ItemTotalAmountMap.Emplace(Slot.ItemClass, InAmount);
+				if(const AAlchemyItem* TempItem = Cast<AAlchemyItem>(InItem))
+				{
+					if(InItem->GetItemState() == EItemState::EIS_Initial) ItemTotalAmountMap.Emplace(Slot.ItemClass, InAmount * TempItem->IngredientData.IngredientAmountPerHarvest);
+					else ItemTotalAmountMap.Emplace(Slot.ItemClass, InAmount);
+				}
+				else
+				{
+					ItemTotalAmountMap.Emplace(Slot.ItemClass, InAmount);
+				}
 			}
 			InItem->Destroy();
 			Character = Character == nullptr ? Cast<APlayerCharacter>(GetOwner()) : Character;

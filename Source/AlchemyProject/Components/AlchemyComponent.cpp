@@ -6,8 +6,12 @@
 #include "AlchemyProject/InventoryComponent.h"
 #include "AlchemyProject/PlayerCharacter.h"
 #include "AlchemyProject/Alchemy/AlchemyBase.h"
+#include "AlchemyProject/Alchemy/AlchemyOverlay.h"
 #include "AlchemyProject/Alchemy/AlchemyProduct.h"
 #include "AlchemyProject/Alchemy/AlchemyTable.h"
+#include "AlchemyProject/HUD/InventoryWidget.h"
+#include "AlchemyProject/HUD/PlayerHUD.h"
+#include "AlchemyProject/HUD/PlayerOverlay.h"
 #include "AlchemyProject/PlayerController/MyPlayerController.h"
 #include "Components/CapsuleComponent.h"
 
@@ -134,10 +138,16 @@ void UAlchemyComponent::CreateAlchemyProduct(const FAlchemyPackage& AlchemyPacka
 			
 			Aitem->InitProperties(Recipe);
 			
-			
-			
 			AMyPlayerController* TempController = Cast<AMyPlayerController>(Character->GetController());
-			if(TempController) TempController->PlaySound(FName("PotionCreated"));
+			if(TempController)
+			{
+				TempController->PlaySound(FName("PotionCreated"));
+				if(TempController->GetPlayerHUD() && TempController->GetPlayerHUD()->AlchemyOverlay && TempController->GetPlayerHUD()->AlchemyOverlay->CharacterInventory)
+				{
+					TempController->GetPlayerHUD()->AlchemyOverlay->CharacterInventory->UpdateAllSlots();
+					TempController->GetPlayerHUD()->PlayerOverlay->InventoryWidget->UpdateAllSlots();
+				}
+			}
 		}
 	}
 
