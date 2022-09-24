@@ -151,7 +151,7 @@ void AMyPlayerController::SelectAlchemyIngredient(const int32 SelectedSlot)
 	
 	if(INVENTORY(SelectedSlot).ItemClass->ImplementsInterface(UIngredient::StaticClass())) //If item is an ingredient
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Primary Substance: %s"), *UEnum::GetDisplayValueAsText(INVENTORY(SelectedSlot).IngredientInfo.PrimarySubstance).ToString());
+		//UE_LOG(LogTemp, Warning, TEXT("Primary Substance: %s"), *UEnum::GetDisplayValueAsText(INVENTORY(SelectedSlot).IngredientInfo.PrimarySubstance).ToString());
 		if(INVENTORY(SelectedSlot).IngredientInfo.IngredientType == EIngredientType::EIT_Substance)
 		{
 			for(int i = 0; i < 4; i++)
@@ -164,6 +164,16 @@ void AMyPlayerController::SelectAlchemyIngredient(const int32 SelectedSlot)
 					TempSlot->SlotIcon->SetOpacity(AlchemyItemIconOpacity);
 					TempSlot->bEmpty = false;
 					TempSlot->BackgroundImage->SetOpacity(AlchemyItemBGOpacity);
+
+					if(CurrentRecipeMap.Contains(INVENTORY(SelectedSlot).IngredientInfo.PrimarySubstance))
+					{
+						//For showing how much of the currently selected ingredient is needed
+						const FString AmountString =
+							FString::Printf(TEXT("/%d"), CurrentRecipeMap[INVENTORY(SelectedSlot).IngredientInfo.PrimarySubstance]
+							* QuantityValue::GetQuantityValueInt(INVENTORY(SelectedSlot).IngredientInfo.IngredientQuantityValue));
+					
+						TempSlot->AmountText->SetText(FText::FromString(AmountString));
+					}
 					SelectedSubstances.AddUnique(INVENTORY(SelectedSlot).IngredientInfo.PrimarySubstance);
 					IngredientInfos.AddUnique(INVENTORY(SelectedSlot).IngredientInfo);
 					PlayerHUD->AlchemyOverlay->UpdateInfoBox(IngredientInfos);
@@ -190,6 +200,7 @@ void AMyPlayerController::ClearAlchemySelection(const int32 Index)
 				TempSlot->SlotIcon->SetBrush(FSlateBrush());
 				TempSlot->SlotIcon->SetOpacity(0.f);
 				TempSlot->BackgroundImage->SetOpacity(0.25f);
+				TempSlot->AmountText->SetText(FText::FromString("/0"));
 			}
 		}
 		SelectedSubstances.Empty();
@@ -231,6 +242,7 @@ void AMyPlayerController::FindIngredients(const FName& RecipeName)
 	RecipeDataRow = RecipeTableObject->FindRow<FRecipeTable>(RecipeName, TEXT(""));
 	if(RecipeDataRow)
 	{
+		CurrentRecipeMap = RecipeDataRow->AmountPerSubstanceMap;
 		for(const auto& ItemSlot : CurrentCharacter->GetInventoryComponent()->GetInventory())
 		{
 			for(const auto& Subs : RecipeDataRow->AmountPerSubstanceMap)
@@ -246,11 +258,11 @@ void AMyPlayerController::FindIngredients(const FName& RecipeName)
 
 void AMyPlayerController::PlaySound(const FName& SFXName)
 {
-	FString SFXDataTablePath(TEXT("DataTable'/Game/Assets/Datatables/SoundFXDataTable.SoundFXDataTable'"));
-	UDataTable* SFXTableObject = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, *SFXDataTablePath));
+	const FString SFXDataTablePath(TEXT("DataTable'/Game/Assets/Datatables/SoundFXDataTable.SoundFXDataTable'"));
+	const UDataTable* SFXTableObject = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, *SFXDataTablePath));
 	if(!SFXTableObject) return;
 	
-	FSoundEffectTable* SFXDataRow = nullptr;
+	const FSoundEffectTable* SFXDataRow = nullptr;
 	SFXDataRow = SFXTableObject->FindRow<FSoundEffectTable>(SFXName, TEXT(""));
 	
 	if(SFXDataRow && SFXDataRow->SFX) UGameplayStatics::PlaySound2D(this, SFXDataRow->SFX);

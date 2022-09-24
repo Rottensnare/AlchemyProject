@@ -30,6 +30,7 @@ void UAlchemyComponent::BeginPlay()
 	
 }
 
+//TODO: Divide this function to several smaller functions
 void UAlchemyComponent::CreateAlchemyProduct(const FAlchemyPackage& AlchemyPackage)
 {
 	//Checking which substances are selected
@@ -82,7 +83,8 @@ void UAlchemyComponent::CreateAlchemyProduct(const FAlchemyPackage& AlchemyPacka
 			
 			Character = Character == nullptr ? Cast<APlayerCharacter>(GetOwner()) : Character;
 			if(Character == nullptr) return;
-			//TODO: Check if player has required materials and then spend the resources
+			
+			//Check if player has required materials and then spend the resources
 			TMap<EPrimarySubstance, bool> TempMap;
 			TMap<int32, int32> DecreasePerIndexMap;
 			for(auto& Slut : Character->GetInventoryComponent()->GetInventory())
@@ -94,7 +96,6 @@ void UAlchemyComponent::CreateAlchemyProduct(const FAlchemyPackage& AlchemyPacka
 					{
 						if(Slut.ItemAmount >= RecipeDataRow->AmountPerSubstanceMap[Slut.IngredientInfo.PrimarySubstance] * QuantityValue::GetQuantityValueInt(Slut.IngredientInfo.IngredientQuantityValue))
 						{
-							//Slut.ItemAmount -= RecipeDataRow->AmountPerSubstanceMap[Slut.IngredientInfo.PrimarySubstance]; //DON'T DECREASE ITEM AMOUNT HERE, DO IT LATER
 							DecreasePerIndexMap.Emplace(Slut.SlotId, RecipeDataRow->AmountPerSubstanceMap[Slut.IngredientInfo.PrimarySubstance] * QuantityValue::GetQuantityValueInt(Slut.IngredientInfo.IngredientQuantityValue));
 							TempMap.Emplace(InInfo.PrimarySubstance, true);
 							break;
@@ -106,7 +107,7 @@ void UAlchemyComponent::CreateAlchemyProduct(const FAlchemyPackage& AlchemyPacka
 					}
 				}
 			}
-			
+			//Return if player doesn't have enough resources
 			for(const auto& Sub : TempMap)
 			{
 				if(!Sub.Value)

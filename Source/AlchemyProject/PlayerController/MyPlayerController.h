@@ -56,6 +56,8 @@ private:
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TArray<FIngredientInfo> IngredientInfos;
 
+	TMap<EPrimarySubstance, int32> CurrentRecipeMap;
+
 	//UI PARAMS
 
 	UPROPERTY(EditAnywhere)
