@@ -57,7 +57,9 @@ public:
 	void DropItem(const int32 Index);
 	void SpawnItemFromInventory(const int32 InIndex, const int32 InAmount);
 
-
+	//Will be used to easily check if character has the correct amount of required item
+	UPROPERTY()
+	TMap<TSubclassOf<AItem>, int32> ItemTotalAmountMap;
 
 protected:
 
@@ -85,9 +87,7 @@ private:
 
 	FTimerHandle GridCreationTimer;
 
-	//Will be used to easily check if character has the correct amount of required item
-	UPROPERTY()
-	TMap<TSubclassOf<AItem>, int32> ItemTotalAmountMap;
+	
 
 public:
 	

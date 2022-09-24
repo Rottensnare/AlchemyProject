@@ -37,7 +37,6 @@ void UInventoryComponent::BeginPlay()
 		InventorySlot.ItemClass = nullptr;
 		InventorySlot.ItemIcon = nullptr;
 		InventorySlot.ItemType = EItemType::EIT_MAX;
-		
 		InventorySlots.Add(InventorySlot);
 	}
 
@@ -231,6 +230,7 @@ void UInventoryComponent::AddToInventory(AItem* InItem, int32 InAmount) //TODO: 
 					Slot.IngredientInfo.SecondarySubstance = TempAlchemyItem->IngredientData.SecondarySubstance;
 					Slot.IngredientInfo.TertiarySubstance = TempAlchemyItem->IngredientData.TertiarySubstance;
 					Slot.IngredientInfo.IngredientType = TempAlchemyItem->IngredientData.IngredientType;
+					Slot.IngredientInfo.IngredientClass = InItem->GetClass();
 				}
 			}
 				

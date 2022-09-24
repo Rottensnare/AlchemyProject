@@ -82,6 +82,45 @@ void UAlchemyComponent::CreateAlchemyProduct(const FAlchemyPackage& AlchemyPacka
 			
 			Character = Character == nullptr ? Cast<APlayerCharacter>(GetOwner()) : Character;
 			if(Character == nullptr) return;
+			//TODO: Check if player has required materials and then spend the resources
+			TMap<EPrimarySubstance, bool> TempMap;
+			TMap<int32, int32> DecreasePerIndexMap;
+			for(auto& Slut : Character->GetInventoryComponent()->GetInventory())
+			{
+				for(auto& InInfo : AlchemyPackage.IngredientInfos)
+				{
+					
+					if(Slut.ItemClass == InInfo.IngredientClass)
+					{
+						if(Slut.ItemAmount >= RecipeDataRow->AmountPerSubstanceMap[Slut.IngredientInfo.PrimarySubstance] * QuantityValue::GetQuantityValueInt(Slut.IngredientInfo.IngredientQuantityValue))
+						{
+							//Slut.ItemAmount -= RecipeDataRow->AmountPerSubstanceMap[Slut.IngredientInfo.PrimarySubstance]; //DON'T DECREASE ITEM AMOUNT HERE, DO IT LATER
+							DecreasePerIndexMap.Emplace(Slut.SlotId, RecipeDataRow->AmountPerSubstanceMap[Slut.IngredientInfo.PrimarySubstance] * QuantityValue::GetQuantityValueInt(Slut.IngredientInfo.IngredientQuantityValue));
+							TempMap.Emplace(InInfo.PrimarySubstance, true);
+							break;
+						}
+						else
+						{
+							TempMap.Emplace(InInfo.PrimarySubstance, false);
+						}
+					}
+				}
+			}
+			
+			for(const auto& Sub : TempMap)
+			{
+				if(!Sub.Value)
+				{
+					UE_LOG(LogTemp, Error, TEXT("Not enough %s"), *UEnum::GetDisplayValueAsText(Sub.Key).ToString())
+					return;
+				}
+			}
+
+			for(const auto& Slut : DecreasePerIndexMap)
+			{
+				Character->GetInventoryComponent()->GetInventory()[Slut.Key].ItemAmount -= Slut.Value;
+			}
+			
 			
 			Aitem = GetWorld()->SpawnActor<AAlchemyProduct>(RecipeDataRow->AlchemyClass, Character->GetActorLocation() + Character->GetActorForwardVector() * 25.f, Character->GetActorRotation());
 			Aitem->OnInitialized.AddDynamic(this, &UAlchemyComponent::AddAitemToInventory);
@@ -92,7 +131,7 @@ void UAlchemyComponent::CreateAlchemyProduct(const FAlchemyPackage& AlchemyPacka
 	}
 
 	
-	//TODO: Check if player has required materials and then spend the resources
+	
 	//TODO: Check if player has enough inventory space, if not spawn the potion next to player anyway
 }
 
