@@ -87,6 +87,7 @@ void UAlchemyComponent::CreateAlchemyProduct(const FAlchemyPackage& AlchemyPacka
 			//Check if player has required materials and then spend the resources
 			TMap<EPrimarySubstance, bool> TempMap;
 			TMap<int32, int32> DecreasePerIndexMap;
+			TArray<EIngredientQuality> IngredientQualities;
 			for(auto& Slut : Character->GetInventoryComponent()->GetInventory())
 			{
 				for(auto& InInfo : AlchemyPackage.IngredientInfos)
@@ -97,6 +98,7 @@ void UAlchemyComponent::CreateAlchemyProduct(const FAlchemyPackage& AlchemyPacka
 						if(Slut.ItemAmount >= RecipeDataRow->AmountPerSubstanceMap[Slut.IngredientInfo.PrimarySubstance] * QuantityValue::GetQuantityValueInt(Slut.IngredientInfo.IngredientQuantityValue))
 						{
 							DecreasePerIndexMap.Emplace(Slut.SlotId, RecipeDataRow->AmountPerSubstanceMap[Slut.IngredientInfo.PrimarySubstance] * QuantityValue::GetQuantityValueInt(Slut.IngredientInfo.IngredientQuantityValue));
+							IngredientQualities.Add(Slut.IngredientInfo.IngredientQuality);
 							TempMap.Emplace(InInfo.PrimarySubstance, true);
 							break;
 						}
@@ -116,16 +118,24 @@ void UAlchemyComponent::CreateAlchemyProduct(const FAlchemyPackage& AlchemyPacka
 					return;
 				}
 			}
-
+			//Consume ingredients from the player's inventory
 			for(const auto& Slut : DecreasePerIndexMap)
 			{
 				Character->GetInventoryComponent()->GetInventory()[Slut.Key].ItemAmount -= Slut.Value;
 			}
 			
-			
 			Aitem = GetWorld()->SpawnActor<AAlchemyProduct>(RecipeDataRow->AlchemyClass, Character->GetActorLocation() + Character->GetActorForwardVector() * 25.f, Character->GetActorRotation());
 			Aitem->OnInitialized.AddDynamic(this, &UAlchemyComponent::AddAitemToInventory);
+			
+			//Calculate potion quality
+			//BUG: With the current inventory system, the product quality makes no difference and will be instantly reset to default value
+			Aitem->ProductQuality = ProductQuality::CalculateProductQuality(IngredientQualities);
+			UE_LOG(LogTemp, Warning, TEXT("Product quality: %s"), *UEnum::GetDisplayValueAsText(Aitem->ProductQuality).ToString())
+			
 			Aitem->InitProperties(Recipe);
+			
+			
+			
 			AMyPlayerController* TempController = Cast<AMyPlayerController>(Character->GetController());
 			if(TempController) TempController->PlaySound(FName("PotionCreated"));
 		}

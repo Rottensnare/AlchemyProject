@@ -28,6 +28,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	FRecipe Recipe;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EProductQuality ProductQuality{EProductQuality::EPQ_None};
 	
 	void Use();
 
