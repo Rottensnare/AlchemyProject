@@ -3,6 +3,8 @@
 
 #include "AlchemyProduct.h"
 
+#include "Engine/UserDefinedStruct.h"
+
 void AAlchemyProduct::Use()
 {
 	
@@ -31,11 +33,14 @@ void AAlchemyProduct::InitProperties(const FName& InName)
 		Recipe.RequiredBase = RecipeDataRow->RequiredBase;
 		Recipe.AmountPerSubstanceMap = RecipeDataRow->AmountPerSubstanceMap;
 		Recipe.BaseSuccessChance = RecipeDataRow->BaseSuccessChance;
-		UE_LOG(LogTemp, Warning, TEXT("Recipe copy successful"))
+		//UE_LOG(LogTemp, Warning, TEXT("Recipe copy successful"))
+		UE_LOG(LogTemp, Warning, TEXT("Recipe Hash with u: %u"), UUserDefinedStruct::GetUserDefinedStructTypeHash(&Recipe, FRecipe::StaticStruct()));
 		OnInitialized.Broadcast();
 	}
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("No such recipe exists!"))
 	}
+
+	
 }

@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "AlchemyProduct.h"
-#include "FAlchemyPackage.h"
 #include "Potion.generated.h"
 
 /**

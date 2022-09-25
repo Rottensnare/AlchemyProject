@@ -73,6 +73,7 @@ void AMyPlayerController::SetInventoryVisibility(bool bVisible)
 			}
 		}
 	}
+	
 }
 
 void AMyPlayerController::SetInventoryGrid(int32 NumberOfSlots)

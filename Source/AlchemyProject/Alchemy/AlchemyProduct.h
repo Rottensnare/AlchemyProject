@@ -40,5 +40,9 @@ public:
 	virtual void OnConstruction(const FTransform& Transform) override;
 
 	void InitProperties(const FName& InName);
+
+private:
+
+
 	
 };

@@ -61,7 +61,27 @@ struct FRecipe
 				return false;
 			}
 		}
-		return Recipe.RequiredBase != RequiredBase ?  false : true;
+		return Recipe.RequiredBase != RequiredBase;
 	}
 };
+//Hash will be constructed based on this struct, which will be compared in the inventory system
+//Contains all the necessary data for applying product values when creating or consuming the product
+USTRUCT(BlueprintType)
+struct FProductInfo
+{
+	GENERATED_BODY()
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class AAlchemyProduct> AlchemyClass;
+
+	//Name of the potion
+	UPROPERTY(EditAnywhere)
+	FName Name;
+
+	//Main factor in determining the potency
+	UPROPERTY(EditAnywhere)
+	EProductQuality ProductQuality;
+
+	
+	
+};

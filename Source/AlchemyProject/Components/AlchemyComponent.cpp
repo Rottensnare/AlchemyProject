@@ -66,7 +66,7 @@ void UAlchemyComponent::CreateAlchemyProduct(const FAlchemyPackage& AlchemyPacka
 		PrimarySubstances.AddUnique(InInfo.PrimarySubstance);
 		TempString.Append(FString::Printf(TEXT("%s \n"), *UEnum::GetDisplayValueAsText(InInfo.PrimarySubstance).ToString()));
 	}
-	UE_LOG(LogTemp, Warning, TEXT("Selected Substances:\n %s"), *TempString)
+	//UE_LOG(LogTemp, Warning, TEXT("Selected Substances:\n %s"), *TempString)
 	
 	//TODO: Check known recipes that match selected ingredients
 
