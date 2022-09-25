@@ -10,3 +10,21 @@ enum class EIngredientQuantityValue : uint8
 
 	EIQV_MAX UMETA(DisplayName = "DefaultMax"),
 };
+
+namespace QuantityValue
+{
+	static int32 GetQuantityValueInt(const EIngredientQuantityValue InEIQV)
+	{
+		switch(InEIQV)
+		{
+		case EIngredientQuantityValue::EIQV_Poor:
+			return 4;
+		case EIngredientQuantityValue::EIQV_Medium:
+			return 2;
+		case EIngredientQuantityValue::EIQV_Rich:
+			return 1;
+		default:
+			return 999;
+		}
+	}
+}

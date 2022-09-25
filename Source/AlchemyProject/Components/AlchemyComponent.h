@@ -22,6 +22,7 @@ public:
 protected:
 	
 	virtual void BeginPlay() override;
+	void FailedPotionCreation();
 
 private:
 	
@@ -38,9 +39,16 @@ private:
 	class APlayerCharacter* Character;
 
 	UPROPERTY()
+	class AMyPlayerController* MyPlayerController;
+
+	UPROPERTY()
 	class AAlchemyProduct* Aitem;
 
 	UFUNCTION()
 	void AddAitemToInventory();
+
+public:
+
+	FORCEINLINE TArray<FName>& GetKnownRecipes() {return KnownRecipeNames;}
 };
 

@@ -7,7 +7,9 @@
 #include "AlchemyProject/PlayerCharacter.h"
 #include "AlchemyProject/Alchemy/AlchemyOverlay.h"
 #include "AlchemyProject/Alchemy/IngredientData.h"
-#include "AlchemyProject/HUD/InfoBox.h"
+#include "AlchemyProject/Alchemy/UI/AlchemyScrollBox.h"
+#include "AlchemyProject/Components/AlchemyComponent.h"
+#include "AlchemyProject/Enums/CustomDataTables.h"
 #include "AlchemyProject/HUD/InventorySlot.h"
 #include "AlchemyProject/HUD/InventoryWidget.h"
 #include "AlchemyProject/HUD/PlayerHUD.h"
@@ -17,7 +19,9 @@
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "Components/UniformGridPanel.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetArrayLibrary.h"
+#include "Sound/SoundCue.h"
 
 void AMyPlayerController::SetHUDHealth(float Health, float MaxHealth)
 {
@@ -69,6 +73,7 @@ void AMyPlayerController::SetInventoryVisibility(bool bVisible)
 			}
 		}
 	}
+	
 }
 
 void AMyPlayerController::SetInventoryGrid(int32 NumberOfSlots)
@@ -119,6 +124,8 @@ void AMyPlayerController::ToggleAlchemyOverlay()
 			SetInputMode(InputModeGameAndUI);
 			SetShowMouseCursor(true);
 			PlayerHUD->AlchemyOverlay->CharacterInventory->UpdateAllSlots();
+			PlayerHUD->PlayerOverlay->InventoryWidget->UpdateAllSlots();
+			PlayerHUD->AlchemyOverlay->AlchemyScrollBox->UpdateInfo(CurrentCharacter->GetAlchemyComponent()->GetKnownRecipes());
 			CurrentCharacter->bIsDoingAlchemy = true;
 			
 		}
@@ -126,6 +133,8 @@ void AMyPlayerController::ToggleAlchemyOverlay()
 		{
 			PlayerHUD->AlchemyOverlay->SetVisibility(ESlateVisibility::Collapsed);
 			PlayerHUD->PlayerOverlay->SetVisibility(ESlateVisibility::Visible);
+			PlayerHUD->PlayerOverlay->InventoryWidget->UpdateAllSlots();
+			PlayerHUD->AlchemyOverlay->CharacterInventory->UpdateAllSlots();
 			FInputModeGameOnly InputModeGameOnly;
 			SetInputMode(InputModeGameOnly);
 			SetShowMouseCursor(false);
@@ -146,7 +155,7 @@ void AMyPlayerController::SelectAlchemyIngredient(const int32 SelectedSlot)
 	
 	if(INVENTORY(SelectedSlot).ItemClass->ImplementsInterface(UIngredient::StaticClass())) //If item is an ingredient
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Primary Substance: %s"), *UEnum::GetDisplayValueAsText(INVENTORY(SelectedSlot).IngredientInfo.PrimarySubstance).ToString());
+		//UE_LOG(LogTemp, Warning, TEXT("Primary Substance: %s"), *UEnum::GetDisplayValueAsText(INVENTORY(SelectedSlot).IngredientInfo.PrimarySubstance).ToString());
 		if(INVENTORY(SelectedSlot).IngredientInfo.IngredientType == EIngredientType::EIT_Substance)
 		{
 			for(int i = 0; i < 4; i++)
@@ -159,6 +168,16 @@ void AMyPlayerController::SelectAlchemyIngredient(const int32 SelectedSlot)
 					TempSlot->SlotIcon->SetOpacity(AlchemyItemIconOpacity);
 					TempSlot->bEmpty = false;
 					TempSlot->BackgroundImage->SetOpacity(AlchemyItemBGOpacity);
+
+					if(CurrentRecipeMap.Contains(INVENTORY(SelectedSlot).IngredientInfo.PrimarySubstance))
+					{
+						//For showing how much of the currently selected ingredient is needed
+						const FString AmountString =
+							FString::Printf(TEXT("/%d"), CurrentRecipeMap[INVENTORY(SelectedSlot).IngredientInfo.PrimarySubstance]
+							* QuantityValue::GetQuantityValueInt(INVENTORY(SelectedSlot).IngredientInfo.IngredientQuantityValue));
+					
+						TempSlot->AmountText->SetText(FText::FromString(AmountString));
+					}
 					SelectedSubstances.AddUnique(INVENTORY(SelectedSlot).IngredientInfo.PrimarySubstance);
 					IngredientInfos.AddUnique(INVENTORY(SelectedSlot).IngredientInfo);
 					PlayerHUD->AlchemyOverlay->UpdateInfoBox(IngredientInfos);
@@ -185,6 +204,7 @@ void AMyPlayerController::ClearAlchemySelection(const int32 Index)
 				TempSlot->SlotIcon->SetBrush(FSlateBrush());
 				TempSlot->SlotIcon->SetOpacity(0.f);
 				TempSlot->BackgroundImage->SetOpacity(0.25f);
+				TempSlot->AmountText->SetText(FText::FromString("/0"));
 			}
 		}
 		SelectedSubstances.Empty();
@@ -209,6 +229,47 @@ void AMyPlayerController::ClearAlchemySelection(const int32 Index)
 			TempSlot->BackgroundImage->SetOpacity(0.25f);
 		}
 	}
+}
+
+void AMyPlayerController::FindIngredients(const FName& RecipeName)
+{
+	CurrentCharacter = CurrentCharacter == nullptr ? Cast<APlayerCharacter>(GetCharacter()) : CurrentCharacter;
+	if(CurrentCharacter == nullptr) return;
+
+	ClearAlchemySelection();
+	
+	FString RecipeDataTablePath(TEXT("DataTable'/Game/Assets/Datatables/RecipeDataTable.RecipeDataTable'"));
+	UDataTable* RecipeTableObject = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, *RecipeDataTablePath));
+	if(!RecipeTableObject) return;
+	
+	FRecipeTable* RecipeDataRow = nullptr;
+	RecipeDataRow = RecipeTableObject->FindRow<FRecipeTable>(RecipeName, TEXT(""));
+	if(RecipeDataRow)
+	{
+		CurrentRecipeMap = RecipeDataRow->AmountPerSubstanceMap;
+		for(const auto& ItemSlot : CurrentCharacter->GetInventoryComponent()->GetInventory())
+		{
+			for(const auto& Subs : RecipeDataRow->AmountPerSubstanceMap)
+			{
+				if(Subs.Key == ItemSlot.IngredientInfo.PrimarySubstance)
+				{
+					SelectAlchemyIngredient(ItemSlot.SlotId);
+				}
+			}
+		}
+	}
+}
+
+void AMyPlayerController::PlaySound(const FName& SFXName)
+{
+	const FString SFXDataTablePath(TEXT("DataTable'/Game/Assets/Datatables/SoundFXDataTable.SoundFXDataTable'"));
+	const UDataTable* SFXTableObject = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, *SFXDataTablePath));
+	if(!SFXTableObject) return;
+	
+	const FSoundEffectTable* SFXDataRow = nullptr;
+	SFXDataRow = SFXTableObject->FindRow<FSoundEffectTable>(SFXName, TEXT(""));
+	
+	if(SFXDataRow && SFXDataRow->SFX) UGameplayStatics::PlaySound2D(this, SFXDataRow->SFX);
 	
 }
 

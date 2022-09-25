@@ -44,6 +44,9 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UButton* ClearButton;
 
+	UPROPERTY(meta = (BindWidget))
+	class UAlchemyScrollBox* AlchemyScrollBox;
+
 	virtual void NativeOnInitialized() override;
 
 	void UpdateInfoBox(TArray<FIngredientInfo>& IngredientInfos);

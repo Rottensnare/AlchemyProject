@@ -30,6 +30,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ClearAlchemySelection(const int32 Index = -1);
 
+	void FindIngredients(const FName& RecipeName);
+
+	void PlaySound(const FName& SFXName);
+
 protected:
 
 	virtual void BeginPlay() override;
@@ -52,6 +56,8 @@ private:
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TArray<FIngredientInfo> IngredientInfos;
 
+	TMap<EPrimarySubstance, int32> CurrentRecipeMap;
+
 	//UI PARAMS
 
 	UPROPERTY(EditAnywhere)
@@ -60,5 +66,7 @@ private:
 	float AlchemyItemIconOpacity{0.9f};
 
 	
-	
+public:
+
+	FORCEINLINE APlayerHUD* GetPlayerHUD() const {return PlayerHUD;}
 };

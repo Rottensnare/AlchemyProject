@@ -22,10 +22,7 @@ struct FInventoriSlot
 
 	UPROPERTY(BlueprintReadOnly)
 	int32 ItemAmount;
-
-	//UPROPERTY(BlueprintReadWrite)
-	//class AItem* ItemInSlot;
-
+	
 	UPROPERTY(BlueprintReadOnly)
 	TSubclassOf<AItem> ItemClass;
 
@@ -57,6 +54,9 @@ public:
 	void DropItem(const int32 Index);
 	void SpawnItemFromInventory(const int32 InIndex, const int32 InAmount);
 
+	//Will be used to easily check if character has the correct amount of required item
+	UPROPERTY()
+	TMap<TSubclassOf<AItem>, int32> ItemTotalAmountMap;
 
 protected:
 
@@ -84,12 +84,11 @@ private:
 
 	FTimerHandle GridCreationTimer;
 
-	//Will be used to easily check if character has the correct amount of required item
-	UPROPERTY()
-	TMap<TSubclassOf<AItem>, int32> ItemTotalAmountMap;
+	
 
 public:
 	
 	TArray<FInventoriSlot>& GetInventory() {return InventorySlots;}
+	
 	
 };

@@ -28,6 +28,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	FRecipe Recipe;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EProductQuality ProductQuality{EProductQuality::EPQ_None};
 	
 	void Use();
 
@@ -37,5 +40,9 @@ public:
 	virtual void OnConstruction(const FTransform& Transform) override;
 
 	void InitProperties(const FName& InName);
+
+private:
+
+
 	
 };
