@@ -35,7 +35,7 @@ void AMyPlayerController::SetHUDHealth(float Health, float MaxHealth)
 	if(bIsHUDValid)
 	{
 		PlayerHUD->PlayerOverlay->HealthBar->SetPercent(Health / MaxHealth);
-		const FText HealthTxt = FText::FromString(FString::Printf(TEXT("%d : %d"), FMath::TruncToInt32(Health), FMath::TruncToInt32(MaxHealth)));
+		const FText HealthTxt = FText::FromString(FString::Printf(TEXT("%d / %d"), FMath::TruncToInt32(Health), FMath::TruncToInt32(MaxHealth)));
 		PlayerHUD->PlayerOverlay->HealthText->SetText(HealthTxt);
 	}
 }

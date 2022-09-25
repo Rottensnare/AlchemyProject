@@ -82,6 +82,7 @@ struct FProductInfo
 	UPROPERTY(EditAnywhere)
 	EProductQuality ProductQuality;
 
-	
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UPotionComponent> PotionComponentClass;
 	
 };

@@ -23,14 +23,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString ProductDescription;
 
-	UPROPERTY(EditAnywhere)
-	FName Name;
-
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FRecipe Recipe;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EProductQuality ProductQuality{EProductQuality::EPQ_None};
+	FProductInfo ProductInfo;
 	
 	void Use();
 

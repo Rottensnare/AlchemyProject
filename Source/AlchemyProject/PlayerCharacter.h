@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Alchemy/AlchemyItem.h"
+#include "Alchemy/Components/Potion/PotionComponent.h"
 #include "GameFramework/Character.h"
 #include "PlayerCharacter.generated.h"
 
@@ -22,6 +23,11 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 	bool bIsDoingAlchemy{false};
+	
+	void UsePotion(const TSubclassOf<UPotionComponent> InComponentClass);
+
+	UPROPERTY(VisibleAnywhere, Category = Alchemy)
+	TMap<UActorComponent*, int32> CurrentPotionComponents;
 
 protected:
 
@@ -83,11 +89,17 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	class AAlchemyTable* CurrentAlchemyTable;
 
+	
+
 public:
 	
 	FORCEINLINE UInventoryComponent* GetInventoryComponent() const {return InventoryComponent;}
 	FORCEINLINE UAlchemyComponent* GetAlchemyComponent() const {return AlchemyComponent;}
+	FORCEINLINE UHealthComponent* GetHealthComponent() const {return HealthComponent;}
 	FORCEINLINE void SetAlchemyTable(AAlchemyTable* InTable) {CurrentAlchemyTable = InTable;}
 	FORCEINLINE AAlchemyTable* GetAlchemyTable() const {return CurrentAlchemyTable;}
 	
 };
+
+
+

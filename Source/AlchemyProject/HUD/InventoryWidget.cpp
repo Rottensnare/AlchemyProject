@@ -6,6 +6,7 @@
 #include "InventorySlot.h"
 #include "AlchemyProject/Ingredient.h"
 #include "AlchemyProject/PlayerCharacter.h"
+#include "AlchemyProject/Alchemy/Potion.h"
 #include "AlchemyProject/PlayerController/MyPlayerController.h"
 #include "Components/ComboBoxString.h"
 #include "Components/GridPanel.h"
@@ -128,8 +129,13 @@ void UInventoryWidget::HandleComboSelection(FString SelectedItem, ESelectInfo::T
 
 	if(SelectedItem == "Use")
 	{
+		if(true) //TODO: FIX THIS
+		{
+			PlayerCharacter->UsePotion(PlayerCharacter->GetInventoryComponent()->GetInventory()[SelectedSlotIndex].ProductInfo.PotionComponentClass);
+		}
 		PlayerCharacter->UpdateInventorySlotAmount(SelectedSlotIndex, -1);
 		UpdateInventorySlot(SelectedSlotIndex);
+		
 	}
 	else if(SelectedItem == "Drop")
 	{

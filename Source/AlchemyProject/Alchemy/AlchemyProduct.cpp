@@ -19,20 +19,23 @@ void AAlchemyProduct::OnConstruction(const FTransform& Transform)
 
 void AAlchemyProduct::InitProperties(const FName& InName)
 {
-	Name = InName;
+	ProductInfo.Name = InName;
 	
 	FString RecipeDataTablePath(TEXT("DataTable'/Game/Assets/Datatables/RecipeDataTable.RecipeDataTable'"));
 	UDataTable* RecipeTableObject = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, *RecipeDataTablePath));
 	if(!RecipeTableObject) return;
 	
 	FRecipeTable* RecipeDataRow = nullptr;
-	RecipeDataRow = RecipeTableObject->FindRow<FRecipeTable>(Name, TEXT(""));
+	RecipeDataRow = RecipeTableObject->FindRow<FRecipeTable>(ProductInfo.Name, TEXT(""));
 	if(RecipeDataRow)
 	{
 		Recipe.AlchemyClass = RecipeDataRow->AlchemyClass;
 		Recipe.RequiredBase = RecipeDataRow->RequiredBase;
 		Recipe.AmountPerSubstanceMap = RecipeDataRow->AmountPerSubstanceMap;
 		Recipe.BaseSuccessChance = RecipeDataRow->BaseSuccessChance;
+		ItemType = EItemType::EIT_Consumable;
+		ProductInfo.AlchemyClass = RecipeDataRow->AlchemyClass;
+		
 		//UE_LOG(LogTemp, Warning, TEXT("Recipe copy successful"))
 		UE_LOG(LogTemp, Warning, TEXT("Recipe Hash with u: %u"), UUserDefinedStruct::GetUserDefinedStructTypeHash(&Recipe, FRecipe::StaticStruct()));
 		OnInitialized.Broadcast();

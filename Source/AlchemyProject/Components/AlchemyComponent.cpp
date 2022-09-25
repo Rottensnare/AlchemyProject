@@ -153,7 +153,6 @@ void UAlchemyComponent::CreateAlchemyProduct(const FAlchemyPackage& AlchemyPacka
 					{
 						MyPlayerController->ClearAlchemySelection();
 					}
-					
 				}
 			}
 			
@@ -162,8 +161,8 @@ void UAlchemyComponent::CreateAlchemyProduct(const FAlchemyPackage& AlchemyPacka
 			
 			//Calculate potion quality
 			//BUG: With the current inventory system, the product quality makes no difference and will be instantly reset to default value
-			Aitem->ProductQuality = ProductQuality::CalculateProductQuality(IngredientQualities);
-			UE_LOG(LogTemp, Warning, TEXT("Product quality: %s"), *UEnum::GetDisplayValueAsText(Aitem->ProductQuality).ToString())
+			Aitem->ProductInfo.ProductQuality = ProductQuality::CalculateProductQuality(IngredientQualities);
+			UE_LOG(LogTemp, Warning, TEXT("Product quality: %s"), *UEnum::GetDisplayValueAsText(Aitem->ProductInfo.ProductQuality ).ToString())
 			
 			Aitem->InitProperties(Recipe);
 			

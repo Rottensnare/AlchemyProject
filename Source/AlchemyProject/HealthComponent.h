@@ -32,5 +32,12 @@ private:
 
 	UPROPERTY()
 	class AMyPlayerController* OwnerController;
+
+public:
+
+	FORCEINLINE float GetHealth() const {return Health;}
+	FORCEINLINE void SetHealth(const float InHealth) {Health = InHealth;}
+	FORCEINLINE float GetMaxHealth() const {return MaxHealth;}
+	FORCEINLINE void SetMaxHealth(const float InMaxHealth) {MaxHealth = InMaxHealth;}
 	
 };

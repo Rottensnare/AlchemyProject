@@ -20,6 +20,14 @@ public:
 
 protected:
 
-	
+	UPROPERTY(EditAnywhere)
+	FProductInfo PotionInfo;
+
+private:
+
+
+public:
+
+	FORCEINLINE FProductInfo GetProductInfo() const {return PotionInfo;}
 	
 };

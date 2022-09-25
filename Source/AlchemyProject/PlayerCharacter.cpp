@@ -35,6 +35,7 @@ APlayerCharacter::APlayerCharacter()
 
 }
 
+
 // Called when the game starts or when spawned
 void APlayerCharacter::BeginPlay()
 {
@@ -240,3 +241,17 @@ void APlayerCharacter::UpdateInventorySlotAmount(const int32 Index, const int32 
 	InventoryComponent->UpdateItemAmount(Index, Amount);
 }
 
+void APlayerCharacter::UsePotion(const TSubclassOf<UPotionComponent> InComponentClass)
+{
+	if(InComponentClass == nullptr) return;
+	UE_LOG(LogTemp, Warning, TEXT("APlayerCharacter::UsePotion if(InComponentClass == nullptr)"))
+	auto* PotionComponent = NewObject<UPotionComponent>(this, InComponentClass, NAME_None, RF_Transient);
+	if(PotionComponent == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to create PotionComponent"))
+		return;
+	}
+	
+	PotionComponent->RegisterComponent();
+	CurrentPotionComponents.Emplace(PotionComponent, 0);
+}

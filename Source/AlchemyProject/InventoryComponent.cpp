@@ -7,6 +7,7 @@
 #include "Item.h"
 #include "PlayerCharacter.h"
 #include "Alchemy/AlchemyItem.h"
+#include "Alchemy/Potion.h"
 #include "HUD/InventoryWidget.h"
 #include "HUD/PlayerHUD.h"
 #include "HUD/ScrollableInventoryWidget.h"
@@ -37,10 +38,19 @@ void UInventoryComponent::BeginPlay()
 		InventorySlot.ItemClass = nullptr;
 		InventorySlot.ItemIcon = nullptr;
 		InventorySlot.ItemType = EItemType::EIT_MAX;
+		InventorySlot.ProductInfo = FProductInfo();
 		InventorySlots.Add(InventorySlot);
 	}
 
 	//Character->GetWorldTimerManager().SetTimer(GridCreationTimer, this, &UInventoryComponent::InitGridCreation, 0.2f);
+	
+}
+
+// Called every frame
+void UInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
 	
 }
 
@@ -93,6 +103,7 @@ void UInventoryComponent::DropItem(const int32 Index)
 	InventorySlots[Index].ItemClass = nullptr;
 	InventorySlots[Index].ItemIcon = nullptr;
 	InventorySlots[Index].ItemType = EItemType::EIT_MAX;
+	InventorySlots[Index].ProductInfo = FProductInfo();
 	
 	if(Character) //TODO: This code repeats in multiple places, might need to make it a function
 	{
@@ -135,13 +146,7 @@ void UInventoryComponent::SpawnItemFromInventory(const int32 InIndex, const int3
 }
 
 
-// Called every frame
-void UInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	
-}
 
 void UInventoryComponent::ShowInventory(bool bVisible)
 {
@@ -276,6 +281,9 @@ void UInventoryComponent::AddToInventory(AItem* InItem, int32 InAmount) //TODO: 
 					Slot.IngredientInfo.IngredientType = TempAlchemyItem->IngredientData.IngredientType;
 					Slot.IngredientInfo.IngredientClass = InItem->GetClass();
 				}
+			}else if (APotion* Potion = Cast<APotion>(InItem))
+			{
+				Slot.ProductInfo = Potion->GetProductInfo();
 			}
 				
 			if(ItemTotalAmountMap.Contains(Slot.ItemClass))
