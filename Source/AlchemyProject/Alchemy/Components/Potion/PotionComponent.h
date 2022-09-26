@@ -23,6 +23,9 @@ protected:
 	virtual void BeginPlay() override;
 
 	UFUNCTION()
+	virtual void ExecuteFunctionality();
+
+	UFUNCTION()
 	virtual void DestroyThisComponent();
 
 	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) override;

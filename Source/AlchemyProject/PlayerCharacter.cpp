@@ -251,7 +251,6 @@ void APlayerCharacter::UsePotion(const TSubclassOf<UPotionComponent> InComponent
 		UE_LOG(LogTemp, Error, TEXT("Failed to create PotionComponent"))
 		return;
 	}
-	
 	PotionComponent->RegisterComponent();
 	PotionComponent->SetProductQuality(InProductQuality);
 	CurrentPotionComponents.Emplace(PotionComponent, 0);

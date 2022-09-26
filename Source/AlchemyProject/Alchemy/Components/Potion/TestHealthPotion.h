@@ -20,6 +20,8 @@ protected:
 
 	virtual void DestroyThisComponent() override;
 
+	virtual void ExecuteFunctionality() override;
+
 private:
 
 	UPROPERTY(EditAnywhere)

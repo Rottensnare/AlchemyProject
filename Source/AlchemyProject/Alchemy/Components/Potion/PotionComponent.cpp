@@ -22,6 +22,11 @@ void UPotionComponent::BeginPlay()
 	
 }
 
+void UPotionComponent::ExecuteFunctionality()
+{
+	
+}
+
 void UPotionComponent::DestroyThisComponent()
 {
 	DestroyComponent();

@@ -104,6 +104,7 @@ void UInventoryComponent::DropItem(const int32 Index)
 	InventorySlots[Index].ItemIcon = nullptr;
 	InventorySlots[Index].ItemType = EItemType::EIT_MAX;
 	InventorySlots[Index].ProductInfo = FProductInfo();
+	InventorySlots[Index].HashCode = 0;
 	
 	if(Character) //TODO: This code repeats in multiple places, might need to make it a function
 	{
@@ -133,7 +134,7 @@ void UInventoryComponent::SpawnItemFromInventory(const int32 InIndex, const int3
 		for(int i = 0; i < InAmount; i++)
 		{
 			//TODO: Make the spawning location smarter, so that you can't spawn objects inside other objects or behind walls etc. Maybe with a spring arm?
-			auto Item = GetWorld()->SpawnActor<AItem>(InventorySlots[InIndex].ItemClass, Character->GetActorLocation() + FVector(100.f, 0.f, 0.f), FRotator(0.f));
+			auto Item = GetWorld()->SpawnActor<AItem>(InventorySlots[InIndex].ItemClass, Character->GetActorLocation() + Character->GetActorForwardVector() * 25.f, FRotator(0.f));
 			Item->SetItemState(EItemState::EIS_Dropped);
 			Item->GetItemMesh()->SetSimulatePhysics(true);
 			if(APotion* TempPotion = Cast<APotion>(Item))
@@ -172,13 +173,7 @@ void UInventoryComponent::ShowInventory(bool bVisible)
 //Function that's over 150 lines of code. This is a mess and this system doesn't work well with the alchemy system, needs a thorough rework!
 void UInventoryComponent::AddToInventory(AItem* InItem, int32 InAmount) //TODO: Might need to make this into several smaller functions
 {
-	int32 ItemIndex{-1};
 	UE_LOG(LogTemp, Warning, TEXT("AddToInventory: Class Name: %s"),  *InItem->GetClass()->GetName());
-	if(APotion* TempPotion = Cast<APotion>(InItem))
-	{
-		
-		UE_LOG(LogTemp, Warning, TEXT("AddToInventory Product quality: %s"), *UEnum::GetDisplayValueAsText(TempPotion->GetProductInfo().ProductQuality).ToString())
-	}
 	
 	for(auto& Slot : InventorySlots)
 	{
@@ -290,12 +285,7 @@ void UInventoryComponent::AddToInventory(AItem* InItem, int32 InAmount) //TODO: 
 					Slot.IngredientInfo.IngredientType = TempAlchemyItem->IngredientData.IngredientType;
 					Slot.IngredientInfo.IngredientClass = InItem->GetClass();
 				}
-			}else if (APotion* Potion = Cast<APotion>(InItem))
-			{
-				UE_LOG(LogTemp, Warning, TEXT("InventoryComponent.cpp %s"), *UEnum::GetDisplayValueAsText(Potion->GetProductInfo().ProductQuality).ToString())
-				Slot.ProductInfo = Potion->GetProductInfo();
 			}
-				
 			if(ItemTotalAmountMap.Contains(Slot.ItemClass))
 			{
 				if(const AAlchemyItem* TempItem = Cast<AAlchemyItem>(InItem))
@@ -343,3 +333,52 @@ void UInventoryComponent::AddToInventory(AItem* InItem, int32 InAmount) //TODO: 
 	//UE_LOG(LogTemp, Warning, TEXT("AddToInventory: Total Item Amount: %d"), ItemTotalAmountMap[InItem->GetClass()])
 }
 
+
+
+void UInventoryComponent::AddPotionToInventory(APotion* const InPotion, const int32 InAmount, const uint32 InHashCode)
+{
+	if(HashSlotIDMap.Contains(InHashCode))
+	{
+		InventorySlots[HashSlotIDMap[InHashCode]].ItemAmount += InAmount;
+		UpdateInventorySlot(HashSlotIDMap[InHashCode]);
+		InPotion->Destroy();
+		return;
+	}
+	for(auto& Slot : InventorySlots)
+	{
+		
+		if(Slot.HashCode == InHashCode)
+		{
+			Slot.ItemAmount += InAmount;
+			UpdateInventorySlot(Slot.SlotId);
+			InPotion->Destroy();
+			break;
+		}
+		else if(Slot.ItemClass == nullptr)
+		{
+			HashSlotIDMap.Emplace(InHashCode, Slot.SlotId);
+			Slot.HashCode = InHashCode;
+			Slot.ItemAmount = InAmount;
+			Slot.ItemClass = InPotion->GetClass();
+			Slot.ItemType = InPotion->GetItemType();
+			Slot.ItemIcon = InPotion->GetSlotImage();
+			Slot.ProductInfo = InPotion->ProductInfo;
+			UpdateInventorySlot(Slot.SlotId);
+			InPotion->Destroy();
+			break;
+		}
+	}
+}
+
+void UInventoryComponent::UpdateInventorySlot(const int32 Index)
+{
+	Character = Character == nullptr ? Cast<APlayerCharacter>(GetOwner()) : Character;
+	if(Character)
+	{
+		AMyPlayerController* MyPlayerController = Cast<AMyPlayerController>(Character->Controller);
+		if(MyPlayerController)
+		{
+			MyPlayerController->UpdateInventory(Index);
+		}
+	}
+}

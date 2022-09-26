@@ -56,7 +56,7 @@ void UInventoryWidget::CreateInventoryGrid(const int32 NumberOfElements)
 				const int32 Index = j + (i * NumberOfColumns);
 				if(IsValid(InventorySlots[Index]))
 				{
-					UE_LOG(LogTemp, Warning, TEXT("Adding inventory slot #%d"), Index)
+					//UE_LOG(LogTemp, Warning, TEXT("Adding inventory slot #%d"), Index)
 					InventoryGrid->AddChildToUniformGrid(InventorySlots[Index], i, j);
 					if(InventoryGrid->GetChildrenCount() >= NumberOfElements)
 					{
@@ -131,7 +131,7 @@ void UInventoryWidget::HandleComboSelection(FString SelectedItem, ESelectInfo::T
 	if(SelectedItem == "Use")
 	{
 		if(true) //TODO: FIX THIS
-		{ 
+		{
 			PlayerCharacter->UsePotion(INVENTORY(SelectedSlotIndex).ProductInfo.PotionComponentClass, INVENTORY(SelectedSlotIndex).ProductInfo.ProductQuality);
 		}
 		PlayerCharacter->UpdateInventorySlotAmount(SelectedSlotIndex, -1);
