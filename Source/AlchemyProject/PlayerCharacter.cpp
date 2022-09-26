@@ -241,10 +241,10 @@ void APlayerCharacter::UpdateInventorySlotAmount(const int32 Index, const int32 
 	InventoryComponent->UpdateItemAmount(Index, Amount);
 }
 
-void APlayerCharacter::UsePotion(const TSubclassOf<UPotionComponent> InComponentClass)
+void APlayerCharacter::UsePotion(const TSubclassOf<UPotionComponent> InComponentClass, const EProductQuality InProductQuality)
 {
 	if(InComponentClass == nullptr) return;
-	UE_LOG(LogTemp, Warning, TEXT("APlayerCharacter::UsePotion if(InComponentClass == nullptr)"))
+
 	auto* PotionComponent = NewObject<UPotionComponent>(this, InComponentClass, NAME_None, RF_Transient);
 	if(PotionComponent == nullptr)
 	{
@@ -253,5 +253,6 @@ void APlayerCharacter::UsePotion(const TSubclassOf<UPotionComponent> InComponent
 	}
 	
 	PotionComponent->RegisterComponent();
+	PotionComponent->SetProductQuality(InProductQuality);
 	CurrentPotionComponents.Emplace(PotionComponent, 0);
 }

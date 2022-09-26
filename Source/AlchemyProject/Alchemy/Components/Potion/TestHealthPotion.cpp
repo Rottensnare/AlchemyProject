@@ -11,6 +11,8 @@
 void UTestHealthPotion::BeginPlay()
 {
 	Super::BeginPlay();
+
+	UE_LOG(LogTemp, Warning, TEXT("%s"), *UEnum::GetDisplayValueAsText(ProductQuality).ToString())
 	
 	CurrentCharacter = CurrentCharacter == nullptr ? Cast<APlayerCharacter>(GetOwner()) : CurrentCharacter;
 	if(CurrentCharacter)
@@ -18,7 +20,7 @@ void UTestHealthPotion::BeginPlay()
 		//Heal Player
 		CurrentCharacter->GetHealthComponent()->SetHealth(
 		FMath::Clamp(
-			CurrentCharacter->GetHealthComponent()->GetHealth() + InstantHealAmount
+			CurrentCharacter->GetHealthComponent()->GetHealth() + FMath::Clamp(InstantHealAmount * (1 + (0.2f * (uint8)ProductQuality) - 1), 0, 10000)
 			, 0.f
 			, CurrentCharacter->GetHealthComponent()->GetMaxHealth()));
 
@@ -32,7 +34,7 @@ void UTestHealthPotion::BeginPlay()
 			}
 		}
 		
-		//DestroyComponent can't be executed on the same frame, se we wait for the next frame
+		//DestroyComponent can't be executed within the same frame, se we wait for the next frame
 		FTimerDelegate TimerDelegate;
 		TimerDelegate.BindUFunction(this, FName("DestroyThisComponent"));
 		CurrentCharacter->GetWorldTimerManager().SetTimerForNextTick(TimerDelegate);

@@ -136,6 +136,10 @@ void UInventoryComponent::SpawnItemFromInventory(const int32 InIndex, const int3
 			auto Item = GetWorld()->SpawnActor<AItem>(InventorySlots[InIndex].ItemClass, Character->GetActorLocation() + FVector(100.f, 0.f, 0.f), FRotator(0.f));
 			Item->SetItemState(EItemState::EIS_Dropped);
 			Item->GetItemMesh()->SetSimulatePhysics(true);
+			if(APotion* TempPotion = Cast<APotion>(Item))
+			{
+				TempPotion->ProductInfo = InventorySlots[InIndex].ProductInfo;
+			}
 			
 			UE_LOG(LogTemp, Warning, TEXT("Item Name: %s"), *Item->GetName())/*
 			UE_LOG(LogTemp, Warning, TEXT("Item Class Name using StaticClass: %s"), *Item->StaticClass()->GetName())
@@ -170,6 +174,11 @@ void UInventoryComponent::AddToInventory(AItem* InItem, int32 InAmount) //TODO: 
 {
 	int32 ItemIndex{-1};
 	UE_LOG(LogTemp, Warning, TEXT("AddToInventory: Class Name: %s"),  *InItem->GetClass()->GetName());
+	if(APotion* TempPotion = Cast<APotion>(InItem))
+	{
+		
+		UE_LOG(LogTemp, Warning, TEXT("AddToInventory Product quality: %s"), *UEnum::GetDisplayValueAsText(TempPotion->GetProductInfo().ProductQuality).ToString())
+	}
 	
 	for(auto& Slot : InventorySlots)
 	{
@@ -225,7 +234,7 @@ void UInventoryComponent::AddToInventory(AItem* InItem, int32 InAmount) //TODO: 
 				Character = Character == nullptr ? Cast<APlayerCharacter>(GetOwner()) : Character;
 				if(Character)
 				{
-					if(Character->Controller)
+					if(Character->Controller) //???? What was I thinking ?????
 					{
 						//Inefficient but does the job for this prototype
 						AMyPlayerController* MyPlayerController = Cast<AMyPlayerController>(Character->Controller);
@@ -283,6 +292,7 @@ void UInventoryComponent::AddToInventory(AItem* InItem, int32 InAmount) //TODO: 
 				}
 			}else if (APotion* Potion = Cast<APotion>(InItem))
 			{
+				UE_LOG(LogTemp, Warning, TEXT("InventoryComponent.cpp %s"), *UEnum::GetDisplayValueAsText(Potion->GetProductInfo().ProductQuality).ToString())
 				Slot.ProductInfo = Potion->GetProductInfo();
 			}
 				
@@ -315,7 +325,7 @@ void UInventoryComponent::AddToInventory(AItem* InItem, int32 InAmount) //TODO: 
 			Character = Character == nullptr ? Cast<APlayerCharacter>(GetOwner()) : Character;
 			if(Character)
 			{
-				if(Character->Controller)
+				if(Character->Controller) //Again WTF Was I Thinking with this ???
 				{
 					//Inefficient but does the job for this prototype
 					AMyPlayerController* MyPlayerController = Cast<AMyPlayerController>(Character->Controller);

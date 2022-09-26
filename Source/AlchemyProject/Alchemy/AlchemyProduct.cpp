@@ -37,7 +37,7 @@ void AAlchemyProduct::InitProperties(const FName& InName)
 		ProductInfo.AlchemyClass = RecipeDataRow->AlchemyClass;
 		
 		//UE_LOG(LogTemp, Warning, TEXT("Recipe copy successful"))
-		UE_LOG(LogTemp, Warning, TEXT("Recipe Hash with u: %u"), UUserDefinedStruct::GetUserDefinedStructTypeHash(&Recipe, FRecipe::StaticStruct()));
+		UE_LOG(LogTemp, Warning, TEXT("Recipe Hash as a uin32: %u"), UUserDefinedStruct::GetUserDefinedStructTypeHash(&Recipe, FRecipe::StaticStruct()));
 		OnInitialized.Broadcast();
 	}
 	else

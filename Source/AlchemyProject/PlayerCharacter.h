@@ -24,7 +24,7 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	bool bIsDoingAlchemy{false};
 	
-	void UsePotion(const TSubclassOf<UPotionComponent> InComponentClass);
+	void UsePotion(const TSubclassOf<UPotionComponent> InComponentClass, const EProductQuality InProductQuality);
 
 	UPROPERTY(VisibleAnywhere, Category = Alchemy)
 	TMap<UActorComponent*, int32> CurrentPotionComponents;

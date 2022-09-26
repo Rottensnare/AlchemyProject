@@ -196,5 +196,6 @@ FAlchemyPackage UAlchemyComponent::CreateAlchemyPackage(const TArray<FIngredient
 
 void UAlchemyComponent::AddAitemToInventory()
 {
+	UE_LOG(LogTemp, Warning, TEXT("AddAitemToInventory Product quality: %s"), *UEnum::GetDisplayValueAsText(Aitem->ProductInfo.ProductQuality ).ToString())
 	Character->GetInventoryComponent()->AddToInventory(Aitem, 1);
 }

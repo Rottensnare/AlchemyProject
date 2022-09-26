@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AlchemyProject/Enums/EIngredientQuality.h"
 #include "Components/ActorComponent.h"
 #include "PotionComponent.generated.h"
 
@@ -30,10 +31,13 @@ protected:
 	UPROPERTY()
 	class APlayerCharacter* CurrentCharacter;
 
+	EProductQuality ProductQuality;
+
 private:
 
-	
-	
+public:
+
+	FORCEINLINE void SetProductQuality(const EProductQuality InProductQuality) {ProductQuality = InProductQuality;}
 	
 		
 };
