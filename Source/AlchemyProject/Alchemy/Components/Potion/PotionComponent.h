@@ -8,7 +8,7 @@
 #include "PotionComponent.generated.h"
 
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS( Blueprintable, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class ALCHEMYPROJECT_API UPotionComponent : public UActorComponent
 {
 	GENERATED_BODY()

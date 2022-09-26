@@ -337,15 +337,7 @@ void UInventoryComponent::AddPotionToInventory(APotion* const InPotion, const in
 	}
 	for(auto& Slot : InventorySlots)
 	{
-		
-		if(Slot.HashCode == InHashCode) //Just to be sure :)
-		{
-			Slot.ItemAmount += InAmount;
-			UpdateInventorySlot(Slot.SlotId);
-			InPotion->Destroy();
-			break;
-		}
-		else if(Slot.ItemClass == nullptr)
+		if(Slot.ItemClass == nullptr)
 		{
 			HashSlotIDMap.Emplace(InHashCode, Slot.SlotId);
 			Slot.HashCode = InHashCode;

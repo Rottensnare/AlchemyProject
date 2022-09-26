@@ -123,6 +123,8 @@ void APlayerCharacter::InteractButtonPressed()
 		{
 			InventoryComponent->AddToInventory(TempItem, 1);
 			TracedActor = nullptr;
+			MyPlayerController = MyPlayerController == nullptr ? Cast<AMyPlayerController>(GetController()) : MyPlayerController;
+			if(MyPlayerController) MyPlayerController->PlaySound(FName("Pop"));
 		}
 	}
 }
@@ -160,6 +162,10 @@ void APlayerCharacter::SweepInteractButtonPressed()
 				}
 			}
 		}
+		
+		MyPlayerController = MyPlayerController == nullptr ? Cast<AMyPlayerController>(GetController()) : MyPlayerController;
+		if(MyPlayerController) MyPlayerController->PlaySound(FName("Pop"));
+		
 		if(Items.Num() > 0)
 		{
 			InventoryComponent->AddToInventory(Items[0], Items.Num());
