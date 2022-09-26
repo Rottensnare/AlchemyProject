@@ -104,7 +104,9 @@ void UInventoryComponent::DropItem(const int32 Index)
 	InventorySlots[Index].ItemIcon = nullptr;
 	InventorySlots[Index].ItemType = EItemType::EIT_MAX;
 	InventorySlots[Index].ProductInfo = FProductInfo();
+	HashSlotIDMap.Remove(InventorySlots[Index].HashCode);
 	InventorySlots[Index].HashCode = 0;
+	
 	
 	if(Character) //TODO: This code repeats in multiple places, might need to make it a function
 	{
@@ -126,11 +128,6 @@ void UInventoryComponent::SpawnItemFromInventory(const int32 InIndex, const int3
 	UE_LOG(LogTemp, Warning, TEXT("SpawnItemFromInventory: InAmount: %d"), InAmount)
 	if(InventorySlots[InIndex].ItemClass && Character)
 	{
-		
-		//UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent::SpawnItemFromInventory: ItemClass = %s"), *InventorySlots[InIndex].ItemClass->GetName())
-		//UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent::SpawnItemFromInventory: ItemClass->StaticClass = %s"), *InventorySlots[InIndex].ItemClass->StaticClass()->GetName())
-		const FActorSpawnParameters SpawnParameters;
-		
 		for(int i = 0; i < InAmount; i++)
 		{
 			//TODO: Make the spawning location smarter, so that you can't spawn objects inside other objects or behind walls etc. Maybe with a spring arm?
@@ -142,10 +139,7 @@ void UInventoryComponent::SpawnItemFromInventory(const int32 InIndex, const int3
 				TempPotion->ProductInfo = InventorySlots[InIndex].ProductInfo;
 			}
 			
-			UE_LOG(LogTemp, Warning, TEXT("Item Name: %s"), *Item->GetName())/*
-			UE_LOG(LogTemp, Warning, TEXT("Item Class Name using StaticClass: %s"), *Item->StaticClass()->GetName())
-			UE_LOG(LogTemp, Warning, TEXT("Item Class Name using GetClass: %s"), *Item->GetClass()->GetName())
-			*/
+			UE_LOG(LogTemp, Warning, TEXT("Item Name: %s"), *Item->GetName())
 		}
 	}
 }
@@ -328,9 +322,6 @@ void UInventoryComponent::AddToInventory(AItem* InItem, int32 InAmount) //TODO: 
 			break;
 		}
 	}
-	//UE_LOG(LogTemp, Warning, TEXT("AddToInventory: Amount in slot 0: %d"), InventorySlots[0].ItemAmount)
-	//UE_LOG(LogTemp, Warning, TEXT("AddToInventory: Amount in slot 1: %d"), InventorySlots[1].ItemAmount)
-	//UE_LOG(LogTemp, Warning, TEXT("AddToInventory: Total Item Amount: %d"), ItemTotalAmountMap[InItem->GetClass()])
 }
 
 
@@ -347,7 +338,7 @@ void UInventoryComponent::AddPotionToInventory(APotion* const InPotion, const in
 	for(auto& Slot : InventorySlots)
 	{
 		
-		if(Slot.HashCode == InHashCode)
+		if(Slot.HashCode == InHashCode) //Just to be sure :)
 		{
 			Slot.ItemAmount += InAmount;
 			UpdateInventorySlot(Slot.SlotId);
