@@ -20,4 +20,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FIngredientInfo IngredientData;
+
+	virtual void UpdatePopUp() override;
+
+protected:
+
+
 };

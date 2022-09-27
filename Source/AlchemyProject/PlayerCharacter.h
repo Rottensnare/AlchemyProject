@@ -80,6 +80,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	AActor* TracedActor;
+
+	UPROPERTY(VisibleAnywhere)
+	AItem* TracedItemLastFrame;
 	
 	TSubclassOf<class AItem> ItemClass;
 
@@ -89,7 +92,8 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	class AAlchemyTable* CurrentAlchemyTable;
 
-	
+	UPROPERTY()
+	const USkeletalMeshSocket* HeadSocket{nullptr};
 
 public:
 	

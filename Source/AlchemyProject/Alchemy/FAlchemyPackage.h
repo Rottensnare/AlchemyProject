@@ -30,6 +30,9 @@ struct FRecipeTable : public FTableRowBase
 	TSubclassOf<class AAlchemyProduct> AlchemyClass;
 
 	UPROPERTY(EditAnywhere)
+	FName ProductName;
+
+	UPROPERTY(EditAnywhere)
 	float BaseSuccessChance{1.f};
 	
 };
@@ -47,6 +50,9 @@ struct FRecipe
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AAlchemyProduct> AlchemyClass;
+
+	UPROPERTY(EditAnywhere)
+	FName ProductName;
 
 	UPROPERTY(EditAnywhere)
 	float BaseSuccessChance{1.f};

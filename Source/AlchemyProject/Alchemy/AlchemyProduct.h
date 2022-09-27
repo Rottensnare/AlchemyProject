@@ -37,6 +37,13 @@ public:
 	virtual void OnConstruction(const FTransform& Transform) override;
 
 	void InitProperties(const FName& InName);
+	virtual void UpdatePopUp() override;
+
+protected:
+
+	virtual void BeginPlay() override;
+
+	
 
 private:
 

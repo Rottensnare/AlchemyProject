@@ -13,7 +13,6 @@ void AAlchemyProduct::Use()
 void AAlchemyProduct::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
-
 	
 }
 
@@ -21,8 +20,8 @@ void AAlchemyProduct::InitProperties(const FName& InName)
 {
 	ProductInfo.Name = InName;
 	
-	FString RecipeDataTablePath(TEXT("DataTable'/Game/Assets/Datatables/RecipeDataTable.RecipeDataTable'"));
-	UDataTable* RecipeTableObject = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, *RecipeDataTablePath));
+	const FString RecipeDataTablePath(TEXT("DataTable'/Game/Assets/Datatables/RecipeDataTable.RecipeDataTable'"));
+	const UDataTable* RecipeTableObject = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, *RecipeDataTablePath));
 	if(!RecipeTableObject) return;
 	
 	FRecipeTable* RecipeDataRow = nullptr;
@@ -46,4 +45,21 @@ void AAlchemyProduct::InitProperties(const FName& InName)
 	}
 
 	
+}
+
+void AAlchemyProduct::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
+void AAlchemyProduct::UpdatePopUp()
+{
+	//Setting the Popup text
+	FString Quality = FString::Printf(TEXT("%s"), *UEnum::GetDisplayValueAsText(ProductInfo.ProductQuality).ToString());
+	FString TempString("");
+	Quality.Split(" ", &Quality, &TempString, ESearchCase::IgnoreCase);
+	PopUpText = FString::Printf(TEXT("<Header1>%s</>\n<Header2>Quality:</><%s>%s</>\n"), *ProductInfo.Name.ToString(), *Quality, *Quality);
+	//UE_LOG(LogTemp, Warning, TEXT("Quality: %s"), *Quality)
+	
+	Super::UpdatePopUp();
 }

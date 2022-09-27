@@ -29,15 +29,18 @@ class ALCHEMYPROJECT_API AItem : public AActor, public IPickable
 public:	
 
 	AItem();
-	virtual void Tick(float DeltaTime) override;
 
 	bool bInventoryPlaceable{true};
 
-	
+	void ShowItemPopupWidget() const;
+	UFUNCTION()
+	virtual void UpdatePopUp();
 	
 protected:
 
 	virtual void BeginPlay() override;
+
+	
 
 	UPROPERTY(EditAnywhere)
 	class UTexture2D* ImageInSlot;
@@ -46,7 +49,8 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	bool bStackable{true};
 
-	//How many items of this type can be stacked per slot
+	//DEPRECATED: There will be no Max Stack amount.
+	//How many items of this type can be stacked per slot.
 	UPROPERTY(EditAnywhere)
 	int32 MaxStack{16};
 
@@ -58,6 +62,15 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	EItemType ItemType{EItemType::EIT_Misc};
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Popup, meta = (AllowPrivateAccess = "true"))
+	class UWidgetComponent* ItemPopUp;
+
+	UPROPERTY(EditAnywhere)
+	FString PopUpText;
+
+	UPROPERTY(EditAnywhere)
+	FString ItemName;
 
 	
 

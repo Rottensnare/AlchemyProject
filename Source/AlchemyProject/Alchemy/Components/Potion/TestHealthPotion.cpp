@@ -38,7 +38,7 @@ void UTestHealthPotion::ExecuteFunctionality()
 		//Heal Player
 		CurrentCharacter->GetHealthComponent()->SetHealth(
 		FMath::Clamp(
-			CurrentCharacter->GetHealthComponent()->GetHealth() + FMath::Clamp(InstantHealAmount * ((1 + (0.2f * (uint8)ProductQuality))), 0, 10000)
+			CurrentCharacter->GetHealthComponent()->GetHealth() + FMath::Clamp(InstantHealAmount * ((1 + (0.5f * (uint8)ProductQuality))), 0, 10000)
 			, 0.f
 			, CurrentCharacter->GetHealthComponent()->GetMaxHealth()));
 
