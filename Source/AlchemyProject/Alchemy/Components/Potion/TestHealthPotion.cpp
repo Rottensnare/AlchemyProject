@@ -29,9 +29,6 @@ void UTestHealthPotion::DestroyThisComponent()
 
 void UTestHealthPotion::ExecuteFunctionality()
 {
-
-	//UE_LOG(LogTemp, Warning, TEXT("UTestHealthPotion::ExecuteFunctionality()  %s"), *UEnum::GetDisplayValueAsText(ProductQuality).ToString())
-	
 	CurrentCharacter = CurrentCharacter == nullptr ? Cast<APlayerCharacter>(GetOwner()) : CurrentCharacter;
 	if(CurrentCharacter)
 	{
@@ -43,10 +40,9 @@ void UTestHealthPotion::ExecuteFunctionality()
 			, CurrentCharacter->GetHealthComponent()->GetMaxHealth()));
 
 		//Update HUD
-		AMyPlayerController* TempController = Cast<AMyPlayerController>(CurrentCharacter->Controller);
-		if(TempController)
+		if(const AMyPlayerController* const TempController = Cast<AMyPlayerController>(CurrentCharacter->Controller))
 		{
-			if(APlayerHUD* TempHUD = Cast<APlayerHUD>(TempController->GetHUD()))
+			if(APlayerHUD* const TempHUD = Cast<APlayerHUD>(TempController->GetHUD()))
 			{
 				TempHUD->UpdateHealthBar(CurrentCharacter->GetHealthComponent()->GetHealth(), CurrentCharacter->GetHealthComponent()->GetMaxHealth());
 			}
@@ -57,8 +53,6 @@ void UTestHealthPotion::ExecuteFunctionality()
 		TimerDelegate2.BindUFunction(this, FName("DestroyThisComponent"));
 		CurrentCharacter->GetWorldTimerManager().SetTimerForNextTick(TimerDelegate2);
 	}
-	
-	
 }
 
 

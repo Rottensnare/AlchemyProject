@@ -26,9 +26,6 @@ AItem::AItem()
 	
 }
 
-
-
-
 void AItem::BeginPlay()
 {
 	Super::BeginPlay();

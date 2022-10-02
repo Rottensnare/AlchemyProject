@@ -32,7 +32,9 @@ public:
 
 	bool bInventoryPlaceable{true};
 
+	//TODO: Add a short timer to the character's trace function so that the pop up won't become visible immediately
 	void ShowItemPopupWidget() const;
+	
 	UFUNCTION()
 	virtual void UpdatePopUp();
 	

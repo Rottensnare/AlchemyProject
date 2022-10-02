@@ -24,7 +24,7 @@ void AAlchemyProduct::InitProperties(const FName& InName)
 	const UDataTable* RecipeTableObject = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, *RecipeDataTablePath));
 	if(!RecipeTableObject) return;
 	
-	FRecipeTable* RecipeDataRow = nullptr;
+	const FRecipeTable* RecipeDataRow = nullptr;
 	RecipeDataRow = RecipeTableObject->FindRow<FRecipeTable>(ProductInfo.Name, TEXT(""));
 	if(RecipeDataRow)
 	{

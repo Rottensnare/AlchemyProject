@@ -358,8 +358,7 @@ void UInventoryComponent::UpdateInventorySlot(const int32 Index)
 	Character = Character == nullptr ? Cast<APlayerCharacter>(GetOwner()) : Character;
 	if(Character)
 	{
-		AMyPlayerController* MyPlayerController = Cast<AMyPlayerController>(Character->Controller);
-		if(MyPlayerController)
+		if(AMyPlayerController* MyPlayerController = Cast<AMyPlayerController>(Character->Controller))
 		{
 			MyPlayerController->UpdateInventory(Index);
 		}
