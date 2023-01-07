@@ -52,6 +52,7 @@ void AAIBase::OnSeenPawn(APawn* InPawn)
 		
 		if(AIController == nullptr || AIController->GetAIBlackboardComponent() == nullptr) return;
 		AIController->GetAIBlackboardComponent()->SetValueAsBool(FName("PlayerSeen"), bPlayerSeen);
+		AIController->GetAIBlackboardComponent()->SetValueAsObject(FName("Target"), InPawn);
 		
 		GetWorldTimerManager().ClearTimer(PlayerSeenTimer);
 		GetWorldTimerManager().SetTimer(PlayerSeenTimer,this, &ThisClass::ResetPlayerSeen, PlayerSeenTimerTime);
@@ -64,6 +65,7 @@ void AAIBase::ResetPlayerSeen()
 	
 	if(AIController == nullptr || AIController->GetAIBlackboardComponent() == nullptr) return;
 	AIController->GetAIBlackboardComponent()->SetValueAsBool(FName("PlayerSeen"), bPlayerSeen);
+	AIController->GetAIBlackboardComponent()->SetValueAsObject(FName("Target"), nullptr);
 }
 
 void AAIBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

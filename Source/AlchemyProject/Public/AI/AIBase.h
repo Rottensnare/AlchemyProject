@@ -68,6 +68,8 @@ public:
 
 	FORCEINLINE UBehaviorTree* GetBehaviorTree() const {return BehaviorTree;}
 	FORCEINLINE EAIState GetAIState() const {return AIState;}
+	FORCEINLINE bool GetPlayerSeen() const {return bPlayerSeen;}
+	FORCEINLINE void SetPlayerSeen(const bool bValue) {bPlayerSeen = bValue;}
 };
 
 template <typename T>
