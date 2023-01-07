@@ -19,6 +19,7 @@ protected:
 
 	virtual void Tick(float DeltaSeconds) override;
 	void CalculateDateTime(float DeltaSeconds);
+	virtual void BeginPlay() override;
 
 private:
 
@@ -33,20 +34,31 @@ private:
 	TArray<FName> DayNames{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
 	TArray<FName> MonthNames{"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
 
-
+	
 	/*******************************
 	 *	Time stuff
 	 *******************************/
 
-	UPROPERTY(BlueprintReadOnly, Category = "Time", meta = (AllowPrivateAccess, ClampMin = "0", ClampMax = "23", UIMin = "0", UIMax = "23"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Time", meta = (AllowPrivateAccess, ClampMin = "0", ClampMax = "23", UIMin = "0", UIMax = "23"))
 	uint8 CurrentHour{0};
-	UPROPERTY(BlueprintReadOnly, Category = "Time", meta = (AllowPrivateAccess, ClampMin = "0", ClampMax = "59", UIMin = "0", UIMax = "59"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Time", meta = (AllowPrivateAccess, ClampMin = "0", ClampMax = "59", UIMin = "0", UIMax = "59"))
 	uint8 CurrentMinute{0};
-	UPROPERTY(BlueprintReadOnly, Category = "Time", meta = (AllowPrivateAccess, ClampMin = "0.000", ClampMax = "59.999", UIMin = "0.000", UIMax = "59.999"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Time", meta = (AllowPrivateAccess, ClampMin = "0.000", ClampMax = "59.999", UIMin = "0.000", UIMax = "59.999"))
 	float CurrentSecond{0.f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Time", meta = (AllowPrivateAccess))
 	float TimeScaler{1.f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Time", meta = (AllowPrivateAccess, ClampMin = "0", ClampMax = "23", UIMin = "0", UIMax = "23"))
+	uint8 StartHour{12};
+	
+	/*******************
+	 *	
+	 ******************/
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Misc", meta = (AllowPrivateAccess = "true"))
+	class ADirectionalLight* TheSun;
+	void RotateTheSun();
 
 public:
 
