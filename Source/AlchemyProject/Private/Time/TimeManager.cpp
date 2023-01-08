@@ -17,13 +17,15 @@ void ATimeManager::BeginPlay()
 	Super::BeginPlay();
 }
 
+
+
 void ATimeManager::Tick(float DeltaSeconds)
 {
 	AActor::Tick(DeltaSeconds);
 	
 	CalculateDateTime(DeltaSeconds);
 	RotateTheSun();
-	
+	UpdateDateTime();
 }
 
 void ATimeManager::CalculateDateTime(float DeltaSeconds)
@@ -39,6 +41,10 @@ void ATimeManager::CalculateDateTime(float DeltaSeconds)
 	if(CurrentMinute < 60) return;
 	CurrentMinute -= 60;
 	CurrentHour++;
+	if(CurrentHour < 6) CurrentTimeOfDay = TimesOfDay[0];
+	else if(CurrentHour < 12) CurrentTimeOfDay = TimesOfDay[1];
+	else if(CurrentHour < 18) CurrentTimeOfDay = TimesOfDay[2];
+	else CurrentTimeOfDay = TimesOfDay[3];
 	if(CurrentHour < 24) return;
 	CurrentHour -= 24;
 	DayNumber++;
@@ -63,4 +69,14 @@ void ATimeManager::RotateTheSun()
 	TheSun->SetActorRotation(NewRotator);
 }
 
-
+void ATimeManager::UpdateDateTime()
+{
+	CurrentTimeDate.CurrentSecond = CurrentSecond;
+	CurrentTimeDate.CurrentMinute = CurrentMinute;
+	CurrentTimeDate.CurrentHour = CurrentHour;
+	CurrentTimeDate.DayNumber = DayNumber;
+	CurrentTimeDate.MonthNumber = MonthNumber;
+	CurrentTimeDate.Year = Year;
+	CurrentTimeDate.CurrentDayName = CurrentDayName;
+	CurrentTimeDate.CurrentMonthName = CurrentMonthName;
+}
