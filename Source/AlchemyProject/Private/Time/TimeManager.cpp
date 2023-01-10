@@ -35,7 +35,7 @@ void ATimeManager::CalculateDateTime(float DeltaSeconds)
 	CurrentSecond += TimeToAdd;
 	//UE_LOG(LogTemp, Warning, TEXT("CurrentSecond: %f"), CurrentSecond)
 	if(CurrentSecond < 60.f) return;
-	UE_LOG(LogTemp, Warning, TEXT("%0f : %0d : %0d"), CurrentSecond, CurrentMinute, CurrentHour)
+	//UE_LOG(LogTemp, Warning, TEXT("%0f : %0d : %0d"), CurrentSecond, CurrentMinute, CurrentHour)
 	CurrentSecond -= 60;
 	CurrentMinute++;
 	if(CurrentMinute < 60) return;

@@ -18,6 +18,7 @@ class ALCHEMYPROJECT_API AMyPlayerController : public APlayerController
 
 public:
 
+	AMyPlayerController();
 
 	void SetHUDHealth(float Health, float MaxHealth);
 	void SetInventoryVisibility(bool bVisible);
@@ -33,6 +34,11 @@ public:
 	void FindIngredients(const FName& RecipeName);
 
 	void PlaySound(const FName& SFXName);
+	//Native version
+	void CreateNoiseNative(const float InVolume, const float InMaxRange, TOptional<FName> InTag);
+	//Blueprint version
+	UFUNCTION(BlueprintCallable)
+	void CreateNoise(const float InVolume, const float InMaxRange, FName InTag = NAME_None);
 
 protected:
 
@@ -50,6 +56,9 @@ private:
 
 	UPROPERTY()
 	class APlayerCharacter* CurrentCharacter;
+
+	UPROPERTY()
+	class UPawnNoiseEmitterComponent* PawnNoiseEmitterComponent;
 
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TArray<EPrimarySubstance> SelectedSubstances;

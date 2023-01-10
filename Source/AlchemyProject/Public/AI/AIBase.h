@@ -39,11 +39,20 @@ protected:
 
 	UFUNCTION()
 	virtual void OnSeenPawn(APawn* InPawn);
+	UFUNCTION()
+	virtual void OnSomethingHeard(APawn* InInstigator, const FVector& Location, float Volume);
+	
 	template<typename T>
 	void SetBlackboardValue(FName InName, T InValue);
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Perception", meta = (AllowPrivateAccess = "true"))
 	class UPawnSensingComponent* PawnSensingComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Perception", meta = (AllowPrivateAccess = "true"))
+	class UAIPerceptionComponent* AIPerceptionComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Perception", meta = (AllowPrivateAccess = "true"))
+	class UAISenseConfig* SenseConfig;
 
 	UPROPERTY(EditAnywhere, Category = "Behavior Tree", meta = (AllowPrivateAccess = "true"))
 	class UBehaviorTree* BehaviorTree;
@@ -53,16 +62,43 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = "AI", meta = (AllowPrivateAccess = "true"))
 	EAIState AIState;
+
+	//Only works with Editor and changing values from the editor windows
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 	
 private:	
 
 	bool bPlayerSeen{false};
+	bool bSomethingHeard{false};
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "AI|Movement", meta = (AllowPrivateAccess = "true") )
+	bool bFollowPlayer{false};
+	void SetFollowPlayer(bool Value);
 
+	
+	
+	
 	FTimerHandle PlayerSeenTimer;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI", meta = (AllowPrivateAccess = "true"))
 	float PlayerSeenTimerTime{30.f};
 	UFUNCTION()
 	void ResetPlayerSeen();
+
+	//Array of all the actors that the AI might care about
+	//Not meant for keeping track of the other NPCs
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "AI|Containers", meta = (AllowPrivateAccess = "true"))
+	TArray<AActor*> ActorsOfInterest;
+
+	//Current actor of interest
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "AI", meta = (AllowPrivateAccess = "true"))
+	AActor* CurrentAOI;
+
+	UFUNCTION(BlueprintCallable)
+	void AddToActorsOfInterest(AActor* InActor);
+	UFUNCTION(BlueprintCallable)
+	void RemoveFromActorsOfInterest(AActor* InActor);
+
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "AI|Navigation", meta = (AllowPrivateAccess = "true"))
+	FVector PointOfInterest{FVector::ZeroVector};
 	
 public:
 
@@ -70,6 +106,7 @@ public:
 	FORCEINLINE EAIState GetAIState() const {return AIState;}
 	FORCEINLINE bool GetPlayerSeen() const {return bPlayerSeen;}
 	FORCEINLINE void SetPlayerSeen(const bool bValue) {bPlayerSeen = bValue;}
+	FORCEINLINE bool GetFollowPlayer() const {return bFollowPlayer;}
 };
 
 template <typename T>

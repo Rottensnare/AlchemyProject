@@ -16,12 +16,18 @@
 #include "AlchemyProject/HUD/PlayerOverlay.h"
 #include "AlchemyProject/HUD/ScrollableInventoryWidget.h"
 #include "Components/Image.h"
+#include "Components/PawnNoiseEmitterComponent.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "Components/UniformGridPanel.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetArrayLibrary.h"
 #include "Sound/SoundCue.h"
+
+AMyPlayerController::AMyPlayerController()
+{
+	PawnNoiseEmitterComponent = CreateDefaultSubobject<UPawnNoiseEmitterComponent>(TEXT("PawnNoiseEmitterComponent"));
+}
 
 void AMyPlayerController::SetHUDHealth(float Health, float MaxHealth)
 {
@@ -271,6 +277,22 @@ void AMyPlayerController::PlaySound(const FName& SFXName)
 	
 	if(SFXDataRow && SFXDataRow->SFX) UGameplayStatics::PlaySound2D(this, SFXDataRow->SFX);
 	
+}
+
+void AMyPlayerController::CreateNoiseNative(const float InVolume, const float InMaxRange, TOptional<FName> InTag)
+{
+	if(GetPawn() == nullptr || PawnNoiseEmitterComponent == nullptr) return;
+	PawnNoiseEmitterComponent->MakeNoise(GetPawn(), InVolume, GetPawn()->GetActorLocation());
+	//if(InTag.IsSet()) MakeNoise(InVolume, GetPawn(), GetPawn()->GetActorLocation(), InMaxRange, InTag.GetValue());
+	//else MakeNoise(InVolume, GetPawn(), GetPawn()->GetActorLocation(), InMaxRange);
+	
+}
+
+void AMyPlayerController::CreateNoise(const float InVolume, const float InMaxRange, FName InTag)
+{
+	if(GetPawn() == nullptr || PawnNoiseEmitterComponent == nullptr) return;
+	//MakeNoise(InVolume, GetPawn(), GetPawn()->GetActorLocation(), InMaxRange, InTag);
+	PawnNoiseEmitterComponent->MakeNoise(GetPawn(), InVolume, GetPawn()->GetActorLocation());
 }
 
 
