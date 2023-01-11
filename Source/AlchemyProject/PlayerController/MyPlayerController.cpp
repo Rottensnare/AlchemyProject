@@ -296,6 +296,11 @@ void AMyPlayerController::CreateNoise(const float InVolume, const float InMaxRan
 }
 
 
+FGenericTeamId AMyPlayerController::GetGenericTeamId() const
+{
+	return TeamId;
+}
+
 void AMyPlayerController::BeginPlay()
 {
 	Super::BeginPlay();

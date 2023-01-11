@@ -48,12 +48,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Perception", meta = (AllowPrivateAccess = "true"))
 	class UPawnSensingComponent* PawnSensingComponent;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Perception", meta = (AllowPrivateAccess = "true"))
-	class UAIPerceptionComponent* AIPerceptionComponent;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Perception", meta = (AllowPrivateAccess = "true"))
-	class UAISenseConfig* SenseConfig;
-
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Perception|Components", meta = (AllowPrivateAccess = "true"))
+	class UAIPerceptionStimuliSourceComponent* PerceptionStimuliSourceComponent;
+	
 	UPROPERTY(EditAnywhere, Category = "Behavior Tree", meta = (AllowPrivateAccess = "true"))
 	class UBehaviorTree* BehaviorTree;
 
@@ -73,9 +70,6 @@ private:
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "AI|Movement", meta = (AllowPrivateAccess = "true") )
 	bool bFollowPlayer{false};
 	void SetFollowPlayer(bool Value);
-
-	
-	
 	
 	FTimerHandle PlayerSeenTimer;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI", meta = (AllowPrivateAccess = "true"))

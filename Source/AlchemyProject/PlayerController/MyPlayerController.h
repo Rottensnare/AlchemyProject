@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GenericTeamAgentInterface.h"
 #include "AlchemyProject/Alchemy/FIngredientInfo.h"
 #include "AlchemyProject/Enums/EPrimarySubstance.h"
 #include "GameFramework/PlayerController.h"
@@ -12,7 +13,7 @@
  * 
  */
 UCLASS()
-class ALCHEMYPROJECT_API AMyPlayerController : public APlayerController
+class ALCHEMYPROJECT_API AMyPlayerController : public APlayerController, public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 
@@ -39,6 +40,9 @@ public:
 	//Blueprint version
 	UFUNCTION(BlueprintCallable)
 	void CreateNoise(const float InVolume, const float InMaxRange, FName InTag = NAME_None);
+
+	FGenericTeamId TeamId{FGenericTeamId(4)};
+	virtual FGenericTeamId GetGenericTeamId() const override;
 
 protected:
 

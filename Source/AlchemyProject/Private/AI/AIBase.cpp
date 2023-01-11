@@ -8,6 +8,9 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig.h"
+#include "Perception/AISenseConfig_Sight.h"
+#include "Perception/AISense_Hearing.h"
+#include "Perception/AISense_Sight.h"
 #include "Perception/PawnSensingComponent.h"
 
 AAIBase::AAIBase()
@@ -15,7 +18,6 @@ AAIBase::AAIBase()
 	PrimaryActorTick.bCanEverTick = true;
 
 	PawnSensingComponent = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensingComp"));
-	AIPerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("AIPerceptionComp"));
 	
 	
 }
@@ -26,10 +28,7 @@ void AAIBase::BeginPlay()
 
 	PawnSensingComponent->OnSeePawn.AddDynamic(this, &AAIBase::OnSeenPawn);
 	PawnSensingComponent->OnHearNoise.AddDynamic(this, &AAIBase::OnSomethingHeard);
-
 	
-	AIPerceptionComponent->ConfigureSense(*SenseConfig);
-
 	AIController = Cast<ABaseAIController>(GetController());
 	
 	if(AIController)
