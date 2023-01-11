@@ -25,11 +25,17 @@ ABaseAIController::ABaseAIController()
 	SenseConfig_Sight->DetectionByAffiliation.bDetectEnemies = true;
 	SenseConfig_Sight->DetectionByAffiliation.bDetectFriendlies = false;
 	SenseConfig_Sight->DetectionByAffiliation.bDetectNeutrals = true;
+	TeamAttitudeMap_Sight.Emplace(ETeamAttitude::Hostile, true);
+	TeamAttitudeMap_Sight.Emplace(ETeamAttitude::Friendly, false);
+	TeamAttitudeMap_Sight.Emplace(ETeamAttitude::Neutral, true);
 	
 	SenseConfig_Hearing = CreateDefaultSubobject<UAISenseConfig_Hearing>(TEXT("SenseConfig_Hearing"));
 	SenseConfig_Hearing->DetectionByAffiliation.bDetectEnemies = true;
 	SenseConfig_Hearing->DetectionByAffiliation.bDetectFriendlies = false;
 	SenseConfig_Hearing->DetectionByAffiliation.bDetectNeutrals = true;
+	TeamAttitudeMap_Hearing.Emplace(ETeamAttitude::Hostile, true);
+	TeamAttitudeMap_Hearing.Emplace(ETeamAttitude::Friendly, false);
+	TeamAttitudeMap_Hearing.Emplace(ETeamAttitude::Neutral, true);
 
 	AIPerceptionComponent->ConfigureSense(*SenseConfig_Sight);
 	AIPerceptionComponent->ConfigureSense(*SenseConfig_Hearing);
@@ -62,7 +68,6 @@ void ABaseAIController::OnPossess(APawn* InPawn)
 
 ETeamAttitude::Type ABaseAIController::GetTeamAttitudeTowards(const AActor& Other) const
 {
-
 	if(APawn const* OtherPawn = Cast<APawn>(&Other))
 	{
 		if(auto const TeamAgent = Cast<IGenericTeamAgentInterface>(OtherPawn->GetController()))
@@ -107,6 +112,41 @@ void ABaseAIController::OnTargetPerceptionUpdated_Delegate(AActor* InActor, FAIS
 		//Do the default thing
 		break;
 	}
+}
+
+void ABaseAIController::ChangeAttitudeTowards()
+{
+	//UE_LOG(LogTemp, Warning, TEXT("TeamAttitudeMap_Sight: %d"), TeamAttitudeMap_Sight[ETeamAttitude::Hostile])
+	
+	SenseConfig_Sight->DetectionByAffiliation.bDetectEnemies = TeamAttitudeMap_Sight[ETeamAttitude::Hostile];
+	SenseConfig_Sight->DetectionByAffiliation.bDetectFriendlies = TeamAttitudeMap_Sight[ETeamAttitude::Friendly];
+	SenseConfig_Sight->DetectionByAffiliation.bDetectNeutrals = TeamAttitudeMap_Sight[ETeamAttitude::Neutral];
+	if(AIPerceptionComponent) AIPerceptionComponent->ConfigureSense(*SenseConfig_Sight);
+	
+	SenseConfig_Hearing->DetectionByAffiliation.bDetectEnemies = TeamAttitudeMap_Hearing[ETeamAttitude::Hostile];
+	SenseConfig_Hearing->DetectionByAffiliation.bDetectFriendlies = TeamAttitudeMap_Hearing[ETeamAttitude::Friendly];
+	SenseConfig_Hearing->DetectionByAffiliation.bDetectNeutrals = TeamAttitudeMap_Hearing[ETeamAttitude::Neutral];
+	if(AIPerceptionComponent) AIPerceptionComponent->ConfigureSense(*SenseConfig_Hearing);
+}
+
+void ABaseAIController::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+	static const FName NAME_TeamAttitudeMap_Sight = FName("TeamAttitudeMap_Sight");
+	static const FName NAME_TeamAttitudeMap_Hearing = FName("TeamAttitudeMap_Hearing");
+
+	if(PropertyChangedEvent.Property)
+	{
+		if(PropertyChangedEvent.Property->GetFName() == NAME_TeamAttitudeMap_Sight)
+		{
+			ChangeAttitudeTowards();
+		}
+		else if(PropertyChangedEvent.Property->GetFName() == NAME_TeamAttitudeMap_Hearing)
+		{
+			ChangeAttitudeTowards();
+		}
+	}
+	
+	Super::PostEditChangeProperty(PropertyChangedEvent);
 }
 
 

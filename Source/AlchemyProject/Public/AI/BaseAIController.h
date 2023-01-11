@@ -22,6 +22,8 @@ public:
 	virtual ETeamAttitude::Type GetTeamAttitudeTowards(const AActor& Other) const override;
 	UFUNCTION()
 	void OnTargetPerceptionUpdated_Delegate(AActor* InActor, FAIStimulus Stimulus);
+	void ChangeAttitudeTowards();
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 
 protected:
 
@@ -53,6 +55,12 @@ protected:
 	class UAISense_Hearing* HearingSense;
 
 	FGenericTeamId TeamId{FGenericTeamId(1)};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Perception|Teams", meta = (AllowPrivateAccess = "true"))
+	TMap<TEnumAsByte<ETeamAttitude::Type>, bool> TeamAttitudeMap_Sight;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Perception|Teams", meta = (AllowPrivateAccess = "true"))
+	TMap<TEnumAsByte<ETeamAttitude::Type>, bool> TeamAttitudeMap_Hearing;
 
 private:
 
