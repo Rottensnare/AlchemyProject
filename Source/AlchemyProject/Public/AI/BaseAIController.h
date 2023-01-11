@@ -22,12 +22,14 @@ public:
 	virtual ETeamAttitude::Type GetTeamAttitudeTowards(const AActor& Other) const override;
 	UFUNCTION()
 	void OnTargetPerceptionUpdated_Delegate(AActor* InActor, FAIStimulus Stimulus);
+	
 	void ChangeAttitudeTowards();
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 
 protected:
 
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
 
 	UPROPERTY(BlueprintReadWrite, Category = "AI Behavior", meta = (AllowPrivateAccess = "true"))
 	class UBlackboardComponent* BlackboardComponent;
@@ -64,6 +66,13 @@ protected:
 
 private:
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Perception|Values", meta = (AllowPrivateAccess = "true"))
+	float MaxSightRadius{2000.f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Perception|Values", meta = (AllowPrivateAccess = "true"))
+	float PeripheralVisionAngle{73.f};
+	
+	float CheckStimulusTimer{0.f};
 public:
 
 	FORCEINLINE UBlackboardComponent* GetAIBlackboardComponent() const {return BlackboardComponent;}

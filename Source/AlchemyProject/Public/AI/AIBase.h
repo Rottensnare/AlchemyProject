@@ -45,8 +45,9 @@ protected:
 	template<typename T>
 	void SetBlackboardValue(FName InName, T InValue);
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Perception", meta = (AllowPrivateAccess = "true"))
-	class UPawnSensingComponent* PawnSensingComponent;
+	//Deprecated
+	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Perception", meta = (AllowPrivateAccess = "true"))
+	//class UPawnSensingComponent* PawnSensingComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Perception|Components", meta = (AllowPrivateAccess = "true"))
 	class UAIPerceptionStimuliSourceComponent* PerceptionStimuliSourceComponent;
@@ -93,6 +94,13 @@ private:
 
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "AI|Navigation", meta = (AllowPrivateAccess = "true"))
 	FVector PointOfInterest{FVector::ZeroVector};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Movement", meta = (AllowPrivateAccess = "true"))
+	float DefaultMoveSpeed{600.f};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Movement", meta = (AllowPrivateAccess = "true"))
+	float CurrentMoveSpeed{0.f};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Movement", meta = (AllowPrivateAccess = "true"))
+	float PatrolMoveSpeed{100.f};
 	
 public:
 

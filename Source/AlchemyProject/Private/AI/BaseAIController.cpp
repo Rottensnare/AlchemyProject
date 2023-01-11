@@ -28,6 +28,9 @@ ABaseAIController::ABaseAIController()
 	TeamAttitudeMap_Sight.Emplace(ETeamAttitude::Hostile, true);
 	TeamAttitudeMap_Sight.Emplace(ETeamAttitude::Friendly, false);
 	TeamAttitudeMap_Sight.Emplace(ETeamAttitude::Neutral, true);
+	SenseConfig_Sight->SightRadius = MaxSightRadius;
+	SenseConfig_Sight->PeripheralVisionAngleDegrees = PeripheralVisionAngle;
+	//SenseConfig_Sight->DescribeSelfToGameplayDebugger()
 	
 	SenseConfig_Hearing = CreateDefaultSubobject<UAISenseConfig_Hearing>(TEXT("SenseConfig_Hearing"));
 	SenseConfig_Hearing->DetectionByAffiliation.bDetectEnemies = true;
@@ -47,8 +50,26 @@ ABaseAIController::ABaseAIController()
 void ABaseAIController::BeginPlay()
 {
 	AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &ABaseAIController::OnTargetPerceptionUpdated_Delegate);
-	
 	Super::BeginPlay();
+}
+
+void ABaseAIController::Tick(float DeltaSeconds)
+{
+	CheckStimulusTimer += DeltaSeconds;
+	if(CheckStimulusTimer >= 2.f)
+	{
+		CheckStimulusTimer = 0.f;
+		if(AIPerceptionComponent == nullptr || BlackboardComponent == nullptr) return;
+		const bool bHasActiveStimulus = AIPerceptionComponent->HasActiveStimulus(*Cast<AActor>(BlackboardComponent->GetValueAsObject(FName("Target"))), AIPerceptionComponent->GetDominantSenseID());
+		if(!bHasActiveStimulus)
+		{
+			//UE_LOG(LogTemp, Warning, TEXT("HasActiveStimulus: %d"), bHasActiveStimulus)
+			//BlackboardComponent->SetValueAsObject(FName("Target"), nullptr);
+			//BlackboardComponent->SetValueAsBool(FName("PlayerSeen"), false);
+		}
+	}
+	
+	Super::Tick(DeltaSeconds);
 }
 
 void ABaseAIController::OnPossess(APawn* InPawn)
@@ -88,6 +109,7 @@ ETeamAttitude::Type ABaseAIController::GetTeamAttitudeTowards(const AActor& Othe
 
 void ABaseAIController::OnTargetPerceptionUpdated_Delegate(AActor* InActor, FAIStimulus Stimulus)
 {
+	if(InActor == nullptr || BlackboardComponent == nullptr) return;
 	switch (Stimulus.Type)
 	{
 	case 0:
@@ -95,6 +117,11 @@ void ABaseAIController::OnTargetPerceptionUpdated_Delegate(AActor* InActor, FAIS
 		if(ETeamAttitude::Hostile == GetTeamAttitudeTowards(*InActor))
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Enemy sighted!"))
+			
+			BlackboardComponent->SetValueAsBool(FName("PlayerSeen"), true);
+			BlackboardComponent->SetValueAsObject(FName("Target"), InActor);
+			BlackboardComponent->SetValueAsVector(FName("LastTargetLocation"), InActor->GetActorLocation());
+			BlackboardComponent->ClearValue(FName("PointOfInterest"));
 		}
 		else if(ETeamAttitude::Friendly == GetTeamAttitudeTowards(*InActor))
 		{
@@ -107,6 +134,11 @@ void ABaseAIController::OnTargetPerceptionUpdated_Delegate(AActor* InActor, FAIS
 		break;
 	case 1:
 		//Hearing
+		if(!(ETeamAttitude::Friendly == GetTeamAttitudeTowards(*InActor)))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Heard sum ting"))
+			BlackboardComponent->SetValueAsVector(FName("PointOfInterest"), Stimulus.StimulusLocation);
+		}
 		break;
 	default:
 		//Do the default thing

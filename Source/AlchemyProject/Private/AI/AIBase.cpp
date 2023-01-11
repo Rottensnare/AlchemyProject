@@ -7,18 +7,15 @@
 #include "AlchemyProject/PlayerCharacter.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Perception/AIPerceptionComponent.h"
+#include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "Perception/AISenseConfig.h"
-#include "Perception/AISenseConfig_Sight.h"
-#include "Perception/AISense_Hearing.h"
-#include "Perception/AISense_Sight.h"
-#include "Perception/PawnSensingComponent.h"
 
 AAIBase::AAIBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	PawnSensingComponent = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensingComp"));
-	
+	//PawnSensingComponent = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensingComp"));
+	PerceptionStimuliSourceComponent = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("PerceptionStimuliSourceComp"));
 	
 }
 
@@ -26,8 +23,8 @@ void AAIBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	PawnSensingComponent->OnSeePawn.AddDynamic(this, &AAIBase::OnSeenPawn);
-	PawnSensingComponent->OnHearNoise.AddDynamic(this, &AAIBase::OnSomethingHeard);
+	//PawnSensingComponent->OnSeePawn.AddDynamic(this, &AAIBase::OnSeenPawn);
+	//PawnSensingComponent->OnHearNoise.AddDynamic(this, &AAIBase::OnSomethingHeard);
 	
 	AIController = Cast<ABaseAIController>(GetController());
 	
