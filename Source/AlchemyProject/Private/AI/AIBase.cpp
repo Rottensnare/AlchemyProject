@@ -4,8 +4,10 @@
 #include "AlchemyProject/Public/AI/AIBase.h"
 
 #include "AI/BaseAIController.h"
+#include "AI/Utility/PatrolArea.h"
 #include "AlchemyProject/PlayerCharacter.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "Perception/AISenseConfig.h"
@@ -25,18 +27,20 @@ void AAIBase::BeginPlay()
 
 	//PawnSensingComponent->OnSeePawn.AddDynamic(this, &AAIBase::OnSeenPawn);
 	//PawnSensingComponent->OnHearNoise.AddDynamic(this, &AAIBase::OnSomethingHeard);
+
+	if(GetCharacterMovement()) GetCharacterMovement()->MaxWalkSpeed = PatrolMoveSpeed;
+	OriginalPosition = GetActorLocation();
 	
 	AIController = Cast<ABaseAIController>(GetController());
-	
 	if(AIController)
 	{
 		AIController->RunBehaviorTree(BehaviorTree);
 		
 		if(AIController->GetAIBlackboardComponent() == nullptr) return;
 		
-		AIController->GetAIBlackboardComponent()->SetValueAsEnum(FName("AIState"), (uint8)EAIState::EAIS_Idle);
+		AIController->GetAIBlackboardComponent()->SetValueAsEnum(FName("AIState"), (uint8)AIState);
 		AIController->GetAIBlackboardComponent()->SetValueAsBool(FName("FollowPlayer"), bFollowPlayer);
-		
+		AIController->GetAIBlackboardComponent()->SetValueAsVector(FName("OriginalPosition"), OriginalPosition);
 	}
 }
 
@@ -51,7 +55,7 @@ void AAIBase::OnSeenPawn(APawn* InPawn)
 	if(Cast<APlayerCharacter>(InPawn))
 	{
 		if(!bPlayerSeen) UE_LOG(LogTemp, Warning, TEXT("Hello There"))
-		bPlayerSeen = true;
+		SetPlayerSeen(true);
 		
 		if(AIController == nullptr || AIController->GetAIBlackboardComponent() == nullptr) return;
 		AIController->GetAIBlackboardComponent()->SetValueAsBool(FName("PlayerSeen"), bPlayerSeen);
@@ -70,6 +74,21 @@ void AAIBase::OnSomethingHeard(APawn* InInstigator, const FVector& Location, flo
 	
 	if(AIController == nullptr || AIController->GetBlackboardComponent() == nullptr) return;
 	AIController->GetBlackboardComponent()->SetValueAsVector(FName("PointOfInterest"), PointOfInterest);
+}
+
+bool AAIBase::FindNextPatrolPoint()
+{
+	if(PatrolArea && AIController && AIController->GetBlackboardComponent())
+	{
+		AIController->GetBlackboardComponent()->SetValueAsVector(FName("OriginalPosition"), GetActorLocation());
+		PointOfInterest = PatrolArea->GetRandomPatrolCoordinates();
+		if(PointOfInterest != FVector())
+		{
+			AIController->GetBlackboardComponent()->SetValueAsVector(FName("PointOfInterest"), PointOfInterest);
+			return true;
+		}
+	}
+	return false;
 }
 
 void AAIBase::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
@@ -101,7 +120,7 @@ void AAIBase::SetFollowPlayer(bool Value)
 
 void AAIBase::ResetPlayerSeen()
 {
-	bPlayerSeen = false;
+	SetPlayerSeen(false);
 	
 	if(AIController == nullptr || AIController->GetAIBlackboardComponent() == nullptr) return;
 	AIController->GetAIBlackboardComponent()->SetValueAsBool(FName("PlayerSeen"), bPlayerSeen);
@@ -122,6 +141,22 @@ void AAIBase::RemoveFromActorsOfInterest(AActor* InActor)
 	ActorsOfInterest.Remove(InActor);
 }
 
+void AAIBase::SetPlayerSeen(const bool bValue)
+{
+	bPlayerSeen = bValue;
+	
+	if(bPlayerSeen)
+	{
+		SetAIState(EAIState::EAIS_Chasing);
+		GetCharacterMovement()->MaxWalkSpeed = DefaultMoveSpeed;
+	}
+	else
+	{
+		SetAIState(EAIState::EAIS_Patrolling);
+		GetCharacterMovement()->MaxWalkSpeed = PatrolMoveSpeed;
+	}
+}
+
 void AAIBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -130,9 +165,10 @@ void AAIBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AAIBase::SetAIState(EAIState NewState)
 {
+	LastAIState = AIState;
 	AIState = NewState;
 
 	if(AIController == nullptr || AIController->GetAIBlackboardComponent() == nullptr) return;
-
 	AIController->GetAIBlackboardComponent()->SetValueAsEnum(FName("AIState"), (uint8)AIState);
+	
 }

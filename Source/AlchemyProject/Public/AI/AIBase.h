@@ -14,6 +14,7 @@ enum class EAIState : uint8
 	EAIS_Idle UMETA(DisplayName = "Idle"),
 	EAIS_Moving UMETA(DisplayName = "Moving"),
 	EAIS_Patrolling UMETA(DisplayName = "Patrolling"),
+	EAIS_Chasing UMETA(DisplayName = "Chasing"),
 	EAIS_Alerted UMETA(DisplayName = "Alerted"),
 	EAIS_InCombat UMETA(DisplayName = "InCombat"),
 	EAIS_Unconscious UMETA(DisplayName = "Unconscious"),
@@ -32,11 +33,11 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void SetAIState(EAIState NewState);
 	
 protected:
 	virtual void BeginPlay() override;
-	virtual void SetAIState(EAIState NewState);
-
+	
 	UFUNCTION()
 	virtual void OnSeenPawn(APawn* InPawn);
 	UFUNCTION()
@@ -44,6 +45,9 @@ protected:
 	
 	template<typename T>
 	void SetBlackboardValue(FName InName, T InValue);
+
+	UFUNCTION(BlueprintCallable)
+	bool FindNextPatrolPoint();
 	
 	//Deprecated
 	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Perception", meta = (AllowPrivateAccess = "true"))
@@ -58,9 +62,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI", meta = (AllowPrivateAccess = "true"))
 	class ABaseAIController* AIController;
 
-	UPROPERTY(BlueprintReadOnly, Category = "AI", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI", meta = (AllowPrivateAccess = "true"))
 	EAIState AIState;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI", meta = (AllowPrivateAccess = "true"))
+	EAIState LastAIState;
 	//Only works with Editor and changing values from the editor windows
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 	
@@ -92,7 +98,7 @@ private:
 	UFUNCTION(BlueprintCallable)
 	void RemoveFromActorsOfInterest(AActor* InActor);
 
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "AI|Navigation", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "AI|Patrol", meta = (AllowPrivateAccess = "true"))
 	FVector PointOfInterest{FVector::ZeroVector};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Movement", meta = (AllowPrivateAccess = "true"))
@@ -101,13 +107,32 @@ private:
 	float CurrentMoveSpeed{0.f};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Movement", meta = (AllowPrivateAccess = "true"))
 	float PatrolMoveSpeed{100.f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Patrol", meta = (AllowPrivateAccess = "true"))
+	class APatrolArea* PatrolArea;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI|Patrol", meta = (AllowPrivateAccess = "true"))
+	FVector OriginalPosition{FVector()};
+
+	///////////////////////////
+	/// Dialogue
+
+	//Player can interact at least in some way, meaning that when pressing the interact button the NPC can do something.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Interaction", meta = (AllowPrivateAccess = "true"))
+	bool bCanBeInteractedWith;
+	//Player can have a conversation, meaning that a dialogue widget will pop up.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Interaction", meta = (AllowPrivateAccess = "true"))
+	bool bCanConverse;
+	//Map that stores information about the opinion of other NPCs.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Opinions", meta = (AllowPrivateAccess = "true"))
+	TMap<AActor*, int32> OpinionTable;
 	
 public:
 
 	FORCEINLINE UBehaviorTree* GetBehaviorTree() const {return BehaviorTree;}
 	FORCEINLINE EAIState GetAIState() const {return AIState;}
 	FORCEINLINE bool GetPlayerSeen() const {return bPlayerSeen;}
-	FORCEINLINE void SetPlayerSeen(const bool bValue) {bPlayerSeen = bValue;}
+	FORCEINLINE void SetPlayerSeen(const bool bValue);
 	FORCEINLINE bool GetFollowPlayer() const {return bFollowPlayer;}
 };
 

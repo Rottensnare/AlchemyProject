@@ -50,6 +50,7 @@ ABaseAIController::ABaseAIController()
 void ABaseAIController::BeginPlay()
 {
 	AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &ABaseAIController::OnTargetPerceptionUpdated_Delegate);
+	AIBase = Cast<AAIBase>(GetPawn());
 	Super::BeginPlay();
 }
 
@@ -93,7 +94,7 @@ ETeamAttitude::Type ABaseAIController::GetTeamAttitudeTowards(const AActor& Othe
 	{
 		if(auto const TeamAgent = Cast<IGenericTeamAgentInterface>(OtherPawn->GetController()))
 		{
-			if(TeamAgent->GetGenericTeamId() == FGenericTeamId(0) || TeamAgent->GetGenericTeamId() == FGenericTeamId(1))
+			if(TeamAgent->GetGenericTeamId() == FGenericTeamId(0) || TeamAgent->GetGenericTeamId() == FGenericTeamId(1)) //TODO: Need to remove this hardcoded stuff later
 			{
 				return ETeamAttitude::Friendly;
 			}
@@ -117,8 +118,9 @@ void ABaseAIController::OnTargetPerceptionUpdated_Delegate(AActor* InActor, FAIS
 		if(ETeamAttitude::Hostile == GetTeamAttitudeTowards(*InActor))
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Enemy sighted!"))
-			
+
 			BlackboardComponent->SetValueAsBool(FName("PlayerSeen"), true);
+			if(AIBase) AIBase->SetPlayerSeen(true);
 			BlackboardComponent->SetValueAsObject(FName("Target"), InActor);
 			BlackboardComponent->SetValueAsVector(FName("LastTargetLocation"), InActor->GetActorLocation());
 			BlackboardComponent->ClearValue(FName("PointOfInterest"));
