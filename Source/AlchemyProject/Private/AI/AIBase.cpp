@@ -115,15 +115,14 @@ void AAIBase::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent
 void AAIBase::ToggleSpeechWidget(const FString InString)
 {
 	ClearSpeechWidgetTimer();
-	
-	if(!SpeechWidgetComp->IsVisible())
+	if(InString == FString() || InString == FString(""))
+	{
+		HideSpeechWidget();
+	}
+	else if(!SpeechWidgetComp->IsVisible())
 	{
 		SpeechWidgetComp->SetVisibility(true);
 		SetSpeechWidgetTimer();
-	}
-	else
-	{
-		SpeechWidgetComp->SetVisibility(false);
 	}
 	
 	Cast<USpeechWidget>(SpeechWidgetComp->GetWidget())->SetBlockTextEvent(InString);
@@ -131,15 +130,25 @@ void AAIBase::ToggleSpeechWidget(const FString InString)
 
 void AAIBase::SetSpeechWidgetTimer()
 {
+	/*
+	UE_LOG(LogTemp, Warning, TEXT("SetSpeechWidgetTimer"))
 	const FString TempString = FString();
 	FTimerDelegate SpeechTimerDelegate;
 	SpeechTimerDelegate.BindUFunction(this, FName("ToggleSpeechWidget"), TempString);
 	GetWorldTimerManager().SetTimer(PlayerSeenTimer,SpeechTimerDelegate, PlayerSeenTimerTime, false);
+	*/
+	
+	GetWorldTimerManager().SetTimer(SpeechWidgetTimer, this, &AAIBase::HideSpeechWidget, SpeechWidgetShowTime);
 }
 
 void AAIBase::ClearSpeechWidgetTimer()
 {
 	GetWorldTimerManager().ClearTimer(SpeechWidgetTimer);
+}
+
+void AAIBase::HideSpeechWidget()
+{
+	SpeechWidgetComp->SetVisibility(false);
 }
 
 void AAIBase::SetFollowPlayer(bool Value)

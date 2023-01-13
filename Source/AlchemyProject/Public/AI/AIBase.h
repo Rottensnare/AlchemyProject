@@ -85,6 +85,8 @@ protected:
 	FTimerHandle SpeechWidgetTimer;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Dialogue", meta = (AllowPrivateAccess = "true"))
 	float SpeechWidgetShowTime{4.f};
+	UFUNCTION()
+	void HideSpeechWidget();
 	
 	
 private:	

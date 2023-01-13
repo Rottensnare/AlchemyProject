@@ -138,7 +138,9 @@ void ABaseAIController::OnTargetPerceptionUpdated_Delegate(AActor* InActor, FAIS
 		//Hearing
 		if(!(ETeamAttitude::Friendly == GetTeamAttitudeTowards(*InActor)))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Heard sum ting"))
+			if(AIBase->GetPlayerSeen()) break;
+			AIBase->SetAIState(EAIState::EAIS_Alerted);
+			//UE_LOG(LogTemp, Warning, TEXT("Heard sum ting"))
 			AIBase->ToggleSpeechWidget("Herd sum ting");
 			BlackboardComponent->SetValueAsVector(FName("PointOfInterest"), Stimulus.StimulusLocation);
 		}
