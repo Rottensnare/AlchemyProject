@@ -118,7 +118,7 @@ void ABaseAIController::OnTargetPerceptionUpdated_Delegate(AActor* InActor, FAIS
 		if(ETeamAttitude::Hostile == GetTeamAttitudeTowards(*InActor))
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Enemy sighted!"))
-
+			AIBase->ToggleSpeechWidget("Enemy Sighted");
 			BlackboardComponent->SetValueAsBool(FName("PlayerSeen"), true);
 			if(AIBase) AIBase->SetPlayerSeen(true);
 			BlackboardComponent->SetValueAsObject(FName("Target"), InActor);
@@ -139,6 +139,7 @@ void ABaseAIController::OnTargetPerceptionUpdated_Delegate(AActor* InActor, FAIS
 		if(!(ETeamAttitude::Friendly == GetTeamAttitudeTowards(*InActor)))
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Heard sum ting"))
+			AIBase->ToggleSpeechWidget("Herd sum ting");
 			BlackboardComponent->SetValueAsVector(FName("PointOfInterest"), Stimulus.StimulusLocation);
 		}
 		break;

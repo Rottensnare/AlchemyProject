@@ -6,6 +6,7 @@
 #include "BaseAIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/Character.h"
+#include "UI/SpeechWidget.h"
 #include "AIBase.generated.h"
 
 UENUM(BlueprintType)
@@ -34,6 +35,11 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void SetAIState(EAIState NewState);
+	
+	void SetSpeechWidgetTimer();
+	void ClearSpeechWidgetTimer();
+	UFUNCTION()
+	void ToggleSpeechWidget(const FString InString = FString(""));
 	
 protected:
 	virtual void BeginPlay() override;
@@ -69,6 +75,17 @@ protected:
 	EAIState LastAIState;
 	//Only works with Editor and changing values from the editor windows
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Dialogue", meta = (AllowPrivateAccess = "true"))
+	class UWidgetComponent* SpeechWidgetComp;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Dialogue")
+	TSubclassOf<USpeechWidget> SpeechWidgetClass;
+
+	FTimerHandle SpeechWidgetTimer;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Dialogue", meta = (AllowPrivateAccess = "true"))
+	float SpeechWidgetShowTime{4.f};
+	
 	
 private:	
 

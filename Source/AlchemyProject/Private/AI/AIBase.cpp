@@ -4,9 +4,12 @@
 #include "AlchemyProject/Public/AI/AIBase.h"
 
 #include "AI/BaseAIController.h"
+#include "AI/UI/SpeechWidget.h"
 #include "AI/Utility/PatrolArea.h"
 #include "AlchemyProject/PlayerCharacter.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Components/RichTextBlock.h"
+#include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
@@ -18,7 +21,11 @@ AAIBase::AAIBase()
 
 	//PawnSensingComponent = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensingComp"));
 	PerceptionStimuliSourceComponent = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("PerceptionStimuliSourceComp"));
-	
+
+	SpeechWidgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("SpeechWidgetComp"));
+	SpeechWidgetComp->SetupAttachment(GetRootComponent());
+	SpeechWidgetComp->SetVisibility(false);
+	//SpeechWidgetComp->SetWidgetClass(SpeechWidgetClass);
 }
 
 void AAIBase::BeginPlay()
@@ -103,6 +110,36 @@ void AAIBase::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent
 	}
 
 	Super::PostEditChangeProperty(PropertyChangedEvent);
+}
+
+void AAIBase::ToggleSpeechWidget(const FString InString)
+{
+	ClearSpeechWidgetTimer();
+	
+	if(!SpeechWidgetComp->IsVisible())
+	{
+		SpeechWidgetComp->SetVisibility(true);
+		SetSpeechWidgetTimer();
+	}
+	else
+	{
+		SpeechWidgetComp->SetVisibility(false);
+	}
+	
+	Cast<USpeechWidget>(SpeechWidgetComp->GetWidget())->SetBlockTextEvent(InString);
+}
+
+void AAIBase::SetSpeechWidgetTimer()
+{
+	const FString TempString = FString();
+	FTimerDelegate SpeechTimerDelegate;
+	SpeechTimerDelegate.BindUFunction(this, FName("ToggleSpeechWidget"), TempString);
+	GetWorldTimerManager().SetTimer(PlayerSeenTimer,SpeechTimerDelegate, PlayerSeenTimerTime, false);
+}
+
+void AAIBase::ClearSpeechWidgetTimer()
+{
+	GetWorldTimerManager().ClearTimer(SpeechWidgetTimer);
 }
 
 void AAIBase::SetFollowPlayer(bool Value)
