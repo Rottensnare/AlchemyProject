@@ -73,9 +73,12 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI", meta = (AllowPrivateAccess = "true"))
 	EAIState LastAIState;
+
+#if WITH_EDITOR
 	//Only works with Editor and changing values from the editor windows
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
-
+#endif
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Dialogue", meta = (AllowPrivateAccess = "true"))
 	class UWidgetComponent* SpeechWidgetComp;
 

@@ -119,7 +119,7 @@ void AAIBase::ToggleSpeechWidget(const FString InString)
 	{
 		HideSpeechWidget();
 	}
-	else if(!SpeechWidgetComp->IsVisible())
+	else
 	{
 		SpeechWidgetComp->SetVisibility(true);
 		SetSpeechWidgetTimer();

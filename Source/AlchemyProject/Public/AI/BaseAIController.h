@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AIController.h"
+#include "Perception/AIPerceptionComponent.h"
 #include "Perception/AIPerceptionTypes.h"
 #include "BaseAIController.generated.h"
 
@@ -22,9 +23,15 @@ public:
 	virtual ETeamAttitude::Type GetTeamAttitudeTowards(const AActor& Other) const override;
 	UFUNCTION()
 	void OnTargetPerceptionUpdated_Delegate(AActor* InActor, FAIStimulus Stimulus);
+	UFUNCTION()
+	void OnTargetPerceptionInfoUpdated_Delegate(const FActorPerceptionUpdateInfo& UpdateInfo);
 	
 	void ChangeAttitudeTowards();
+
+#if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif
+	
 	void ShowAIInfo();
 
 protected:
@@ -53,6 +60,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Perception|Components", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UAISenseConfig_Hearing> SenseConfig_Hearing{nullptr};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Perception|Components", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UAISenseConfig_Prediction> SenseConfig_Prediction{nullptr};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Perception|Components", meta = (AllowPrivateAccess = "true"))
 	class UAISense_Sight* SightSense;

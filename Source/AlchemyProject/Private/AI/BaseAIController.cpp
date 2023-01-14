@@ -9,7 +9,9 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Hearing.h"
+#include "Perception/AISenseConfig_Prediction.h"
 #include "Perception/AISenseConfig_Sight.h"
+#include "Perception/AISense_Prediction.h"
 
 ABaseAIController::ABaseAIController()
 {
@@ -42,8 +44,12 @@ ABaseAIController::ABaseAIController()
 	TeamAttitudeMap_Hearing.Emplace(ETeamAttitude::Friendly, false);
 	TeamAttitudeMap_Hearing.Emplace(ETeamAttitude::Neutral, true);
 
+	SenseConfig_Prediction = CreateDefaultSubobject<UAISenseConfig_Prediction>(TEXT("SenseConfig_Prediction"));
+	SenseConfig_Prediction->SetMaxAge(10.f);
+
 	AIPerceptionComponent->ConfigureSense(*SenseConfig_Sight);
 	AIPerceptionComponent->ConfigureSense(*SenseConfig_Hearing);
+	AIPerceptionComponent->ConfigureSense(*SenseConfig_Prediction);
 	AIPerceptionComponent->SetDominantSense(SenseConfig_Sight->StaticClass());
 	
 	
@@ -53,6 +59,7 @@ ABaseAIController::ABaseAIController()
 void ABaseAIController::BeginPlay()
 {
 	AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &ABaseAIController::OnTargetPerceptionUpdated_Delegate);
+	AIPerceptionComponent->OnTargetPerceptionInfoUpdated.AddDynamic(this, &ThisClass::OnTargetPerceptionInfoUpdated_Delegate);
 	AIBase = Cast<AAIBase>(GetPawn());
 	Super::BeginPlay();
 }
@@ -113,20 +120,35 @@ ETeamAttitude::Type ABaseAIController::GetTeamAttitudeTowards(const AActor& Othe
 
 void ABaseAIController::OnTargetPerceptionUpdated_Delegate(AActor* InActor, FAIStimulus Stimulus)
 {
-	if(InActor == nullptr || BlackboardComponent == nullptr) return;
+	UE_LOG(LogTemp, Warning, TEXT("OnTargetPerceptionUpdated_Delegate"))
+	if(InActor == nullptr || BlackboardComponent == nullptr || AIBase == nullptr) return;
 	switch (Stimulus.Type)
 	{
 	case 0:
 		//Sight
 		if(ETeamAttitude::Hostile == GetTeamAttitudeTowards(*InActor))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Enemy sighted!"))
-			AIBase->ToggleSpeechWidget("Enemy Sighted");
-			BlackboardComponent->SetValueAsBool(FName("PlayerSeen"), true);
-			if(AIBase) AIBase->SetPlayerSeen(true);
+			
+			if(Stimulus.WasSuccessfullySensed())
+			{
+				//UE_LOG(LogTemp, Warning, TEXT("Enemy sighted!"))
+				AIBase->ToggleSpeechWidget("Enemy Sighted");
+				BlackboardComponent->SetValueAsBool(FName("PlayerSeen"), true);
+				AIBase->SetPlayerSeen(true);
+				BlackboardComponent->ClearValue(FName("PointOfInterest"));
+				BlackboardComponent->ClearValue(FName("PredictedTargetLocation"));
+			}
+			else
+			{
+				AIBase->ToggleSpeechWidget("Lost sight of the Enemy");
+				UAISense_Prediction::RequestPawnPredictionEvent(GetPawn(), InActor, 2.f);
+			}
+			
 			BlackboardComponent->SetValueAsObject(FName("Target"), InActor);
 			BlackboardComponent->SetValueAsVector(FName("LastTargetLocation"), InActor->GetActorLocation());
-			BlackboardComponent->ClearValue(FName("PointOfInterest"));
+
+			UE_LOG(LogTemp, Warning, TEXT("Stimulus Debug: %s"), *Stimulus.GetDebugDescription())
+			
 		}
 		else if(ETeamAttitude::Friendly == GetTeamAttitudeTowards(*InActor))
 		{
@@ -148,10 +170,21 @@ void ABaseAIController::OnTargetPerceptionUpdated_Delegate(AActor* InActor, FAIS
 			BlackboardComponent->SetValueAsVector(FName("PointOfInterest"), Stimulus.StimulusLocation);
 		}
 		break;
+	case 2:
+		//Prediction
+		//DrawDebugBox(GetWorld(), Stimulus.StimulusLocation, FVector(10.f), FColor::Emerald, false, 5.f);
+		BlackboardComponent->SetValueAsVector(FName("PredictedTargetLocation"), Stimulus.StimulusLocation);
+		//UE_LOG(LogTemp, Warning, TEXT("Stimulus: %s"), *Stimulus.Type.Name.ToString())
+		break;
 	default:
 		//Do the default thing
 		break;
 	}
+}
+
+void ABaseAIController::OnTargetPerceptionInfoUpdated_Delegate(const FActorPerceptionUpdateInfo& UpdateInfo)
+{
+	//UE_LOG(LogTemp, Warning, TEXT("OnTargetPerceptionInfoUpdated_Delegate"))
 }
 
 void ABaseAIController::ChangeAttitudeTowards()
