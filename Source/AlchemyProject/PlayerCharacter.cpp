@@ -6,6 +6,7 @@
 #include "HealthComponent.h"
 #include "InventoryComponent.h"
 #include "Item.h"
+#include "AI/AIBase.h"
 #include "Alchemy/Potion.h"
 #include "Camera/CameraComponent.h"
 #include "Components/AlchemyComponent.h"
@@ -240,6 +241,53 @@ void APlayerCharacter::TraceForObjects()
 	}
 }
 
+void APlayerCharacter::ShowInfoButtonPressed()
+{
+	if(HeadSocket == nullptr) return;
+	FHitResult HitResult;
+	FVector2D ViewportSize;
+	if(GEngine && GEngine->GameViewport)
+	{
+		GEngine->GameViewport->GetViewportSize(ViewportSize);
+	}
+	FVector2D ScreenCenter = FVector2D(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
+	FVector TraceWorldPosition, TraceWorldDirection;
+	bool bScreenToWorld = UGameplayStatics::DeprojectScreenToWorld(UGameplayStatics::GetPlayerController(this, 0), ScreenCenter, TraceWorldPosition, TraceWorldDirection);
+	if(bScreenToWorld)
+	{
+		FVector Start{TraceWorldPosition};
+		float DistanceToHead = (HeadSocket->GetSocketLocation(GetMesh()) - Start).Size();
+		Start += TraceWorldDirection * (DistanceToHead);
+		const FVector End{Start + TraceWorldDirection * DebugObjectTraceRadius};
+		UKismetSystemLibrary::BoxTraceSingle(
+			this,
+			Start,
+			End,
+			FVector(10.f),
+			FRotator::ZeroRotator,
+			UEngineTypes::ConvertToTraceType(ECC_Pawn),
+			false,
+			 TArray<AActor*>(),
+			 EDrawDebugTrace::ForDuration,
+			 HitResult,
+			 true,
+			 FLinearColor::Green,
+			 FLinearColor::Red,
+			 3.f);
+		if(HitResult.bBlockingHit)
+		{
+			AAIBase* TempAIBase = Cast<AAIBase>(HitResult.GetActor());
+			if(TempAIBase)
+			{
+				if(ABaseAIController* BaseAIController = Cast<ABaseAIController>(TempAIBase->GetController()))
+				{
+					BaseAIController->ShowAIInfo();
+				}
+			}
+		}
+	}
+}
+
 void APlayerCharacter::HUDInitTimerFinished()
 {
 	MyPlayerController = MyPlayerController == nullptr ? Cast<AMyPlayerController>(Controller) : MyPlayerController;
@@ -262,6 +310,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("ToggleInventory", IE_Released, this, &APlayerCharacter::InventoryButtonReleased);
 	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &APlayerCharacter::InteractButtonPressed);
 	PlayerInputComponent->BindAction("SweepInteract", IE_Pressed, this, &APlayerCharacter::SweepInteractButtonPressed);
+	PlayerInputComponent->BindAction("ShowInfo", IE_Pressed, this, &APlayerCharacter::ShowInfoButtonPressed);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ThisClass::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ThisClass::MoveRight);

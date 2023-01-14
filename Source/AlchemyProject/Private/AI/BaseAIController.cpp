@@ -30,12 +30,14 @@ ABaseAIController::ABaseAIController()
 	TeamAttitudeMap_Sight.Emplace(ETeamAttitude::Neutral, true);
 	SenseConfig_Sight->SightRadius = MaxSightRadius;
 	SenseConfig_Sight->PeripheralVisionAngleDegrees = PeripheralVisionAngle;
+	SenseConfig_Sight->SetMaxAge(MaxAgeSight);
 	//SenseConfig_Sight->DescribeSelfToGameplayDebugger()
 	
 	SenseConfig_Hearing = CreateDefaultSubobject<UAISenseConfig_Hearing>(TEXT("SenseConfig_Hearing"));
 	SenseConfig_Hearing->DetectionByAffiliation.bDetectEnemies = true;
 	SenseConfig_Hearing->DetectionByAffiliation.bDetectFriendlies = false;
 	SenseConfig_Hearing->DetectionByAffiliation.bDetectNeutrals = true;
+	SenseConfig_Hearing->SetMaxAge(MaxAgeHearing);
 	TeamAttitudeMap_Hearing.Emplace(ETeamAttitude::Hostile, true);
 	TeamAttitudeMap_Hearing.Emplace(ETeamAttitude::Friendly, false);
 	TeamAttitudeMap_Hearing.Emplace(ETeamAttitude::Neutral, true);
@@ -43,6 +45,7 @@ ABaseAIController::ABaseAIController()
 	AIPerceptionComponent->ConfigureSense(*SenseConfig_Sight);
 	AIPerceptionComponent->ConfigureSense(*SenseConfig_Hearing);
 	AIPerceptionComponent->SetDominantSense(SenseConfig_Sight->StaticClass());
+	
 	
 	ABaseAIController::SetGenericTeamId(FGenericTeamId(1));
 }
@@ -184,6 +187,29 @@ void ABaseAIController::PostEditChangeProperty(FPropertyChangedEvent& PropertyCh
 	}
 	
 	Super::PostEditChangeProperty(PropertyChangedEvent);
+}
+
+void ABaseAIController::ShowAIInfo()
+{
+	TArray<AActor*> ActorArrayKnown;
+	TArray<AActor*> ActorArrayCurrent;
+	
+	if(AIPerceptionComponent == nullptr || GEngine == nullptr) return;
+	
+	AIPerceptionComponent->GetKnownPerceivedActors(UAISense_Sight::StaticClass(), ActorArrayKnown);
+	AIPerceptionComponent->GetCurrentlyPerceivedActors(UAISense_Sight::StaticClass(), ActorArrayCurrent);
+	
+	FActorPerceptionBlueprintInfo PerceptionBlueprintInfo;
+	for (AActor* Acter : ActorArrayKnown)
+	{
+		AIPerceptionComponent->GetActorsPerception(Acter, PerceptionBlueprintInfo);
+		GEngine->AddOnScreenDebugMessage(0, 3.f, FColor::Blue, FString::Printf(TEXT("Known Perceived Actor: %s, Is Hostile: %d"), *Acter->GetName(), PerceptionBlueprintInfo.bIsHostile));
+	}
+	for(AActor* Ector : ActorArrayCurrent)
+	{
+		AIPerceptionComponent->GetActorsPerception(Ector, PerceptionBlueprintInfo);
+		GEngine->AddOnScreenDebugMessage(0, 3.f, FColor::Cyan, FString::Printf(TEXT("Currently Perceived Actor: %s, Is Hostile: %d"), *Ector->GetName(), PerceptionBlueprintInfo.bIsHostile));
+	}
 }
 
 

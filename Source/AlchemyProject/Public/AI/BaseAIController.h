@@ -25,6 +25,7 @@ public:
 	
 	void ChangeAttitudeTowards();
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+	void ShowAIInfo();
 
 protected:
 
@@ -76,6 +77,12 @@ private:
 	float PeripheralVisionAngle{73.f};
 	
 	float CheckStimulusTimer{0.f};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Perception|Values", meta = (AllowPrivateAccess = "true"))
+	float MaxAgeSight{30.f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Perception|Values", meta = (AllowPrivateAccess = "true"))
+	float MaxAgeHearing{30.f};
 public:
 
 	FORCEINLINE UBlackboardComponent* GetAIBlackboardComponent() const {return BlackboardComponent;}

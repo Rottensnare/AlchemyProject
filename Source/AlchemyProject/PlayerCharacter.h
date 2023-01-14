@@ -41,6 +41,7 @@ protected:
 	void InteractButtonPressed();
 	void SweepInteractButtonPressed();
 	void TraceForObjects();
+	void ShowInfoButtonPressed();
 
 private:
 	
@@ -77,7 +78,9 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float ObjectTraceRadius{1000.f};
-
+	UPROPERTY(EditAnywhere)
+	float DebugObjectTraceRadius{8000.f};
+	
 	UPROPERTY(VisibleAnywhere)
 	AActor* TracedActor;
 
