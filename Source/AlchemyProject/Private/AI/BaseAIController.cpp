@@ -3,6 +3,7 @@
 
 #include "AI/BaseAIController.h"
 
+#include "MyAIPerceptionComponent.h"
 #include "AI/AIBase.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
@@ -21,7 +22,7 @@ ABaseAIController::ABaseAIController()
 	BehaviorTreeComponent = CreateDefaultSubobject<UBehaviorTreeComponent>(TEXT("BehaviorTreeComponent"));
 	checkf(BehaviorTreeComponent, TEXT("BehaviorTreeComponent was null in the constructor"));
 
-	AIPerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("AIPerceptionComponent"));
+	AIPerceptionComponent = CreateDefaultSubobject<UMyAIPerceptionComponent>(TEXT("AIPerceptionComponent"));
 	
 	SenseConfig_Sight = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SenseConfig_Sight"));
 	SenseConfig_Sight->DetectionByAffiliation.bDetectEnemies = true;
@@ -60,6 +61,9 @@ void ABaseAIController::BeginPlay()
 {
 	AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &ABaseAIController::OnTargetPerceptionUpdated_Delegate);
 	AIPerceptionComponent->OnTargetPerceptionInfoUpdated.AddDynamic(this, &ThisClass::OnTargetPerceptionInfoUpdated_Delegate);
+	AIPerceptionComponent->OnSightStimulusExpired.AddDynamic(this, &ABaseAIController::OnSightStimulusExpired_Delegate);
+	AIPerceptionComponent->OnHearingStimulusExpired.AddDynamic(this, &ABaseAIController::OnHearingStimulusExpired_Delegate);
+	
 	AIBase = Cast<AAIBase>(GetPawn());
 	Super::BeginPlay();
 }
@@ -135,12 +139,16 @@ void ABaseAIController::OnTargetPerceptionUpdated_Delegate(AActor* InActor, FAIS
 				AIBase->ToggleSpeechWidget("Enemy Sighted");
 				BlackboardComponent->SetValueAsBool(FName("PlayerSeen"), true);
 				AIBase->SetPlayerSeen(true);
+				BlackboardComponent->SetValueAsBool(FName("CanSeeTarget"), true);
+				AIBase->SetCanSeeTarget(true);
 				BlackboardComponent->ClearValue(FName("PointOfInterest"));
 				BlackboardComponent->ClearValue(FName("PredictedTargetLocation"));
 			}
 			else
 			{
 				AIBase->ToggleSpeechWidget("Lost sight of the Enemy");
+				AIBase->SetCanSeeTarget(false);
+				BlackboardComponent->SetValueAsBool(FName("CanSeeTarget"), false);
 				UAISense_Prediction::RequestPawnPredictionEvent(GetPawn(), InActor, 2.f);
 			}
 			
@@ -172,10 +180,11 @@ void ABaseAIController::OnTargetPerceptionUpdated_Delegate(AActor* InActor, FAIS
 		break;
 	case 2:
 		//Prediction
+		
 		//DrawDebugBox(GetWorld(), Stimulus.StimulusLocation, FVector(10.f), FColor::Emerald, false, 5.f);
 		BlackboardComponent->SetValueAsVector(FName("PredictedTargetLocation"), Stimulus.StimulusLocation);
-		//UE_LOG(LogTemp, Warning, TEXT("Stimulus: %s"), *Stimulus.Type.Name.ToString())
 		break;
+		
 	default:
 		//Do the default thing
 		break;
@@ -185,6 +194,23 @@ void ABaseAIController::OnTargetPerceptionUpdated_Delegate(AActor* InActor, FAIS
 void ABaseAIController::OnTargetPerceptionInfoUpdated_Delegate(const FActorPerceptionUpdateInfo& UpdateInfo)
 {
 	//UE_LOG(LogTemp, Warning, TEXT("OnTargetPerceptionInfoUpdated_Delegate"))
+}
+
+void ABaseAIController::OnSightStimulusExpired_Delegate()
+{
+	if(BlackboardComponent == nullptr || AIBase == nullptr) return;
+	
+	BlackboardComponent->SetValueAsBool(FName("PlayerSeen"), false);
+	AIBase->SetPlayerSeen(false);
+	AIBase->SetAIState(EAIState::EAIS_Patrolling); //TODO: Need to make this the state the AI was before the chain of events.
+}
+
+void ABaseAIController::OnHearingStimulusExpired_Delegate()
+{
+	if(!AIBase->GetPlayerSeen())
+	{
+		AIBase->SetAIState(EAIState::EAIS_Patrolling);
+	}
 }
 
 void ABaseAIController::ChangeAttitudeTowards()

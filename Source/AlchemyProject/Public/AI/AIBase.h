@@ -95,6 +95,7 @@ protected:
 private:	
 
 	bool bPlayerSeen{false};
+	bool bCanSeeTarget{false};
 	bool bSomethingHeard{false};
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "AI|Movement", meta = (AllowPrivateAccess = "true") )
 	bool bFollowPlayer{false};
@@ -156,6 +157,8 @@ public:
 	FORCEINLINE bool GetPlayerSeen() const {return bPlayerSeen;}
 	FORCEINLINE void SetPlayerSeen(const bool bValue);
 	FORCEINLINE bool GetFollowPlayer() const {return bFollowPlayer;}
+	FORCEINLINE bool GetCanSeeTarget() const {return bCanSeeTarget;}
+	FORCEINLINE void SetCanSeeTarget(const bool Value) {bCanSeeTarget = Value;}
 };
 
 template <typename T>

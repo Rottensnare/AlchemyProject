@@ -25,6 +25,10 @@ public:
 	void OnTargetPerceptionUpdated_Delegate(AActor* InActor, FAIStimulus Stimulus);
 	UFUNCTION()
 	void OnTargetPerceptionInfoUpdated_Delegate(const FActorPerceptionUpdateInfo& UpdateInfo);
+	UFUNCTION()
+	void OnSightStimulusExpired_Delegate();
+	UFUNCTION()
+	void OnHearingStimulusExpired_Delegate();
 	
 	void ChangeAttitudeTowards();
 
@@ -53,7 +57,7 @@ protected:
 	 **********************/
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Perception|Components", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UAIPerceptionComponent> AIPerceptionComponent{nullptr};
+	TObjectPtr<class UMyAIPerceptionComponent> AIPerceptionComponent{nullptr};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Perception|Components", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UAISenseConfig_Sight> SenseConfig_Sight{nullptr};

@@ -53,8 +53,8 @@ bool UTargetVisibilityCheck::CheckVisibility(AAIController* AIController, APawn*
 		else
 		{
 			//UE_LOG(LogTemp, Warning, TEXT("Cast failed"))
-			BaseAI->SetPlayerSeen(false);
-			BaseAIController->GetBlackboardComponent()->SetValueAsBool(FName("PlayerSeen"), false);
+			BaseAI->SetCanSeeTarget(false);
+			BaseAIController->GetBlackboardComponent()->SetValueAsBool(FName("CanSeeTarget"), false);
 			return false;
 		}
 	}
