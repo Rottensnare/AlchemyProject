@@ -172,10 +172,13 @@ void ABaseAIController::OnTargetPerceptionUpdated_Delegate(AActor* InActor, FAIS
 		if(!(ETeamAttitude::Friendly == GetTeamAttitudeTowards(*InActor)))
 		{
 			if(AIBase->GetPlayerSeen()) break;
-			AIBase->SetAIState(EAIState::EAIS_Alerted);
+			if(Stimulus.WasSuccessfullySensed())
+			{
+				AIBase->SetAIState(EAIState::EAIS_Alerted);
+				AIBase->ToggleSpeechWidget("Herd sum ting");
+				BlackboardComponent->SetValueAsVector(FName("PointOfInterest"), Stimulus.StimulusLocation);
+			}
 			//UE_LOG(LogTemp, Warning, TEXT("Heard sum ting"))
-			AIBase->ToggleSpeechWidget("Herd sum ting");
-			BlackboardComponent->SetValueAsVector(FName("PointOfInterest"), Stimulus.StimulusLocation);
 		}
 		break;
 	case 2:
@@ -202,6 +205,7 @@ void ABaseAIController::OnSightStimulusExpired_Delegate()
 	
 	BlackboardComponent->SetValueAsBool(FName("PlayerSeen"), false);
 	AIBase->SetPlayerSeen(false);
+	AIBase->ToggleSpeechWidget("Target got away.");
 	AIBase->SetAIState(EAIState::EAIS_Patrolling); //TODO: Need to make this the state the AI was before the chain of events.
 }
 
@@ -209,6 +213,7 @@ void ABaseAIController::OnHearingStimulusExpired_Delegate()
 {
 	if(!AIBase->GetPlayerSeen())
 	{
+		AIBase->ToggleSpeechWidget("Must have been wind.");
 		AIBase->SetAIState(EAIState::EAIS_Patrolling);
 	}
 }
