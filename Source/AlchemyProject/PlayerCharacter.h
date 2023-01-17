@@ -98,6 +98,11 @@ private:
 	UPROPERTY()
 	const USkeletalMeshSocket* HeadSocket{nullptr};
 
+	/** Perception */
+
+	UPROPERTY()
+	class UAIPerceptionStimuliSourceComponent* PerceptionStimuliSourceComponent;
+
 public:
 	
 	FORCEINLINE UInventoryComponent* GetInventoryComponent() const {return InventoryComponent;}
@@ -105,6 +110,7 @@ public:
 	FORCEINLINE UHealthComponent* GetHealthComponent() const {return HealthComponent;}
 	FORCEINLINE void SetAlchemyTable(AAlchemyTable* InTable) {CurrentAlchemyTable = InTable;}
 	FORCEINLINE AAlchemyTable* GetAlchemyTable() const {return CurrentAlchemyTable;}
+	FORCEINLINE UAIPerceptionStimuliSourceComponent* GetPerceptionStimuliSourceComponent() const {return PerceptionStimuliSourceComponent;}
 	
 };
 

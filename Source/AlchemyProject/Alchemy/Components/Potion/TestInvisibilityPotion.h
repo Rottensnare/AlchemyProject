@@ -28,7 +28,7 @@ protected:
 
 private:
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Properties|Values")
 	float InvisibilityDuration{5.f};
 
 	FTimerHandle InvisibilityTimer;

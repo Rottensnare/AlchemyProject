@@ -4,6 +4,8 @@
 #include "TestInvisibilityPotion.h"
 
 #include "AlchemyProject/PlayerCharacter.h"
+#include "Perception/AIPerceptionStimuliSourceComponent.h"
+#include "Perception/AISense_Sight.h"
 
 void UTestInvisibilityPotion::BeginPlay()
 {
@@ -22,11 +24,12 @@ void UTestInvisibilityPotion::MakePlayerVisible()
 	if(CurrentCharacter == nullptr) return;
 	
 	CurrentCharacter->GetMesh()->SetVisibility(true);
+	CurrentCharacter->GetPerceptionStimuliSourceComponent()->RegisterForSense(UAISense_Sight::StaticClass());
 
 	FTimerDelegate TimerDelegate2;
 	TimerDelegate2.BindUFunction(this, FName("DestroyThisComponent"));
 	CurrentCharacter->GetWorldTimerManager().SetTimerForNextTick(TimerDelegate2);
-
+	
 
 }
 
@@ -39,6 +42,7 @@ void UTestInvisibilityPotion::ExecuteFunctionality()
 	InvisibilityDuration += (uint8)ProductQuality - 1;
 
 	CurrentCharacter->GetWorldTimerManager().SetTimer(InvisibilityTimer, this, &UTestInvisibilityPotion::MakePlayerVisible, InvisibilityDuration);
+	CurrentCharacter->GetPerceptionStimuliSourceComponent()->UnregisterFromSense(UAISense_Sight::StaticClass());
 	
 	Super::ExecuteFunctionality();
 }
