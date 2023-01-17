@@ -14,6 +14,8 @@
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "Perception/AISenseConfig.h"
+#include "Perception/AISense_Hearing.h"
+#include "Perception/AISense_Sight.h"
 
 AAIBase::AAIBase()
 {
@@ -21,6 +23,8 @@ AAIBase::AAIBase()
 
 	//PawnSensingComponent = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensingComp"));
 	PerceptionStimuliSourceComponent = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("PerceptionStimuliSourceComp"));
+	PerceptionStimuliSourceComponent->RegisterForSense(UAISense_Sight::StaticClass());
+	PerceptionStimuliSourceComponent->RegisterForSense(UAISense_Hearing::StaticClass());
 
 	SpeechWidgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("SpeechWidgetComp"));
 	SpeechWidgetComp->SetupAttachment(GetRootComponent());

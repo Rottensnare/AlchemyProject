@@ -16,6 +16,7 @@
 #include "Interfaces/Pickable.h"
 #include "Kismet/GameplayStatics.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
+#include "Perception/AISense_Hearing.h"
 #include "Perception/AISense_Sight.h"
 #include "PlayerController/MyPlayerController.h"
 
@@ -40,8 +41,8 @@ APlayerCharacter::APlayerCharacter()
 	CameraComponent->bUsePawnControlRotation = false;
 
 	PerceptionStimuliSourceComponent = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("PerceptionStimuliSourceComp"));
-	
-
+	PerceptionStimuliSourceComponent->RegisterForSense(UAISense_Sight::StaticClass());
+	PerceptionStimuliSourceComponent->RegisterForSense(UAISense_Hearing::StaticClass());
 }
 
 
