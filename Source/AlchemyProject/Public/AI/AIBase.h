@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "BaseAIController.h"
+#include "GameplayTagAssetInterface.h"
+#include "GameplayTagContainer.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/Character.h"
 #include "UI/SpeechWidget.h"
@@ -13,6 +15,7 @@ UENUM(BlueprintType)
 enum class EAIState : uint8
 {
 	EAIS_Idle UMETA(DisplayName = "Idle"),
+	//Moving means a state where the npc tries to go from A to B in non-combat situations
 	EAIS_Moving UMETA(DisplayName = "Moving"),
 	EAIS_Patrolling UMETA(DisplayName = "Patrolling"),
 	EAIS_Chasing UMETA(DisplayName = "Chasing"),
@@ -25,7 +28,7 @@ enum class EAIState : uint8
 };
 
 UCLASS()
-class ALCHEMYPROJECT_API AAIBase : public ACharacter
+class ALCHEMYPROJECT_API AAIBase : public ACharacter 
 {
 	GENERATED_BODY()
 
@@ -149,9 +152,11 @@ private:
 	//Map that stores information about the opinion of other NPCs.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Opinions", meta = (AllowPrivateAccess = "true"))
 	TMap<AActor*, int32> OpinionTable;
-	
-public:
 
+public:
+	/*******************
+	 *	FORCEINLINES
+	 *****************/
 	FORCEINLINE UBehaviorTree* GetBehaviorTree() const {return BehaviorTree;}
 	FORCEINLINE EAIState GetAIState() const {return AIState;}
 	FORCEINLINE bool GetPlayerSeen() const {return bPlayerSeen;}
@@ -159,6 +164,15 @@ public:
 	FORCEINLINE bool GetFollowPlayer() const {return bFollowPlayer;}
 	FORCEINLINE bool GetCanSeeTarget() const {return bCanSeeTarget;}
 	FORCEINLINE void SetCanSeeTarget(const bool Value) {bCanSeeTarget = Value;}
+
+	/***********************
+	 *	Public Variables
+	 **********************/
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|GameplayTags")
+	FGameplayTagContainer GameplayTagContainer;
+
+	
 };
 
 template <typename T>

@@ -30,6 +30,8 @@ AAIBase::AAIBase()
 	SpeechWidgetComp->SetupAttachment(GetRootComponent());
 	SpeechWidgetComp->SetVisibility(false);
 	//SpeechWidgetComp->SetWidgetClass(SpeechWidgetClass);
+
+	//GameplayTagContainer.AddTag(GameplayTag);
 }
 
 void AAIBase::BeginPlay()

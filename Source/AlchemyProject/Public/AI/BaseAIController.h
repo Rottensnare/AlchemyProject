@@ -4,8 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "AIController.h"
+#include "GameplayTagContainer.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AIPerceptionTypes.h"
+#include "Utility/CustomAIContainer.h"
 #include "BaseAIController.generated.h"
 
 /**
@@ -82,6 +84,17 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Perception|Teams", meta = (AllowPrivateAccess = "true"))
 	TMap<TEnumAsByte<ETeamAttitude::Type>, bool> TeamAttitudeMap_Hearing;
 
+
+	UFUNCTION(BlueprintCallable)
+	void QueryForActors_GameplayTags(const struct FGameplayTagContainer& InGameplayTagContainer, const class UEnvQuery* const InEnvQuery, APawn* InPawn);
+
+	void HandleQueryRequest(TSharedPtr<struct FEnvQueryResult> Result);
+
+	FGameplayTagContainer TagsToBeTested;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	class UCustomAIContainer* CustomAIContainer;
+
 private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Perception|Values", meta = (AllowPrivateAccess = "true"))
@@ -97,10 +110,14 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Perception|Values", meta = (AllowPrivateAccess = "true"))
 	float MaxAgeHearing{30.f};
+	
 public:
 
 	FORCEINLINE UBlackboardComponent* GetAIBlackboardComponent() const {return BlackboardComponent;}
 	FORCEINLINE UBehaviorTreeComponent* GetAIBehaviorTreeComponent() const {return BehaviorTreeComponent;}
 	FORCEINLINE virtual FGenericTeamId GetGenericTeamId() const override {return TeamId;}
-	
+	FORCEINLINE UCustomAIContainer* GetCustomAIContainer() const {return CustomAIContainer;}
+
+	FORCEINLINE void AddToCustomAIContainer(AActor* ActorToAdd) const {if(CustomAIContainer) CustomAIContainer->ActorContainer.Add(ActorToAdd);}
+	FORCEINLINE void ClearCustomAIContainer() const {if(CustomAIContainer) CustomAIContainer->ActorContainer.Empty();}
 };

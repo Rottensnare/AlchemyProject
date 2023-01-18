@@ -8,6 +8,7 @@
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "EnvironmentQuery/EnvQueryManager.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Hearing.h"
 #include "Perception/AISenseConfig_Prediction.h"
@@ -52,7 +53,8 @@ ABaseAIController::ABaseAIController()
 	AIPerceptionComponent->ConfigureSense(*SenseConfig_Hearing);
 	AIPerceptionComponent->ConfigureSense(*SenseConfig_Prediction);
 	AIPerceptionComponent->SetDominantSense(SenseConfig_Sight->StaticClass());
-	
+
+	CustomAIContainer = CreateDefaultSubobject<UCustomAIContainer>(TEXT("CustomAIContainer"));
 	
 	ABaseAIController::SetGenericTeamId(FGenericTeamId(1));
 }
@@ -85,6 +87,47 @@ void ABaseAIController::Tick(float DeltaSeconds)
 	}
 	
 	Super::Tick(DeltaSeconds);
+}
+
+void ABaseAIController::QueryForActors_GameplayTags(const FGameplayTagContainer& InGameplayTagContainer,
+	const UEnvQuery* const InEnvQuery, APawn* InPawn)
+{
+	TagsToBeTested = InGameplayTagContainer;
+	FEnvQueryRequest ActorsQueryRequest = FEnvQueryRequest(InEnvQuery, InPawn);
+	ActorsQueryRequest.Execute(EEnvQueryRunMode::AllMatching, this, &ABaseAIController::HandleQueryRequest);
+}
+
+void ABaseAIController::HandleQueryRequest(TSharedPtr<FEnvQueryResult> Result)
+{
+	ClearCustomAIContainer();
+	
+	if(Result->IsSuccessful())
+	{
+		TArray<AActor*> OutActors;
+		Result->GetAllAsActors(OutActors);
+		if(!OutActors.IsEmpty())
+		{
+			for(AActor* OutActor : OutActors)
+			{
+				//UE_LOG(LogTemp, Display, TEXT("Actor Name: %s"), *OutActor->GetName())
+				AAIBase* TempAI = Cast<AAIBase>(OutActor);
+				if(TempAI)
+				{
+					FGameplayTagQuery NewQuery = FGameplayTagQuery::MakeQuery_MatchAnyTags(TagsToBeTested);
+					bool bMatchesQuery = TempAI->GameplayTagContainer.MatchesQuery(NewQuery);
+					if(bMatchesQuery)
+					{
+						UE_LOG(LogTemp, Display, TEXT("bMatchesQuery: true"))
+						AddToCustomAIContainer(TempAI);
+					}
+				}
+			}
+		}
+	}
+	
+	if(BlackboardComponent) BlackboardComponent->SetValueAsObject(FName("QueryActors"), CustomAIContainer);
+	
+	TagsToBeTested = FGameplayTagContainer::EmptyContainer;
 }
 
 void ABaseAIController::OnPossess(APawn* InPawn)
