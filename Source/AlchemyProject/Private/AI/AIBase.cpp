@@ -20,8 +20,7 @@
 AAIBase::AAIBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
-
-	//PawnSensingComponent = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensingComp"));
+	
 	PerceptionStimuliSourceComponent = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("PerceptionStimuliSourceComp"));
 	PerceptionStimuliSourceComponent->RegisterForSense(UAISense_Sight::StaticClass());
 	PerceptionStimuliSourceComponent->RegisterForSense(UAISense_Hearing::StaticClass());
@@ -29,9 +28,16 @@ AAIBase::AAIBase()
 	SpeechWidgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("SpeechWidgetComp"));
 	SpeechWidgetComp->SetupAttachment(GetRootComponent());
 	SpeechWidgetComp->SetVisibility(false);
-	//SpeechWidgetComp->SetWidgetClass(SpeechWidgetClass);
+	
+}
 
-	//GameplayTagContainer.AddTag(GameplayTag);
+void AAIBase::GetActorEyesViewPoint(FVector& OutLocation, FRotator& OutRotation) const
+{
+	if(GetMesh())
+	{
+		OutLocation = GetMesh()->GetSocketLocation("leftEyeSocket");
+		OutRotation = GetMesh()->GetSocketRotation("leftEyeSocket");
+	}
 }
 
 void AAIBase::BeginPlay()

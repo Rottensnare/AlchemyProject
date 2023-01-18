@@ -94,7 +94,7 @@ void ABaseAIController::QueryForActors_GameplayTags(const FGameplayTagContainer&
 {
 	TagsToBeTested = InGameplayTagContainer;
 	FEnvQueryRequest ActorsQueryRequest = FEnvQueryRequest(InEnvQuery, InPawn);
-	ActorsQueryRequest.Execute(EEnvQueryRunMode::AllMatching, this, &ABaseAIController::HandleQueryRequest);
+	ActorsQueryRequest.Execute(EEnvQueryRunMode::AllMatching, this, &ABaseAIController::HandleQueryRequest); //TODO: Change EEnvQueryRunMode to dynamic property
 }
 
 void ABaseAIController::HandleQueryRequest(TSharedPtr<FEnvQueryResult> Result)
@@ -109,22 +109,20 @@ void ABaseAIController::HandleQueryRequest(TSharedPtr<FEnvQueryResult> Result)
 		{
 			for(AActor* OutActor : OutActors)
 			{
-				//UE_LOG(LogTemp, Display, TEXT("Actor Name: %s"), *OutActor->GetName())
 				AAIBase* TempAI = Cast<AAIBase>(OutActor);
 				if(TempAI)
 				{
-					FGameplayTagQuery NewQuery = FGameplayTagQuery::MakeQuery_MatchAnyTags(TagsToBeTested);
+					FGameplayTagQuery NewQuery = FGameplayTagQuery::MakeQuery_MatchAnyTags(TagsToBeTested); //TODO: Change MakeQuery_MatchAnyTags to a dynamic function which can be selected from the BP
 					bool bMatchesQuery = TempAI->GameplayTagContainer.MatchesQuery(NewQuery);
 					if(bMatchesQuery)
 					{
-						UE_LOG(LogTemp, Display, TEXT("bMatchesQuery: true"))
 						AddToCustomAIContainer(TempAI);
 					}
 				}
 			}
 		}
 	}
-	
+	UE_LOG(LogTemp, Display, TEXT("Number of Matches: %d"), CustomAIContainer->ActorContainer.Num())
 	if(BlackboardComponent) BlackboardComponent->SetValueAsObject(FName("QueryActors"), CustomAIContainer);
 	
 	TagsToBeTested = FGameplayTagContainer::EmptyContainer;
@@ -167,7 +165,7 @@ ETeamAttitude::Type ABaseAIController::GetTeamAttitudeTowards(const AActor& Othe
 
 void ABaseAIController::OnTargetPerceptionUpdated_Delegate(AActor* InActor, FAIStimulus Stimulus)
 {
-	UE_LOG(LogTemp, Warning, TEXT("OnTargetPerceptionUpdated_Delegate"))
+	//UE_LOG(LogTemp, Warning, TEXT("OnTargetPerceptionUpdated_Delegate"))
 	if(InActor == nullptr || BlackboardComponent == nullptr || AIBase == nullptr) return;
 	switch (Stimulus.Type)
 	{
@@ -198,7 +196,7 @@ void ABaseAIController::OnTargetPerceptionUpdated_Delegate(AActor* InActor, FAIS
 			BlackboardComponent->SetValueAsObject(FName("Target"), InActor);
 			BlackboardComponent->SetValueAsVector(FName("LastTargetLocation"), InActor->GetActorLocation());
 
-			UE_LOG(LogTemp, Warning, TEXT("Stimulus Debug: %s"), *Stimulus.GetDebugDescription())
+			//UE_LOG(LogTemp, Warning, TEXT("Stimulus Debug: %s"), *Stimulus.GetDebugDescription())
 			
 		}
 		else if(ETeamAttitude::Friendly == GetTeamAttitudeTowards(*InActor))

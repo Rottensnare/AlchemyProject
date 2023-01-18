@@ -35,6 +35,8 @@ class ALCHEMYPROJECT_API AAIBase : public ACharacter
 public:
 	AAIBase();
 
+	virtual void GetActorEyesViewPoint(FVector& OutLocation, FRotator& OutRotation) const override;
+	
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void SetAIState(EAIState NewState);
