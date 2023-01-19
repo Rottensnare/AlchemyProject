@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BehaviorTree/Decorators/BTDecorator_Loop.h"
 #include "UObject/NoExportTypes.h"
 #include "CustomAIContainer.generated.h"
 
@@ -19,5 +20,8 @@ public:
 	
 	UPROPERTY(BlueprintReadWrite)
 	TArray<AActor*> ActorContainer;
+
+	UFUNCTION(BlueprintCallable)
+	void LeftShiftContainer();
 	
 };

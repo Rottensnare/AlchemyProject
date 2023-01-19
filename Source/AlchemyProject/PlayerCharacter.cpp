@@ -12,6 +12,7 @@
 #include "Components/AlchemyComponent.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Engine/UserDefinedStruct.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Interfaces/Pickable.h"
 #include "Kismet/GameplayStatics.h"
@@ -59,6 +60,8 @@ void APlayerCharacter::BeginPlay()
 	GetWorldTimerManager().SetTimer(HUDInitTimer, this, &APlayerCharacter::HUDInitTimerFinished, HUDInitTime);
 	
 	HeadSocket = GetMesh()->GetSocketByName("headSocket");
+
+	if(GetCharacterMovement()) DefaultWalkSpeed = GetCharacterMovement()->MaxWalkSpeed;
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
@@ -294,6 +297,24 @@ void APlayerCharacter::ShowInfoButtonPressed()
 	}
 }
 
+void APlayerCharacter::ToggleSprint()
+{
+	if(GetCharacterMovement() == nullptr) return;
+	
+	if(bSprinting)
+	{
+		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+		bSprinting = false;
+	}
+	else
+	{
+		GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+		bSprinting = true;
+	}
+	
+	
+}
+
 void APlayerCharacter::HUDInitTimerFinished()
 {
 	MyPlayerController = MyPlayerController == nullptr ? Cast<AMyPlayerController>(Controller) : MyPlayerController;
@@ -317,6 +338,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &APlayerCharacter::InteractButtonPressed);
 	PlayerInputComponent->BindAction("SweepInteract", IE_Pressed, this, &APlayerCharacter::SweepInteractButtonPressed);
 	PlayerInputComponent->BindAction("ShowInfo", IE_Pressed, this, &APlayerCharacter::ShowInfoButtonPressed);
+	PlayerInputComponent->BindAction("ToggleSprint", IE_Pressed, this, &APlayerCharacter::ToggleSprint);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ThisClass::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ThisClass::MoveRight);

@@ -42,7 +42,8 @@ protected:
 	void SweepInteractButtonPressed();
 	void TraceForObjects();
 	void ShowInfoButtonPressed();
-
+	void ToggleSprint();
+	
 private:
 	
 	UPROPERTY(VisibleAnywhere)
@@ -97,6 +98,16 @@ private:
 
 	UPROPERTY()
 	const USkeletalMeshSocket* HeadSocket{nullptr};
+
+	UPROPERTY(EditAnywhere, Category = "Custom Movement")
+	float SprintSpeed{600.f};
+	UPROPERTY(EditAnywhere, Category = "Custom Movement")
+	float WalkSpeed{230.f};
+	UPROPERTY(VisibleAnywhere, Category = "Custom Movement")
+	float DefaultWalkSpeed;
+
+	UPROPERTY(VisibleAnywhere, Category = "Custom Movement")
+	bool bSprinting{true};
 
 	/** Perception */
 
