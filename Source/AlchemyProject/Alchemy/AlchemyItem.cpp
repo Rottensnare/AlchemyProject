@@ -27,4 +27,34 @@ void AAlchemyItem::UpdatePopUp()
 	Super::UpdatePopUp();
 }
 
+void AAlchemyItem::InitGameplayTagContainer()
+{
+	//Can only have 1 primary substance so we remove the last tag if the substance of the item is changed
+	//TODO: Might need to remove all ingredient tags to be sure
+	if(GameplayTagContainer.HasTag(PrimarySubstanceGameplayTag)) GameplayTagContainer.RemoveTag(PrimarySubstanceGameplayTag);
+	
+	const FName TagName =
+		FName(FString::Printf(TEXT("Alchemy.Ingredient.%s"),
+			*UEnum::GetDisplayValueAsText(IngredientData.PrimarySubstance).ToString())); //BUG: Doesn't work in release build, need to make another version
+	PrimarySubstanceGameplayTag = FGameplayTag::RequestGameplayTag(TagName);
+	GameplayTagContainer.AddTag(PrimarySubstanceGameplayTag);
+	
+	Super::InitGameplayTagContainer();
+}
+
+void AAlchemyItem::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+	//UE_LOG(LogTemp, Warning, TEXT("Changed Property Name: %s"), *PropertyChangedEvent.Property->GetFName().ToString())
+	static const FName NAME_IngredientData = FName("PrimarySubstance");
+	if(PropertyChangedEvent.Property)
+	{
+		if(PropertyChangedEvent.Property->GetFName() == NAME_IngredientData)
+		{
+			InitGameplayTagContainer();
+		}
+	}
+	
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+}
+
 

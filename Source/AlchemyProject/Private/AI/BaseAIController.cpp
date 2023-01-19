@@ -8,6 +8,7 @@
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "EnvironmentQuery/EnvQuery.h"
 #include "EnvironmentQuery/EnvQueryManager.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Hearing.h"
@@ -90,14 +91,15 @@ void ABaseAIController::Tick(float DeltaSeconds)
 }
 
 void ABaseAIController::QueryForActors_GameplayTags(const FGameplayTagContainer& InGameplayTagContainer,
-	const UEnvQuery* const InEnvQuery, APawn* InPawn)
+	const UEnvQuery* const InEnvQuery, APawn* InPawn, const float SearchRadius)
 {
 	TagsToBeTested = InGameplayTagContainer;
 	FEnvQueryRequest ActorsQueryRequest = FEnvQueryRequest(InEnvQuery, InPawn);
+	ActorsQueryRequest.SetFloatParam(FName("SearchRadius"), SearchRadius);
 	ActorsQueryRequest.Execute(EEnvQueryRunMode::AllMatching, this, &ABaseAIController::HandleQueryRequest); //TODO: Change EEnvQueryRunMode to dynamic property
 }
 
-void ABaseAIController::HandleQueryRequest(TSharedPtr<FEnvQueryResult> Result)
+void ABaseAIController::HandleQueryRequest(TSharedPtr<FEnvQueryResult> Result) //TODO: Need to make an interface so that this function can be used for other classes than AAIBase
 {
 	ClearCustomAIContainer();
 	

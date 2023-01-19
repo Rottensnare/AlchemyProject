@@ -35,3 +35,13 @@ struct FNPCInfo
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName FullName;
 };
+
+USTRUCT(BlueprintType)
+struct FTagsToSearch
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FGameplayTagContainer SearchTagsContainer;
+	
+};

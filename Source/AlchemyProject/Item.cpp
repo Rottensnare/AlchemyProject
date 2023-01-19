@@ -38,6 +38,29 @@ void AItem::BeginPlay()
 	
 }
 
+void AItem::InitGameplayTagContainer()
+{
+	
+}
+
+void AItem::OnConstruction(const FTransform& Transform)
+{
+	if(bShouldInitGameplayTags)
+	{
+		InitGameplayTagContainer();
+		bShouldInitGameplayTags = false; //Resets to true when restarting the editor
+	}
+	
+	Super::OnConstruction(Transform);
+}
+
+void AItem::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+
+	
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+}
+
 void AItem::UpdatePopUp()
 {
 	if(ItemPopUp)

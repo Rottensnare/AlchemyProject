@@ -6,6 +6,7 @@
 #include "BaseAIController.h"
 #include "GameplayTagAssetInterface.h"
 #include "GameplayTagContainer.h"
+#include "AlchemyProject/Alchemy/CustomStructs/NPCStructs.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/Character.h"
 #include "UI/SpeechWidget.h"
@@ -174,7 +175,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|GameplayTags")
 	FGameplayTagContainer GameplayTagContainer;
 
-	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|GameplayTags")
+	FTagsToSearch TagsToSearch;
 };
 
 template <typename T>

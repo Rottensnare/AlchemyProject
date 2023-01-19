@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "Enums/EItemType.h"
 #include "GameFramework/Actor.h"
 #include "Interfaces/Pickable.h"
@@ -37,13 +38,21 @@ public:
 	
 	UFUNCTION()
 	virtual void UpdatePopUp();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Info|GameplayTags")
+	FGameplayTagContainer GameplayTagContainer;
+	
 	
 protected:
 
 	virtual void BeginPlay() override;
 
-	
+	virtual void InitGameplayTagContainer();
 
+	virtual void OnConstruction(const FTransform& Transform) override;
+#if WITH_EDITOR
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif
 	UPROPERTY(EditAnywhere)
 	class UTexture2D* ImageInSlot;
 
@@ -74,7 +83,7 @@ protected:
 	UPROPERTY(EditAnywhere)
 	FString ItemName;
 
-	
+	bool bShouldInitGameplayTags{true};
 
 private:
 

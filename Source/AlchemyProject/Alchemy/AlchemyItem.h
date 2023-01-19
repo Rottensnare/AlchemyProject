@@ -20,10 +20,19 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FIngredientInfo IngredientData;
-
+	
 	virtual void UpdatePopUp() override;
 
 protected:
 
+	virtual void InitGameplayTagContainer() override;
 
+#if WITH_EDITOR
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif
+	
+private:
+
+	FGameplayTag PrimarySubstanceGameplayTag;
+	
 };
