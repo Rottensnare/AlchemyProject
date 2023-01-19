@@ -28,5 +28,8 @@ public:
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	class UScrollableInventoryWidget* ScrollableInventoryWidget;
 
+	UPROPERTY(EditAnywhere, meta = (BindWidget))
+	class UClockWidget* ClockWidget;
+
 	FORCEINLINE void SetInventoryWidget(UInventoryWidget* InInventory) {InventoryWidget = InInventory;}
 };

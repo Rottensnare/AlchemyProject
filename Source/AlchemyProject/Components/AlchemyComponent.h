@@ -15,7 +15,8 @@ class ALCHEMYPROJECT_API UAlchemyComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-public:	
+public:
+	
 	friend class APlayerCharacter;
 	UAlchemyComponent();
 

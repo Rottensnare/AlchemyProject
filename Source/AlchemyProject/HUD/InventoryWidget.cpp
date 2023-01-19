@@ -6,18 +6,20 @@
 #include "InventorySlot.h"
 #include "AlchemyProject/Ingredient.h"
 #include "AlchemyProject/PlayerCharacter.h"
+#include "AlchemyProject/Alchemy/Potion.h"
 #include "AlchemyProject/PlayerController/MyPlayerController.h"
 #include "Components/ComboBoxString.h"
-#include "Components/GridPanel.h"
 #include "Components/Image.h"
 #include "Components/MultiLineEditableText.h"
 #include "Components/TextBlock.h"
 #include "Components/UniformGridPanel.h"
 #include "Kismet/GameplayStatics.h"
 
+#define INVENTORY(x) PlayerCharacter->GetInventoryComponent()->GetInventory()[x]
+
 void UInventoryWidget::CreateInventoryGrid(const int32 NumberOfElements)
 {
-	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetOwningPlayerPawn());
+	PlayerCharacter = PlayerCharacter == nullptr ? Cast<APlayerCharacter>(GetOwningPlayerPawn()) : PlayerCharacter;
 	if(PlayerCharacter == nullptr || PlayerCharacter->GetInventoryComponent() == nullptr) return;
 	
 	
@@ -54,7 +56,7 @@ void UInventoryWidget::CreateInventoryGrid(const int32 NumberOfElements)
 				const int32 Index = j + (i * NumberOfColumns);
 				if(IsValid(InventorySlots[Index]))
 				{
-					UE_LOG(LogTemp, Warning, TEXT("Adding inventory slot #%d"), Index)
+					//UE_LOG(LogTemp, Warning, TEXT("Adding inventory slot #%d"), Index)
 					InventoryGrid->AddChildToUniformGrid(InventorySlots[Index], i, j);
 					if(InventoryGrid->GetChildrenCount() >= NumberOfElements)
 					{
@@ -108,10 +110,10 @@ void UInventoryWidget::CreateContainerGrid(const int32 NumberOfElements)
 
 void UInventoryWidget::UpdateInventorySlot(const int32 Index)
 {
-	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetOwningPlayerPawn());
+	PlayerCharacter = PlayerCharacter == nullptr ? Cast<APlayerCharacter>(GetOwningPlayerPawn()) : PlayerCharacter;
 	if(PlayerCharacter == nullptr || PlayerCharacter->GetInventoryComponent() == nullptr) return;
 
-	if(PlayerCharacter->GetInventoryComponent()->GetInventory()[Index].ItemAmount <= 0)
+	if(PlayerCharacter->GetInventoryComponent()->GetInventory()[Index].ItemAmount > 0)
 	{
 		UpdateSlotFromInventory(Index);
 	}
@@ -120,7 +122,7 @@ void UInventoryWidget::UpdateInventorySlot(const int32 Index)
 
 void UInventoryWidget::HandleComboSelection(FString SelectedItem, ESelectInfo::Type SelectionType)
 {
-	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetOwningPlayerPawn());
+	PlayerCharacter = PlayerCharacter == nullptr ? Cast<APlayerCharacter>(GetOwningPlayerPawn()) : PlayerCharacter;
 	if(PlayerCharacter == nullptr || PlayerCharacter->GetInventoryComponent() == nullptr) return;
 
 	
@@ -128,8 +130,20 @@ void UInventoryWidget::HandleComboSelection(FString SelectedItem, ESelectInfo::T
 
 	if(SelectedItem == "Use")
 	{
+		if(true) //TODO: FIX THIS
+		{
+			PlayerCharacter->UsePotion(INVENTORY(SelectedSlotIndex).ProductInfo.PotionComponentClass, INVENTORY(SelectedSlotIndex).ProductInfo.ProductQuality);
+		}
 		PlayerCharacter->UpdateInventorySlotAmount(SelectedSlotIndex, -1);
-		UpdateInventorySlot(SelectedSlotIndex);
+		
+		if(INVENTORY(SelectedSlotIndex).ItemAmount <= 0)
+		{
+			PlayerCharacter->GetInventoryComponent()->DropItem(SelectedSlotIndex);
+		}
+		else
+		{
+			UpdateInventorySlot(SelectedSlotIndex);
+		}
 	}
 	else if(SelectedItem == "Drop")
 	{
@@ -175,30 +189,25 @@ void UInventoryWidget::HandleComboSelection(FString SelectedItem, ESelectInfo::T
 
 void UInventoryWidget::UpdateSlotFromInventory(const int32 Index)
 {
-	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetOwningPlayerPawn());
+	PlayerCharacter = PlayerCharacter == nullptr ? Cast<APlayerCharacter>(GetOwningPlayerPawn()) : PlayerCharacter;
 	if(PlayerCharacter == nullptr || PlayerCharacter->GetInventoryComponent() == nullptr) return;
 
 	InventorySlots[Index]->AmountText->SetText(FText::FromString(FString::Printf(TEXT("%d"), PlayerCharacter->GetInventoryComponent()->GetInventory()[Index].ItemAmount)));
 	InventorySlots[Index]->SlotIcon->SetBrushFromTexture(PlayerCharacter->GetInventoryComponent()->GetInventory()[Index].ItemIcon);
 	InventorySlots[Index]->ComboBox->ClearOptions();
-	if(PlayerCharacter->GetInventoryComponent()->GetInventory()[Index].ItemType != EItemType::EIT_Consumable)
+	if(INVENTORY(Index).ItemType == EItemType::EIT_Consumable)
 	{
-		InventorySlots[Index]->ComboBox->AddOption("Drop");
-		InventorySlots[Index]->ComboBox->AddOption("Show Description");
-	}
-	else
-	{
-		
 		InventorySlots[Index]->ComboBox->AddOption("Use");
-		InventorySlots[Index]->ComboBox->AddOption("Drop");
-		InventorySlots[Index]->ComboBox->AddOption("Show Description");
 	}
+	InventorySlots[Index]->ComboBox->AddOption("Drop");
+	InventorySlots[Index]->ComboBox->AddOption("Show Description");
+	
 	
 }
 
 void UInventoryWidget::UpdateAllSlots()
 {
-	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetOwningPlayerPawn());
+	PlayerCharacter = PlayerCharacter == nullptr ? Cast<APlayerCharacter>(GetOwningPlayerPawn()) : PlayerCharacter;
 	if(PlayerCharacter == nullptr || PlayerCharacter->GetInventoryComponent() == nullptr) return;
 	int32 Index = 0;
 	for(auto& Slut : InventorySlots)
@@ -206,10 +215,13 @@ void UInventoryWidget::UpdateAllSlots()
 		Slut->AmountText->SetText(FText::FromString(FString::Printf(TEXT("%d"), PlayerCharacter->GetInventoryComponent()->GetInventory()[Index].ItemAmount)));
 		Slut->SlotIcon->SetBrushFromTexture(PlayerCharacter->GetInventoryComponent()->GetInventory()[Index].ItemIcon);
 		Slut->ComboBox->ClearOptions();
-		if(PlayerCharacter->GetInventoryComponent()->GetInventory()[Index].ItemType == EItemType::EIT_Ingredient)
+		if(INVENTORY(Index).ItemType == EItemType::EIT_Ingredient)
 		{
 			Slut->ComboBox->AddOption("Transfer");
 			Slut->ComboBox->AddOption("Taste_NI");
+		}else if(INVENTORY(Index).ItemType == EItemType::EIT_Consumable)
+		{
+			Slut->ComboBox->AddOption("Use");
 		}
 		Slut->ComboBox->AddOption("Description");
 		Slut->ComboBox->AddOption("Drop");
@@ -220,10 +232,10 @@ void UInventoryWidget::UpdateAllSlots()
 
 void UInventoryWidget::UpdateInfoBox()
 {
-	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetOwningPlayerPawn());
+	PlayerCharacter = PlayerCharacter == nullptr ? Cast<APlayerCharacter>(GetOwningPlayerPawn()) : PlayerCharacter;
 	if(PlayerCharacter == nullptr || PlayerCharacter->GetInventoryComponent() == nullptr) return;
 
-	if(PlayerCharacter->GetInventoryComponent()->GetInventory()[SelectedSlotIndex].ItemClass->ImplementsInterface(UIngredient::StaticClass()))
+	if(INVENTORY(SelectedSlotIndex).ItemClass->ImplementsInterface(UIngredient::StaticClass()))
 	{
 	InfoBox->DescriptionTextBox->SetText(FText::FromString(FString::Printf(TEXT(
 	"Ingredient: %s \n"
@@ -232,12 +244,12 @@ void UInventoryWidget::UpdateInfoBox()
 	"Tertiary substance: %s \n"
 	"Quality: %s \n"
 	"Quantity value: %s \n") ,
-	*PlayerCharacter->GetInventoryComponent()->GetInventory()[SelectedSlotIndex].ItemClass->GetName(),
-	*UEnum::GetDisplayValueAsText(PlayerCharacter->GetInventoryComponent()->GetInventory()[SelectedSlotIndex].IngredientInfo.PrimarySubstance).ToString(),
-	*UEnum::GetDisplayValueAsText(PlayerCharacter->GetInventoryComponent()->GetInventory()[SelectedSlotIndex].IngredientInfo.SecondarySubstance).ToString(),
-	*UEnum::GetDisplayValueAsText(PlayerCharacter->GetInventoryComponent()->GetInventory()[SelectedSlotIndex].IngredientInfo.TertiarySubstance).ToString(),
-	*UEnum::GetDisplayValueAsText(PlayerCharacter->GetInventoryComponent()->GetInventory()[SelectedSlotIndex].IngredientInfo.IngredientQuality).ToString(),
-	*UEnum::GetDisplayValueAsText(PlayerCharacter->GetInventoryComponent()->GetInventory()[SelectedSlotIndex].IngredientInfo.IngredientQuantityValue).ToString()
+	*INVENTORY(SelectedSlotIndex).ItemClass->GetName(),
+	*UEnum::GetDisplayValueAsText(INVENTORY(SelectedSlotIndex).IngredientInfo.PrimarySubstance).ToString(),
+	*UEnum::GetDisplayValueAsText(INVENTORY(SelectedSlotIndex).IngredientInfo.SecondarySubstance).ToString(),
+	*UEnum::GetDisplayValueAsText(INVENTORY(SelectedSlotIndex).IngredientInfo.TertiarySubstance).ToString(),
+	*UEnum::GetDisplayValueAsText(INVENTORY(SelectedSlotIndex).IngredientInfo.IngredientQuality).ToString(),
+	*UEnum::GetDisplayValueAsText(INVENTORY(SelectedSlotIndex).IngredientInfo.IngredientQuantityValue).ToString()
 	)));
 	}
 	

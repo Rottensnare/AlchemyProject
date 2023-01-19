@@ -9,10 +9,12 @@
 #include "AlchemyProject/Alchemy/AlchemyOverlay.h"
 #include "AlchemyProject/Alchemy/AlchemyProduct.h"
 #include "AlchemyProject/Alchemy/AlchemyTable.h"
+#include "AlchemyProject/Alchemy/Potion.h"
 #include "AlchemyProject/HUD/InventoryWidget.h"
 #include "AlchemyProject/HUD/PlayerHUD.h"
 #include "AlchemyProject/HUD/PlayerOverlay.h"
 #include "AlchemyProject/PlayerController/MyPlayerController.h"
+#include "Engine/UserDefinedStruct.h"
 
 
 UAlchemyComponent::UAlchemyComponent()
@@ -94,7 +96,7 @@ void UAlchemyComponent::CreateAlchemyProduct(const FAlchemyPackage& AlchemyPacka
 			if(!bAllSubstancesMatch) continue;
 			
 			//Recipe was found
-			if(RecipeDataRow->AlchemyClass) UE_LOG(LogTemp, Warning, TEXT("Compatible recipe: %s"), *RecipeDataRow->AlchemyClass->GetName())
+			//if(RecipeDataRow->AlchemyClass) UE_LOG(LogTemp, Warning, TEXT("Compatible recipe: %s"), *RecipeDataRow->AlchemyClass->GetName())
 			//TODO: Create a spawn point for potions inside the Alchemy Table Class
 			
 			Character = Character == nullptr ? Cast<APlayerCharacter>(GetOwner()) : Character;
@@ -153,7 +155,6 @@ void UAlchemyComponent::CreateAlchemyProduct(const FAlchemyPackage& AlchemyPacka
 					{
 						MyPlayerController->ClearAlchemySelection();
 					}
-					
 				}
 			}
 			
@@ -162,8 +163,8 @@ void UAlchemyComponent::CreateAlchemyProduct(const FAlchemyPackage& AlchemyPacka
 			
 			//Calculate potion quality
 			//BUG: With the current inventory system, the product quality makes no difference and will be instantly reset to default value
-			Aitem->ProductQuality = ProductQuality::CalculateProductQuality(IngredientQualities);
-			UE_LOG(LogTemp, Warning, TEXT("Product quality: %s"), *UEnum::GetDisplayValueAsText(Aitem->ProductQuality).ToString())
+			Aitem->ProductInfo.ProductQuality = ProductQuality::CalculateProductQuality(IngredientQualities);
+			//UE_LOG(LogTemp, Warning, TEXT("Product quality: %s"), *UEnum::GetDisplayValueAsText(Aitem->ProductInfo.ProductQuality ).ToString())
 			
 			Aitem->InitProperties(Recipe);
 			
@@ -197,5 +198,12 @@ FAlchemyPackage UAlchemyComponent::CreateAlchemyPackage(const TArray<FIngredient
 
 void UAlchemyComponent::AddAitemToInventory()
 {
-	Character->GetInventoryComponent()->AddToInventory(Aitem, 1);
+	//UE_LOG(LogTemp, Warning, TEXT("AddAitemToInventory Product quality: %s"), *UEnum::GetDisplayValueAsText(Aitem->ProductInfo.ProductQuality ).ToString())
+	const uint32 HashCode = UUserDefinedStruct::GetUserDefinedStructTypeHash(&Aitem->ProductInfo, FProductInfo::StaticStruct());
+	//UE_LOG(LogTemp, Warning, TEXT("HashCode: %u"), HashCode)
+	if(APotion* TempPotion = Cast<APotion>(Aitem))
+	{
+		Character->GetInventoryComponent()->AddPotionToInventory(TempPotion, 1, HashCode);
+	}
+	
 }

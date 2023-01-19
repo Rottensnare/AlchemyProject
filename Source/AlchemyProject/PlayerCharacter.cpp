@@ -6,11 +6,18 @@
 #include "HealthComponent.h"
 #include "InventoryComponent.h"
 #include "Item.h"
+#include "AI/AIBase.h"
+#include "Alchemy/Potion.h"
 #include "Camera/CameraComponent.h"
 #include "Components/AlchemyComponent.h"
+#include "Engine/SkeletalMeshSocket.h"
+#include "Engine/UserDefinedStruct.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Interfaces/Pickable.h"
 #include "Kismet/GameplayStatics.h"
+#include "Perception/AIPerceptionStimuliSourceComponent.h"
+#include "Perception/AISense_Hearing.h"
+#include "Perception/AISense_Sight.h"
 #include "PlayerController/MyPlayerController.h"
 
 
@@ -33,7 +40,11 @@ APlayerCharacter::APlayerCharacter()
 	CameraComponent->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	CameraComponent->bUsePawnControlRotation = false;
 
+	PerceptionStimuliSourceComponent = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("PerceptionStimuliSourceComp"));
+	PerceptionStimuliSourceComponent->RegisterForSense(UAISense_Sight::StaticClass());
+	PerceptionStimuliSourceComponent->RegisterForSense(UAISense_Hearing::StaticClass());
 }
+
 
 // Called when the game starts or when spawned
 void APlayerCharacter::BeginPlay()
@@ -47,6 +58,7 @@ void APlayerCharacter::BeginPlay()
 	
 	GetWorldTimerManager().SetTimer(HUDInitTimer, this, &APlayerCharacter::HUDInitTimerFinished, HUDInitTime);
 	
+	HeadSocket = GetMesh()->GetSocketByName("headSocket");
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
@@ -113,15 +125,27 @@ void APlayerCharacter::InventoryButtonReleased()
 
 void APlayerCharacter::InteractButtonPressed()
 {
-	if(TracedActor == nullptr) return;
-	UE_LOG(LogTemp, Warning, TEXT("Traced Actor: %s"), *TracedActor->GetName())
+	if(TracedActor == nullptr || InventoryComponent == nullptr) return;
+	//UE_LOG(LogTemp, Warning, TEXT("Traced Actor: %s"), *TracedActor->GetName())
 	if(TracedActor->Implements<UPickable>())
 	{
-		AItem* TempItem = Cast<AItem>(TracedActor);
-		if(TempItem && InventoryComponent)
+		if(APotion* TempPotion = Cast<APotion>(TracedActor))
 		{
+			const uint32 HashCode = UUserDefinedStruct::GetUserDefinedStructTypeHash(&TempPotion->ProductInfo, FProductInfo::StaticStruct());
+			InventoryComponent->AddPotionToInventory(TempPotion, 1, HashCode);
+			TracedActor = nullptr;
+			MyPlayerController = MyPlayerController == nullptr ? Cast<AMyPlayerController>(GetController()) : MyPlayerController;
+			if(MyPlayerController) MyPlayerController->PlaySound(FName("Pop"));
+			return;
+		}
+		AItem* TempItem = Cast<AItem>(TracedActor);
+		if(TempItem)
+		{
+			
 			InventoryComponent->AddToInventory(TempItem, 1);
 			TracedActor = nullptr;
+			MyPlayerController = MyPlayerController == nullptr ? Cast<AMyPlayerController>(GetController()) : MyPlayerController;
+			if(MyPlayerController) MyPlayerController->PlaySound(FName("Pop"));
 		}
 	}
 }
@@ -147,7 +171,7 @@ void APlayerCharacter::SweepInteractButtonPressed()
 			 FLinearColor::Red,
 			 3.f);
 
-		TArray<AItem*> Items;
+		TArray<AItem*> Items; //BUG: This won't work for potions or other types that have class specific variables that are needed.
 		for(auto HitResult : HitResults)
 		{
 			if(HitResult.GetActor()->GetClass() == TracedActor->GetClass())
@@ -159,10 +183,14 @@ void APlayerCharacter::SweepInteractButtonPressed()
 				}
 			}
 		}
+		
+		MyPlayerController = MyPlayerController == nullptr ? Cast<AMyPlayerController>(GetController()) : MyPlayerController;
+		if(MyPlayerController) MyPlayerController->PlaySound(FName("Pop"));
+		
 		if(Items.Num() > 0)
 		{
 			InventoryComponent->AddToInventory(Items[0], Items.Num());
-			for(auto TempItem : Items)
+			for(const auto& TempItem : Items)
 			{
 				TempItem->Destroy();
 			}
@@ -175,8 +203,8 @@ void APlayerCharacter::SweepInteractButtonPressed()
 
 void APlayerCharacter::TraceForObjects()
 {
+	if(HeadSocket == nullptr) return;
 	FHitResult HitResult;
-	FVector HitLocation;
 	FVector2D ViewportSize;
 	if(GEngine && GEngine->GameViewport)
 	{
@@ -187,18 +215,81 @@ void APlayerCharacter::TraceForObjects()
 	bool bScreenToWorld = UGameplayStatics::DeprojectScreenToWorld(UGameplayStatics::GetPlayerController(this, 0), ScreenCenter, TraceWorldPosition, TraceWorldDirection);
 	if(bScreenToWorld)
 	{
-		const FVector Start{TraceWorldPosition};
+		FVector Start{TraceWorldPosition};
+		float DistanceToHead = (HeadSocket->GetSocketLocation(GetMesh()) - Start).Size();
+		Start += TraceWorldDirection * (DistanceToHead);
 		const FVector End{Start + TraceWorldDirection * ObjectTraceRadius};
-		HitLocation = End;
-		GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility);
+		FCollisionQueryParams QueryParams;
+		QueryParams.AddIgnoredActor(this);
+		GetWorld()->LineTraceSingleByChannel(HitResult, CameraComponent->GetComponentLocation(), End, ECC_Visibility, QueryParams);
 		if(HitResult.bBlockingHit)
 		{
-			//DrawDebugCircle(GetWorld(), HitResult.ImpactPoint, 10.f, 12, FColor::Red, false, 2.f);
+			
+			if(AItem* TempItem = Cast<AItem>(HitResult.GetActor()))
+			{
+				if(TempItem != TracedItemLastFrame)
+				{
+					TempItem->ShowItemPopupWidget();
+					if(TracedItemLastFrame) TracedItemLastFrame->ShowItemPopupWidget();
+					TracedItemLastFrame = TempItem;
+				}
+			}
+			else
+			{
+				if(TracedItemLastFrame) TracedItemLastFrame->ShowItemPopupWidget();
+				TracedItemLastFrame = nullptr;
+			}
 			TracedActor = HitResult.GetActor();
 		}
-		else
+
+			
+		else TracedActor = nullptr;
+	}
+}
+
+void APlayerCharacter::ShowInfoButtonPressed()
+{
+	if(HeadSocket == nullptr) return;
+	FHitResult HitResult;
+	FVector2D ViewportSize;
+	if(GEngine && GEngine->GameViewport)
+	{
+		GEngine->GameViewport->GetViewportSize(ViewportSize);
+	}
+	FVector2D ScreenCenter = FVector2D(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
+	FVector TraceWorldPosition, TraceWorldDirection;
+	bool bScreenToWorld = UGameplayStatics::DeprojectScreenToWorld(UGameplayStatics::GetPlayerController(this, 0), ScreenCenter, TraceWorldPosition, TraceWorldDirection);
+	if(bScreenToWorld)
+	{
+		FVector Start{TraceWorldPosition};
+		float DistanceToHead = (HeadSocket->GetSocketLocation(GetMesh()) - Start).Size();
+		Start += TraceWorldDirection * (DistanceToHead);
+		const FVector End{Start + TraceWorldDirection * DebugObjectTraceRadius};
+		UKismetSystemLibrary::BoxTraceSingle(
+			this,
+			Start,
+			End,
+			FVector(10.f),
+			FRotator::ZeroRotator,
+			UEngineTypes::ConvertToTraceType(ECC_Pawn),
+			false,
+			 TArray<AActor*>(),
+			 EDrawDebugTrace::ForDuration,
+			 HitResult,
+			 true,
+			 FLinearColor::Green,
+			 FLinearColor::Red,
+			 3.f);
+		if(HitResult.bBlockingHit)
 		{
-			TracedActor = nullptr;
+			AAIBase* TempAIBase = Cast<AAIBase>(HitResult.GetActor());
+			if(TempAIBase)
+			{
+				if(ABaseAIController* BaseAIController = Cast<ABaseAIController>(TempAIBase->GetController()))
+				{
+					BaseAIController->ShowAIInfo();
+				}
+			}
 		}
 	}
 }
@@ -225,6 +316,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("ToggleInventory", IE_Released, this, &APlayerCharacter::InventoryButtonReleased);
 	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &APlayerCharacter::InteractButtonPressed);
 	PlayerInputComponent->BindAction("SweepInteract", IE_Pressed, this, &APlayerCharacter::SweepInteractButtonPressed);
+	PlayerInputComponent->BindAction("ShowInfo", IE_Pressed, this, &APlayerCharacter::ShowInfoButtonPressed);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ThisClass::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ThisClass::MoveRight);
@@ -240,3 +332,17 @@ void APlayerCharacter::UpdateInventorySlotAmount(const int32 Index, const int32 
 	InventoryComponent->UpdateItemAmount(Index, Amount);
 }
 
+void APlayerCharacter::UsePotion(const TSubclassOf<UPotionComponent> InComponentClass, const EProductQuality InProductQuality)
+{
+	if(InComponentClass == nullptr) return;
+
+	auto* PotionComponent = NewObject<UPotionComponent>(this, InComponentClass, NAME_None, RF_Transient);
+	if(PotionComponent == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to create PotionComponent"))
+		return;
+	}
+	PotionComponent->RegisterComponent();
+	PotionComponent->SetProductQuality(InProductQuality);
+	CurrentPotionComponents.Emplace(PotionComponent, 0);
+}

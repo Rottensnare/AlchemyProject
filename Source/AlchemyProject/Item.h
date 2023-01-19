@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "Enums/EItemType.h"
 #include "GameFramework/Actor.h"
 #include "Interfaces/Pickable.h"
@@ -29,16 +30,29 @@ class ALCHEMYPROJECT_API AItem : public AActor, public IPickable
 public:	
 
 	AItem();
-	virtual void Tick(float DeltaTime) override;
 
 	bool bInventoryPlaceable{true};
 
+	//TODO: Add a short timer to the character's trace function so that the pop up won't become visible immediately
+	void ShowItemPopupWidget() const;
+	
+	UFUNCTION()
+	virtual void UpdatePopUp();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Info|GameplayTags")
+	FGameplayTagContainer GameplayTagContainer;
 	
 	
 protected:
 
 	virtual void BeginPlay() override;
 
+	virtual void InitGameplayTagContainer();
+
+	virtual void OnConstruction(const FTransform& Transform) override;
+#if WITH_EDITOR
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif
 	UPROPERTY(EditAnywhere)
 	class UTexture2D* ImageInSlot;
 
@@ -46,7 +60,8 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	bool bStackable{true};
 
-	//How many items of this type can be stacked per slot
+	//DEPRECATED: There will be no Max Stack amount.
+	//How many items of this type can be stacked per slot.
 	UPROPERTY(EditAnywhere)
 	int32 MaxStack{16};
 
@@ -59,7 +74,16 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	EItemType ItemType{EItemType::EIT_Misc};
 
-	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Popup, meta = (AllowPrivateAccess = "true"))
+	class UWidgetComponent* ItemPopUp;
+
+	UPROPERTY(EditAnywhere)
+	FString PopUpText;
+
+	UPROPERTY(EditAnywhere)
+	FString ItemName;
+
+	bool bShouldInitGameplayTags{true};
 
 private:
 

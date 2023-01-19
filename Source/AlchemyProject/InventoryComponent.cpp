@@ -7,6 +7,7 @@
 #include "Item.h"
 #include "PlayerCharacter.h"
 #include "Alchemy/AlchemyItem.h"
+#include "Alchemy/Potion.h"
 #include "HUD/InventoryWidget.h"
 #include "HUD/PlayerHUD.h"
 #include "HUD/ScrollableInventoryWidget.h"
@@ -37,10 +38,19 @@ void UInventoryComponent::BeginPlay()
 		InventorySlot.ItemClass = nullptr;
 		InventorySlot.ItemIcon = nullptr;
 		InventorySlot.ItemType = EItemType::EIT_MAX;
+		InventorySlot.ProductInfo = FProductInfo();
 		InventorySlots.Add(InventorySlot);
 	}
 
 	//Character->GetWorldTimerManager().SetTimer(GridCreationTimer, this, &UInventoryComponent::InitGridCreation, 0.2f);
+	
+}
+
+// Called every frame
+void UInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
 	
 }
 
@@ -93,6 +103,10 @@ void UInventoryComponent::DropItem(const int32 Index)
 	InventorySlots[Index].ItemClass = nullptr;
 	InventorySlots[Index].ItemIcon = nullptr;
 	InventorySlots[Index].ItemType = EItemType::EIT_MAX;
+	InventorySlots[Index].ProductInfo = FProductInfo();
+	HashSlotIDMap.Remove(InventorySlots[Index].HashCode);
+	InventorySlots[Index].HashCode = 0;
+	
 	
 	if(Character) //TODO: This code repeats in multiple places, might need to make it a function
 	{
@@ -114,34 +128,24 @@ void UInventoryComponent::SpawnItemFromInventory(const int32 InIndex, const int3
 	UE_LOG(LogTemp, Warning, TEXT("SpawnItemFromInventory: InAmount: %d"), InAmount)
 	if(InventorySlots[InIndex].ItemClass && Character)
 	{
-		
-		//UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent::SpawnItemFromInventory: ItemClass = %s"), *InventorySlots[InIndex].ItemClass->GetName())
-		//UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent::SpawnItemFromInventory: ItemClass->StaticClass = %s"), *InventorySlots[InIndex].ItemClass->StaticClass()->GetName())
-		const FActorSpawnParameters SpawnParameters;
-		
 		for(int i = 0; i < InAmount; i++)
 		{
 			//TODO: Make the spawning location smarter, so that you can't spawn objects inside other objects or behind walls etc. Maybe with a spring arm?
-			auto Item = GetWorld()->SpawnActor<AItem>(InventorySlots[InIndex].ItemClass, Character->GetActorLocation() + FVector(100.f, 0.f, 0.f), FRotator(0.f));
+			auto Item = GetWorld()->SpawnActor<AItem>(InventorySlots[InIndex].ItemClass, Character->GetActorLocation() + Character->GetActorForwardVector() * 25.f, FRotator(0.f));
 			Item->SetItemState(EItemState::EIS_Dropped);
 			Item->GetItemMesh()->SetSimulatePhysics(true);
+			if(APotion* TempPotion = Cast<APotion>(Item))
+			{
+				TempPotion->ProductInfo = InventorySlots[InIndex].ProductInfo;
+			}
 			
-			UE_LOG(LogTemp, Warning, TEXT("Item Name: %s"), *Item->GetName())/*
-			UE_LOG(LogTemp, Warning, TEXT("Item Class Name using StaticClass: %s"), *Item->StaticClass()->GetName())
-			UE_LOG(LogTemp, Warning, TEXT("Item Class Name using GetClass: %s"), *Item->GetClass()->GetName())
-			*/
+			UE_LOG(LogTemp, Warning, TEXT("Item Name: %s"), *Item->GetName())
 		}
 	}
 }
 
 
-// Called every frame
-void UInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	
-}
 
 void UInventoryComponent::ShowInventory(bool bVisible)
 {
@@ -163,7 +167,6 @@ void UInventoryComponent::ShowInventory(bool bVisible)
 //Function that's over 150 lines of code. This is a mess and this system doesn't work well with the alchemy system, needs a thorough rework!
 void UInventoryComponent::AddToInventory(AItem* InItem, int32 InAmount) //TODO: Might need to make this into several smaller functions
 {
-	int32 ItemIndex{-1};
 	UE_LOG(LogTemp, Warning, TEXT("AddToInventory: Class Name: %s"),  *InItem->GetClass()->GetName());
 	
 	for(auto& Slot : InventorySlots)
@@ -220,7 +223,7 @@ void UInventoryComponent::AddToInventory(AItem* InItem, int32 InAmount) //TODO: 
 				Character = Character == nullptr ? Cast<APlayerCharacter>(GetOwner()) : Character;
 				if(Character)
 				{
-					if(Character->Controller)
+					if(Character->Controller) //???? What was I thinking ?????
 					{
 						//Inefficient but does the job for this prototype
 						AMyPlayerController* MyPlayerController = Cast<AMyPlayerController>(Character->Controller);
@@ -277,7 +280,6 @@ void UInventoryComponent::AddToInventory(AItem* InItem, int32 InAmount) //TODO: 
 					Slot.IngredientInfo.IngredientClass = InItem->GetClass();
 				}
 			}
-				
 			if(ItemTotalAmountMap.Contains(Slot.ItemClass))
 			{
 				if(const AAlchemyItem* TempItem = Cast<AAlchemyItem>(InItem))
@@ -307,7 +309,7 @@ void UInventoryComponent::AddToInventory(AItem* InItem, int32 InAmount) //TODO: 
 			Character = Character == nullptr ? Cast<APlayerCharacter>(GetOwner()) : Character;
 			if(Character)
 			{
-				if(Character->Controller)
+				if(Character->Controller) //Again WTF Was I Thinking with this ???
 				{
 					//Inefficient but does the job for this prototype
 					AMyPlayerController* MyPlayerController = Cast<AMyPlayerController>(Character->Controller);
@@ -320,8 +322,45 @@ void UInventoryComponent::AddToInventory(AItem* InItem, int32 InAmount) //TODO: 
 			break;
 		}
 	}
-	//UE_LOG(LogTemp, Warning, TEXT("AddToInventory: Amount in slot 0: %d"), InventorySlots[0].ItemAmount)
-	//UE_LOG(LogTemp, Warning, TEXT("AddToInventory: Amount in slot 1: %d"), InventorySlots[1].ItemAmount)
-	//UE_LOG(LogTemp, Warning, TEXT("AddToInventory: Total Item Amount: %d"), ItemTotalAmountMap[InItem->GetClass()])
 }
 
+
+
+void UInventoryComponent::AddPotionToInventory(APotion* const InPotion, const int32 InAmount, const uint32 InHashCode)
+{
+	if(HashSlotIDMap.Contains(InHashCode))
+	{
+		InventorySlots[HashSlotIDMap[InHashCode]].ItemAmount += InAmount;
+		UpdateInventorySlot(HashSlotIDMap[InHashCode]);
+		InPotion->Destroy();
+		return;
+	}
+	for(auto& Slot : InventorySlots)
+	{
+		if(Slot.ItemClass == nullptr)
+		{
+			HashSlotIDMap.Emplace(InHashCode, Slot.SlotId);
+			Slot.HashCode = InHashCode;
+			Slot.ItemAmount = InAmount;
+			Slot.ItemClass = InPotion->GetClass();
+			Slot.ItemType = InPotion->GetItemType();
+			Slot.ItemIcon = InPotion->GetSlotImage();
+			Slot.ProductInfo = InPotion->ProductInfo;
+			UpdateInventorySlot(Slot.SlotId);
+			InPotion->Destroy();
+			break;
+		}
+	}
+}
+
+void UInventoryComponent::UpdateInventorySlot(const int32 Index)
+{
+	Character = Character == nullptr ? Cast<APlayerCharacter>(GetOwner()) : Character;
+	if(Character)
+	{
+		if(AMyPlayerController* MyPlayerController = Cast<AMyPlayerController>(Character->Controller))
+		{
+			MyPlayerController->UpdateInventory(Index);
+		}
+	}
+}

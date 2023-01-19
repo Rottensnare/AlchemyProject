@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Alchemy/AlchemyItem.h"
+#include "Alchemy/Components/Potion/PotionComponent.h"
 #include "GameFramework/Character.h"
 #include "PlayerCharacter.generated.h"
 
@@ -22,6 +23,11 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 	bool bIsDoingAlchemy{false};
+	
+	void UsePotion(const TSubclassOf<UPotionComponent> InComponentClass, const EProductQuality InProductQuality);
+
+	UPROPERTY(VisibleAnywhere, Category = Alchemy)
+	TMap<UActorComponent*, int32> CurrentPotionComponents;
 
 protected:
 
@@ -35,6 +41,7 @@ protected:
 	void InteractButtonPressed();
 	void SweepInteractButtonPressed();
 	void TraceForObjects();
+	void ShowInfoButtonPressed();
 
 private:
 	
@@ -71,9 +78,14 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float ObjectTraceRadius{1000.f};
-
+	UPROPERTY(EditAnywhere)
+	float DebugObjectTraceRadius{8000.f};
+	
 	UPROPERTY(VisibleAnywhere)
 	AActor* TracedActor;
+
+	UPROPERTY(VisibleAnywhere)
+	AItem* TracedItemLastFrame;
 	
 	TSubclassOf<class AItem> ItemClass;
 
@@ -83,11 +95,24 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	class AAlchemyTable* CurrentAlchemyTable;
 
+	UPROPERTY()
+	const USkeletalMeshSocket* HeadSocket{nullptr};
+
+	/** Perception */
+
+	UPROPERTY()
+	class UAIPerceptionStimuliSourceComponent* PerceptionStimuliSourceComponent;
+
 public:
 	
 	FORCEINLINE UInventoryComponent* GetInventoryComponent() const {return InventoryComponent;}
 	FORCEINLINE UAlchemyComponent* GetAlchemyComponent() const {return AlchemyComponent;}
+	FORCEINLINE UHealthComponent* GetHealthComponent() const {return HealthComponent;}
 	FORCEINLINE void SetAlchemyTable(AAlchemyTable* InTable) {CurrentAlchemyTable = InTable;}
 	FORCEINLINE AAlchemyTable* GetAlchemyTable() const {return CurrentAlchemyTable;}
+	FORCEINLINE UAIPerceptionStimuliSourceComponent* GetPerceptionStimuliSourceComponent() const {return PerceptionStimuliSourceComponent;}
 	
 };
+
+
+

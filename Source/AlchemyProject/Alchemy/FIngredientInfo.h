@@ -18,20 +18,28 @@ struct FIngredientInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EIngredientQuality IngredientQuality{EIngredientQuality::EIQ_MAX};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EIngredientQuantityValue IngredientQuantityValue{EIngredientQuantityValue::EIQV_MAX};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 IngredientAmountPerHarvest{1};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EPrimarySubstance PrimarySubstance{EPrimarySubstance::EPS_MAX};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	ESecondarySubstance SecondarySubstance{ESecondarySubstance::EPS_MAX};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	ETertiarySubstance TertiarySubstance{ETertiarySubstance::ETS_MAX};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UTexture2D* IngredientIcon;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EIngredientType IngredientType;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<class AAlchemyItem> IngredientClass;
 

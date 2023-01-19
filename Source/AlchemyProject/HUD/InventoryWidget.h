@@ -28,7 +28,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	class UInventorySlot* ActiveSlot;
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void HandleComboSelection(FString SelectedItem, ESelectInfo::Type SelectionType);
 
 	void UpdateSlotFromInventory(const int32 Index);
@@ -69,6 +69,9 @@ private:
 	int32 NumberOfColumns;
 	UPROPERTY(EditAnywhere)
 	int32 NumberOfRows;
+
+	UPROPERTY()
+	class APlayerCharacter* PlayerCharacter;
 
 public:
 

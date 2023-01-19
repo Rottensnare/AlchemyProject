@@ -15,18 +15,18 @@ enum class EIngredientQuality : uint8
 UENUM(BlueprintType)
 enum class EProductQuality : uint8
 {
+	EPQ_None UMETA(DisplayName = "No Quality"),
 	EPQ_Poor UMETA(DisplayName = "Poor Quality"),
 	EPQ_Medium UMETA(DisplayName = "Medium Quality"),
 	EPQ_High UMETA(DisplayName = "High Quality"),
 	EPQ_Pure UMETA(DisplayName = "Pure Quality"),
-	EPQ_None UMETA(DisplayName = "No Quality"),
-
+	
 	EIQ_MAX UMETA(DisplayName = "DefaultMax")
 };
 
 namespace ProductQuality
 {
-	static EProductQuality CalculateProductQuality(TArray<EIngredientQuality>& IngredientQualities)
+	static EProductQuality CalculateProductQuality(const TArray<EIngredientQuality>& IngredientQualities)
 	{
 		uint8 TempValue{0};
 		for(const auto& Quality : IngredientQualities)

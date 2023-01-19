@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Item.h"
+#include "Alchemy/FAlchemyPackage.h"
 #include "Alchemy/FIngredientInfo.h"
 #include "Components/ActorComponent.h"
 #include "InventoryComponent.generated.h"
@@ -34,6 +35,12 @@ struct FInventoriSlot
 
 	UPROPERTY(BlueprintReadOnly)
 	FIngredientInfo IngredientInfo;
+
+	UPROPERTY(BlueprintReadOnly)
+	FProductInfo ProductInfo;
+
+	UPROPERTY(VisibleAnywhere)
+	uint32 HashCode;
 	
 };
 
@@ -51,12 +58,17 @@ public:
 	void ShowInventory(bool bVisible);
 	
 	void AddToInventory(AItem* InItem, int32 InAmount);
+	void UpdateInventorySlot(const int32 Index);
+	void AddPotionToInventory(class APotion* const InPotion, const int32 InAmount, const uint32 InHashCode);
 	void DropItem(const int32 Index);
 	void SpawnItemFromInventory(const int32 InIndex, const int32 InAmount);
 
 	//Will be used to easily check if character has the correct amount of required item
 	UPROPERTY()
 	TMap<TSubclassOf<AItem>, int32> ItemTotalAmountMap;
+
+	UPROPERTY()
+	TMap<uint32, int32> HashSlotIDMap;
 
 protected:
 
