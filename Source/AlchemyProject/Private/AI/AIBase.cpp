@@ -53,7 +53,8 @@ void AAIBase::BeginPlay()
 	AIController = Cast<ABaseAIController>(GetController());
 	if(AIController)
 	{
-		AIController->RunBehaviorTree(BehaviorTree);
+		//BUG: Use BehaviorTreeComponent->StartTree Instead
+		//AIController->RunBehaviorTree(BehaviorTree); //BUG: When using RunBehaviorTree it won't add the instance to the UBehaviorTreeComponent::InstanceStack 
 		
 		if(AIController->GetAIBlackboardComponent() == nullptr) return;
 		

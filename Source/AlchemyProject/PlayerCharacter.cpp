@@ -250,7 +250,7 @@ void APlayerCharacter::TraceForObjects()
 	}
 }
 
-void APlayerCharacter::ShowInfoButtonPressed()
+void APlayerCharacter::ShowInfoButtonPressed() //TODO: Can be split into smaller functions. Some of the code here is repeated
 {
 	if(HeadSocket == nullptr) return;
 	FHitResult HitResult;

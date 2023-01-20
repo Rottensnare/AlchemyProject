@@ -95,6 +95,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	class UCustomAIContainer* CustomAIContainer;
 
+	class UBehaviorTree* GetBehaviorTree(const FName BehaviorTreeName) const;
+
 private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Perception|Values", meta = (AllowPrivateAccess = "true"))

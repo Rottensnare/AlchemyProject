@@ -38,4 +38,12 @@ struct FFactionInfo : public FTableRowBase
 	TArray<FNPCInfo> MemberInfos;
 };
 
+USTRUCT(BlueprintType)
+struct FBehaviorTreeTable : public FTableRowBase
+{
+	GENERATED_BODY()
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UBehaviorTree* BehaviorTree;
+	
+};

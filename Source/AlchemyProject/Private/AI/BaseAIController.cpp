@@ -5,9 +5,11 @@
 
 #include "MyAIPerceptionComponent.h"
 #include "AI/AIBase.h"
+#include "AlchemyProject/Enums/CustomDataTables.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Engine/DataTable.h"
 #include "EnvironmentQuery/EnvQuery.h"
 #include "EnvironmentQuery/EnvQueryManager.h"
 #include "Perception/AIPerceptionComponent.h"
@@ -68,6 +70,9 @@ void ABaseAIController::BeginPlay()
 	AIPerceptionComponent->OnHearingStimulusExpired.AddDynamic(this, &ABaseAIController::OnHearingStimulusExpired_Delegate);
 	
 	AIBase = Cast<AAIBase>(GetPawn());
+	
+	//if(GetAIBehaviorTreeComponent()) GetAIBehaviorTreeComponent()->SetDynamicSubtree(FGameplayTag::RequestGameplayTag(FName("Subtree.Work")), GetBehaviorTree("Work"));
+	
 	Super::BeginPlay();
 }
 
@@ -142,6 +147,26 @@ void ABaseAIController::HandleQueryRequest(TSharedPtr<FEnvQueryResult> Result) /
 	TagsToBeTested = FGameplayTagContainer::EmptyContainer;
 }
 
+UBehaviorTree* ABaseAIController::GetBehaviorTree(const FName BehaviorTreeName) const
+{
+	UE_LOG(LogTemp, Display, TEXT("GetBehaviorTree"))
+	const FString BehaviorTreeTablePath(TEXT("DataTable'/Game/Assets/Datatables/BehaviorTreeTable.BehaviorTreeTable'"));
+	// ReSharper disable once CppTooWideScope
+	const UDataTable* BehaviorTreeTableObject = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, *BehaviorTreeTablePath));
+	if(BehaviorTreeTableObject)
+	{
+		UE_LOG(LogTemp, Display, TEXT("BehaviorTreeTableObject"))
+		// ReSharper disable once CppTooWideScope
+		const FBehaviorTreeTable* TableRow = BehaviorTreeTableObject->FindRow<FBehaviorTreeTable>(FName(BehaviorTreeName), TEXT(""));
+		if(TableRow)
+		{
+			UE_LOG(LogTemp, Display, TEXT("TableRow"))
+			return TableRow->BehaviorTree;
+		}
+	}
+	return nullptr;
+}
+
 void ABaseAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
@@ -153,6 +178,9 @@ void ABaseAIController::OnPossess(APawn* InPawn)
 		if(Enemy->GetBehaviorTree())
 		{
 			BlackboardComponent->InitializeBlackboard(*(Enemy->GetBehaviorTree()->GetBlackboardAsset()));
+			BehaviorTreeComponent->StartTree(*GetBehaviorTree("Default"), EBTExecutionMode::Looped); //TODO: Instead of "Default" make it dynamic based on Gameplay Tags
+			//RunBehaviorTree(GetBehaviorTree("Default")); //BUG: RunBehaviorTree doesn't check if the tree is running already
+			if(BehaviorTreeComponent) BehaviorTreeComponent->SetDynamicSubtree(FGameplayTag::RequestGameplayTag(FName("Subtree.Work")), GetBehaviorTree("Work"));
 		}
 	}
 }
