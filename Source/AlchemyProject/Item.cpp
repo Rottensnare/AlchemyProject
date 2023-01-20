@@ -35,12 +35,13 @@ void AItem::BeginPlay()
 	FTimerDelegate TimerDelegate2;
 	TimerDelegate2.BindUFunction(this, FName("UpdatePopUp"));
 	GetWorldTimerManager().SetTimerForNextTick(TimerDelegate2);
-	
+
+	IQueryable::InitializeGameplayTagContainer(GameplayTagContainer);
 }
 
 void AItem::InitGameplayTagContainer()
 {
-	
+	IQueryable::InitializeGameplayTagContainer(GameplayTagContainer);
 }
 
 void AItem::OnConstruction(const FTransform& Transform)

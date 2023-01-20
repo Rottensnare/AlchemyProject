@@ -61,6 +61,8 @@ void AAIBase::BeginPlay()
 		AIController->GetAIBlackboardComponent()->SetValueAsBool(FName("FollowPlayer"), bFollowPlayer);
 		AIController->GetAIBlackboardComponent()->SetValueAsVector(FName("OriginalPosition"), OriginalPosition);
 	}
+
+	IQueryable::InitializeGameplayTagContainer(GameplayTagContainer);
 }
 
 void AAIBase::Tick(float DeltaTime)
@@ -120,7 +122,7 @@ void AAIBase::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent
 			SetFollowPlayer(bFollowPlayer);
 		}
 	}
-
+	
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 }
 

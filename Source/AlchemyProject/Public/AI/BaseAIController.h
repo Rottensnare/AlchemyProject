@@ -86,7 +86,7 @@ protected:
 
 
 	UFUNCTION(BlueprintCallable)
-	void QueryForActors_GameplayTags(const struct FGameplayTagContainer& InGameplayTagContainer, const class UEnvQuery* const InEnvQuery, APawn* InPawn, const float SearchRadius);
+	void QueryForActors_GameplayTags(const struct FGameplayTagContainer& InGameplayTagContainer, const class UEnvQuery* const InEnvQuery, APawn* InPawn, const float SearchRadius, const float MinFindRadius, const float MaxFindRadius);
 
 	void HandleQueryRequest(TSharedPtr<struct FEnvQueryResult> Result);
 

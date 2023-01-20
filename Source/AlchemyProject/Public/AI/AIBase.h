@@ -9,6 +9,7 @@
 #include "AlchemyProject/Alchemy/CustomStructs/NPCStructs.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/Character.h"
+#include "Interfaces/Queryable.h"
 #include "UI/SpeechWidget.h"
 #include "AIBase.generated.h"
 
@@ -25,11 +26,12 @@ enum class EAIState : uint8
 	EAIS_Unconscious UMETA(DisplayName = "Unconscious"),
 	EAIS_Busy UMETA(DisplayName = "Busy"),
 	EAIS_Dead UMETA(DisplayName = "Dead"),
+	EAIS_Working UMETA(DisplayName = "Working"),
 	EAIS_MAX UMETA(DisplayName = "DefaultMax")
 };
 
 UCLASS()
-class ALCHEMYPROJECT_API AAIBase : public ACharacter 
+class ALCHEMYPROJECT_API AAIBase : public ACharacter, public IQueryable
 {
 	GENERATED_BODY()
 
@@ -177,6 +179,13 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|GameplayTags")
 	FTagsToSearch TagsToSearch;
+
+
+	/***********************
+	 *	INTERFACE OVERRIDES
+	 **********************/
+
+
 };
 
 template <typename T>

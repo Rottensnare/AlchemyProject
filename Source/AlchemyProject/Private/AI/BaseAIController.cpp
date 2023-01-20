@@ -91,11 +91,19 @@ void ABaseAIController::Tick(float DeltaSeconds)
 }
 
 void ABaseAIController::QueryForActors_GameplayTags(const FGameplayTagContainer& InGameplayTagContainer,
-	const UEnvQuery* const InEnvQuery, APawn* InPawn, const float SearchRadius)
+	const UEnvQuery* const InEnvQuery, APawn* InPawn, const float SearchRadius, const float MinFindRadius, const float MaxFindRadius)
 {
 	TagsToBeTested = InGameplayTagContainer;
 	FEnvQueryRequest ActorsQueryRequest = FEnvQueryRequest(InEnvQuery, InPawn);
+	
 	ActorsQueryRequest.SetFloatParam(FName("SearchRadius"), SearchRadius);
+	
+	if(MinFindRadius > 0) ActorsQueryRequest.SetFloatParam(FName("MinFindRadius"), MinFindRadius);
+	else ActorsQueryRequest.SetFloatParam(FName("MinFindRadius"), 0.f);
+	
+	if(MaxFindRadius > 0) ActorsQueryRequest.SetFloatParam(FName("MaxFindRadius"), MaxFindRadius);
+	else ActorsQueryRequest.SetFloatParam(FName("MaxFindRadius"), SearchRadius);
+	
 	ActorsQueryRequest.Execute(EEnvQueryRunMode::AllMatching, this, &ABaseAIController::HandleQueryRequest); //TODO: Change EEnvQueryRunMode to dynamic property
 }
 
@@ -111,14 +119,18 @@ void ABaseAIController::HandleQueryRequest(TSharedPtr<FEnvQueryResult> Result) /
 		{
 			for(AActor* OutActor : OutActors)
 			{
-				AAIBase* TempAI = Cast<AAIBase>(OutActor);
-				if(TempAI)
+				// ReSharper disable once CppTooWideScope
+				const IQueryable* QueryableInterface = Cast<IQueryable>(OutActor);
+				if(QueryableInterface)
 				{
+					//UE_LOG(LogTemp, Display, TEXT("First Tag: %s"), *QueryableInterface->InterfaceGameplayTagContainer.First().GetTagName().ToString())
+					
 					FGameplayTagQuery NewQuery = FGameplayTagQuery::MakeQuery_MatchAnyTags(TagsToBeTested); //TODO: Change MakeQuery_MatchAnyTags to a dynamic function which can be selected from the BP
-					bool bMatchesQuery = TempAI->GameplayTagContainer.MatchesQuery(NewQuery);
+					bool bMatchesQuery = QueryableInterface->InterfaceGameplayTagContainer.MatchesQuery(NewQuery);
 					if(bMatchesQuery)
 					{
-						AddToCustomAIContainer(TempAI);
+						//UE_LOG(LogTemp, Display, TEXT("MatchesQuery"))
+						AddToCustomAIContainer(OutActor);
 					}
 				}
 			}
