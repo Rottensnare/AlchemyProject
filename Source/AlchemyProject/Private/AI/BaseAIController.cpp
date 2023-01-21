@@ -320,8 +320,10 @@ void ABaseAIController::PostEditChangeProperty(FPropertyChangedEvent& PropertyCh
 {
 	static const FName NAME_TeamAttitudeMap_Sight = FName("TeamAttitudeMap_Sight");
 	static const FName NAME_TeamAttitudeMap_Hearing = FName("TeamAttitudeMap_Hearing");
-
-	if(PropertyChangedEvent.Property)
+	static const FName NAME_MaxAge_Sight = FName("MaxAgeSight");
+	static const FName NAME_MaxAge_Hearing = FName("MaxAgeHearing");
+	UE_LOG(LogTemp, Warning, TEXT("%s"), *PropertyChangedEvent.Property->GetName())
+	if(PropertyChangedEvent.Property) //TODO: Use switch
 	{
 		if(PropertyChangedEvent.Property->GetFName() == NAME_TeamAttitudeMap_Sight)
 		{
@@ -330,6 +332,20 @@ void ABaseAIController::PostEditChangeProperty(FPropertyChangedEvent& PropertyCh
 		else if(PropertyChangedEvent.Property->GetFName() == NAME_TeamAttitudeMap_Hearing)
 		{
 			ChangeAttitudeTowards();
+		}
+		else if(PropertyChangedEvent.Property->GetFName() == NAME_MaxAge_Sight)
+		{
+			if(PerceptionComponent == nullptr) return;
+			SenseConfig_Sight->SetMaxAge(MaxAgeSight);
+			PerceptionComponent->ConfigureSense(*SenseConfig_Sight);
+			PerceptionComponent->PostInitProperties();
+		}
+		else if(PropertyChangedEvent.Property->GetFName() == NAME_MaxAge_Hearing)
+		{
+			if(PerceptionComponent == nullptr) return;
+			SenseConfig_Hearing->SetMaxAge(MaxAgeHearing);
+			PerceptionComponent->ConfigureSense(*SenseConfig_Hearing);
+			PerceptionComponent->PostInitProperties();
 		}
 	}
 	

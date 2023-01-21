@@ -5,12 +5,14 @@
 
 #include "AI/BaseAIController.h"
 #include "AI/UI/SpeechWidget.h"
+#include "AI/Utility/CustomNavModifierComponent.h"
 #include "AI/Utility/PatrolArea.h"
 #include "AlchemyProject/PlayerCharacter.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Components/RichTextBlock.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "NavAreas/NavArea_Obstacle.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "Perception/AISenseConfig.h"
@@ -28,7 +30,9 @@ AAIBase::AAIBase()
 	SpeechWidgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("SpeechWidgetComp"));
 	SpeechWidgetComp->SetupAttachment(GetRootComponent());
 	SpeechWidgetComp->SetVisibility(false);
-	
+
+	NavModifierComponent = CreateDefaultSubobject<UCustomNavModifierComponent>(TEXT("NavModifierComponent"));
+	NavModifierComponent->SetAreaClass(UNavArea_Obstacle::StaticClass());
 }
 
 void AAIBase::GetActorEyesViewPoint(FVector& OutLocation, FRotator& OutRotation) const
@@ -54,7 +58,7 @@ void AAIBase::BeginPlay()
 	if(AIController)
 	{
 		//BUG: Use BehaviorTreeComponent->StartTree Instead
-		//AIController->RunBehaviorTree(BehaviorTree); //BUG: When using RunBehaviorTree it won't add the instance to the UBehaviorTreeComponent::InstanceStack 
+		//AIController->RunBehaviorTree(BehaviorTree); //BUG: When using RunBehaviorTree in BeginPlay it won't add the instance to the UBehaviorTreeComponent::InstanceStack 
 		
 		if(AIController->GetAIBlackboardComponent() == nullptr) return;
 		
