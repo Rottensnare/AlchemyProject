@@ -26,6 +26,12 @@ public:
 	UPROPERTY()
 	class UPlayerOverlay* PlayerOverlay;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UDialogueOverlay> DialogueOverlayClass;
+	
+	UPROPERTY()
+	UDialogueOverlay* DialogueOverlay;
+
 	//Overlay for the alchemy table user interface
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UAlchemyOverlay> AlchemyOverlayClass;

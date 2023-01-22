@@ -23,6 +23,9 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 	bool bIsDoingAlchemy{false};
+
+	UPROPERTY(BlueprintReadWrite)
+	bool bIsConversing{false};
 	
 	void UsePotion(const TSubclassOf<UPotionComponent> InComponentClass, const EProductQuality InProductQuality);
 

@@ -128,10 +128,24 @@ void APlayerCharacter::InventoryButtonReleased()
 
 void APlayerCharacter::InteractButtonPressed()
 {
-	if(TracedActor == nullptr || InventoryComponent == nullptr) return;
-	//UE_LOG(LogTemp, Warning, TEXT("Traced Actor: %s"), *TracedActor->GetName())
-	if(TracedActor->Implements<UPickable>())
+	if(TracedActor == nullptr) return;
+	UE_LOG(LogTemp, Warning, TEXT("Traced Actor: %s"), *TracedActor->GetName())
+	if(TracedActor->Implements<UInteractable>())
 	{
+		IInteractable* Interactable = Cast<IInteractable>(TracedActor);
+		if(Interactable->Interact(this))
+		{
+			if(Cast<AAIBase>(TracedActor))
+			{
+				MyPlayerController = MyPlayerController == nullptr ? Cast<AMyPlayerController>(GetController()) : MyPlayerController;
+				if(MyPlayerController) MyPlayerController->ToggleDialogueOverlay();
+			}
+		}
+	}
+	else if(TracedActor->Implements<UPickable>())
+	{
+		if(InventoryComponent == nullptr) return;
+		
 		if(APotion* TempPotion = Cast<APotion>(TracedActor))
 		{
 			const uint32 HashCode = UUserDefinedStruct::GetUserDefinedStructTypeHash(&TempPotion->ProductInfo, FProductInfo::StaticStruct());

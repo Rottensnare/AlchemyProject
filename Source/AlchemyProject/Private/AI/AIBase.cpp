@@ -243,6 +243,17 @@ void AAIBase::SetPlayerSeen(const bool bValue)
 	}
 }
 
+bool AAIBase::Interact(AActor* OtherActor)
+{
+	if(!bCanBeInteractedWith) return false;
+	if(bCanConverse)
+	{
+		return true;
+	}
+	
+	return IInteractable::Interact(OtherActor);
+}
+
 void AAIBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);

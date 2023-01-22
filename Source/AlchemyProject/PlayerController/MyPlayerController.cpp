@@ -20,6 +20,7 @@
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "Components/UniformGridPanel.h"
+#include "HUD/DialogueOverlay.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetArrayLibrary.h"
 #include "Sound/SoundCue.h"
@@ -151,6 +152,53 @@ void AMyPlayerController::ToggleAlchemyOverlay()
 	}
 }
 
+void AMyPlayerController::ToggleDialogueOverlay()
+{
+	UE_LOG(LogTemp, Warning, TEXT("ToggleDialogueOverlay"))
+	CurrentCharacter = CurrentCharacter == nullptr ? Cast<APlayerCharacter>(GetCharacter()) : CurrentCharacter;
+	PlayerHUD = PlayerHUD == nullptr ? Cast<APlayerHUD>(GetHUD()) : PlayerHUD;
+	if(PlayerHUD && PlayerHUD->DialogueOverlay && CurrentCharacter)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("DialogueOverlay ok"))
+		if(PlayerHUD->DialogueOverlay->GetVisibility() == ESlateVisibility::Collapsed)
+		{
+			PlayerHUD->DialogueOverlay->SetVisibility(ESlateVisibility::Visible);
+			HideOtherOverlays(2);
+			FInputModeUIOnly InputModeUIOnly;
+			SetInputMode(InputModeUIOnly);
+			SetShowMouseCursor(true);
+			CurrentCharacter->bIsConversing = true;
+		}
+		else
+		{
+			PlayerHUD->DialogueOverlay->SetVisibility(ESlateVisibility::Collapsed);
+			FInputModeGameOnly InputModeGameOnly;
+			SetInputMode(InputModeGameOnly);
+			SetShowMouseCursor(false);
+			CurrentCharacter->bIsConversing = false;
+		}
+	}
+}
+
+void AMyPlayerController::HideOtherOverlays(const uint8 OverlayIndex)
+{
+	if(!PlayerHUD || !PlayerHUD->PlayerOverlay || !PlayerHUD->AlchemyOverlay || !PlayerHUD->DialogueOverlay) return;
+	
+	if(OverlayIndex == 0)
+	{
+		PlayerHUD->AlchemyOverlay->SetVisibility(ESlateVisibility::Collapsed);
+		PlayerHUD->DialogueOverlay->SetVisibility(ESlateVisibility::Collapsed);
+	}else if(OverlayIndex == 1)
+	{
+		PlayerHUD->PlayerOverlay->SetVisibility(ESlateVisibility::Collapsed);
+		PlayerHUD->DialogueOverlay->SetVisibility(ESlateVisibility::Collapsed);
+	}else if(OverlayIndex == 2)
+	{
+		PlayerHUD->PlayerOverlay->SetVisibility(ESlateVisibility::Collapsed);
+		PlayerHUD->AlchemyOverlay->SetVisibility(ESlateVisibility::Collapsed);
+	}
+}
+
 void AMyPlayerController::SelectAlchemyIngredient(const int32 SelectedSlot)
 {
 	CurrentCharacter = CurrentCharacter == nullptr ? Cast<APlayerCharacter>(GetCharacter()) : CurrentCharacter;
@@ -244,8 +292,8 @@ void AMyPlayerController::FindIngredients(const FName& RecipeName)
 
 	ClearAlchemySelection();
 	
-	FString RecipeDataTablePath(TEXT("DataTable'/Game/Assets/Datatables/RecipeDataTable.RecipeDataTable'"));
-	UDataTable* RecipeTableObject = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, *RecipeDataTablePath));
+	FString RecipeDataTablePath(TEXT("DataTable'/Game/Assets/Datatables/RecipeDataTable.RecipeDataTable'")); //TODO: Make this global
+	UDataTable* RecipeTableObject = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, *RecipeDataTablePath)); //TODO: Make this global as well
 	if(!RecipeTableObject) return;
 	
 	FRecipeTable* RecipeDataRow = nullptr;
@@ -268,8 +316,8 @@ void AMyPlayerController::FindIngredients(const FName& RecipeName)
 
 void AMyPlayerController::PlaySound(const FName& SFXName)
 {
-	const FString SFXDataTablePath(TEXT("DataTable'/Game/Assets/Datatables/SoundFXDataTable.SoundFXDataTable'"));
-	const UDataTable* SFXTableObject = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, *SFXDataTablePath));
+	const FString SFXDataTablePath(TEXT("DataTable'/Game/Assets/Datatables/SoundFXDataTable.SoundFXDataTable'")); //TODO: Make this global
+	const UDataTable* SFXTableObject = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, *SFXDataTablePath)); //TODO: Make this global as well
 	if(!SFXTableObject) return;
 	
 	const FSoundEffectTable* SFXDataRow = nullptr;

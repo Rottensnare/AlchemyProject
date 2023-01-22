@@ -9,20 +9,38 @@
 #include "Blueprint/UserWidget.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
+#include "HUD/DialogueOverlay.h"
 
 void APlayerHUD::AddCharacterOverlay()
 {
 	APlayerController* PlayerController = GetOwningPlayerController();
-	if(PlayerController && OverlayClass)
+	if(PlayerController == nullptr) return;
+	if(OverlayClass)
 	{
 		PlayerOverlay = CreateWidget<UPlayerOverlay>(PlayerController, OverlayClass);
-		PlayerOverlay->AddToViewport();
+		if(PlayerOverlay) PlayerOverlay->AddToViewport();
 	}
-	if(PlayerController && AlchemyOverlayClass)
+	if(AlchemyOverlayClass)
 	{
 		AlchemyOverlay = CreateWidget<UAlchemyOverlay>(PlayerController, AlchemyOverlayClass);
-		AlchemyOverlay->AddToViewport();
-		AlchemyOverlay->SetVisibility(ESlateVisibility::Collapsed);
+		if(AlchemyOverlay)
+		{
+			AlchemyOverlay->AddToViewport();
+			AlchemyOverlay->SetVisibility(ESlateVisibility::Collapsed);
+		}
+	}
+	if(DialogueOverlayClass)
+	{
+		DialogueOverlay = CreateWidget<UDialogueOverlay>(PlayerController, DialogueOverlayClass);
+		if(DialogueOverlay)
+		{
+			DialogueOverlay->AddToViewport();
+			DialogueOverlay->SetVisibility(ESlateVisibility::Collapsed);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("DialogueOverlay was nullptr"))
+		}
 	}
 }
 

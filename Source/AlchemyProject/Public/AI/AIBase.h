@@ -9,6 +9,7 @@
 #include "AlchemyProject/Alchemy/CustomStructs/NPCStructs.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/Character.h"
+#include "Interfaces/Interactable.h"
 #include "Interfaces/Queryable.h"
 #include "UI/SpeechWidget.h"
 #include "AIBase.generated.h"
@@ -31,7 +32,7 @@ enum class EAIState : uint8
 };
 
 UCLASS()
-class ALCHEMYPROJECT_API AAIBase : public ACharacter, public IQueryable
+class ALCHEMYPROJECT_API AAIBase : public ACharacter, public IQueryable, public IInteractable
 {
 	GENERATED_BODY()
 
@@ -161,10 +162,10 @@ private:
 
 	//Player can interact at least in some way, meaning that when pressing the interact button the NPC can do something.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Interaction", meta = (AllowPrivateAccess = "true"))
-	bool bCanBeInteractedWith;
+	bool bCanBeInteractedWith{true};
 	//Player can have a conversation, meaning that a dialogue widget will pop up.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Interaction", meta = (AllowPrivateAccess = "true"))
-	bool bCanConverse;
+	bool bCanConverse{true};
 	//Map that stores information about the opinion of other NPCs.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Opinions", meta = (AllowPrivateAccess = "true"))
 	TMap<AActor*, int32> OpinionTable;
@@ -196,7 +197,7 @@ public:
 	 *	INTERFACE OVERRIDES
 	 **********************/
 
-
+	virtual bool Interact(AActor* OtherActor) override;
 };
 
 template <typename T>
