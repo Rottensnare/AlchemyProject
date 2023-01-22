@@ -10,9 +10,11 @@
 #include "AlchemyProject/PlayerCharacter.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Components/RichTextBlock.h"
+#include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "NavAreas/NavArea_Obstacle.h"
+#include "Navigation/CrowdManager.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "Perception/AISenseConfig.h"
@@ -31,8 +33,12 @@ AAIBase::AAIBase()
 	SpeechWidgetComp->SetupAttachment(GetRootComponent());
 	SpeechWidgetComp->SetVisibility(false);
 
-	NavModifierComponent = CreateDefaultSubobject<UCustomNavModifierComponent>(TEXT("NavModifierComponent"));
-	NavModifierComponent->SetAreaClass(UNavArea_Obstacle::StaticClass());
+	ESPSphere = CreateDefaultSubobject<USphereComponent>(TEXT("ESPSphere"));
+	ESPSphere->SetupAttachment(GetRootComponent());
+	ESPSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	ESPSphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	ESPSphere->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
+	
 }
 
 void AAIBase::GetActorEyesViewPoint(FVector& OutLocation, FRotator& OutRotation) const
@@ -50,6 +56,9 @@ void AAIBase::BeginPlay()
 
 	//PawnSensingComponent->OnSeePawn.AddDynamic(this, &AAIBase::OnSeenPawn);
 	//PawnSensingComponent->OnHearNoise.AddDynamic(this, &AAIBase::OnSomethingHeard);
+
+	ESPSphere->OnComponentBeginOverlap.AddDynamic(this, &AAIBase::OnESPBeginOverlap);
+	ESPSphere->OnComponentEndOverlap.AddDynamic(this, &AAIBase::OnESPEndOverlap);
 
 	if(GetCharacterMovement()) GetCharacterMovement()->MaxWalkSpeed = PatrolMoveSpeed;
 	OriginalPosition = GetActorLocation();
@@ -168,6 +177,18 @@ void AAIBase::ClearSpeechWidgetTimer()
 void AAIBase::HideSpeechWidget()
 {
 	SpeechWidgetComp->SetVisibility(false);
+}
+
+void AAIBase::OnESPBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	bESPOverlapping = true;
+}
+
+void AAIBase::OnESPEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	bESPOverlapping = false;
 }
 
 void AAIBase::SetFollowPlayer(bool Value)

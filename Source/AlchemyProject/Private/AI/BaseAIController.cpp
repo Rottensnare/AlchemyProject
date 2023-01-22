@@ -12,13 +12,14 @@
 #include "Engine/DataTable.h"
 #include "EnvironmentQuery/EnvQuery.h"
 #include "EnvironmentQuery/EnvQueryManager.h"
+#include "Navigation/CrowdFollowingComponent.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Hearing.h"
 #include "Perception/AISenseConfig_Prediction.h"
 #include "Perception/AISenseConfig_Sight.h"
 #include "Perception/AISense_Prediction.h"
 
-ABaseAIController::ABaseAIController()
+ABaseAIController::ABaseAIController(const FObjectInitializer& ObjectInitializer) //: Super(ObjectInitializer.SetDefaultSubobjectClass<UCrowdFollowingComponent>(TEXT("PathFollowingComponent")))
 {
 	BlackboardComponent = CreateDefaultSubobject<UBlackboardComponent>(TEXT("BlackboardComponent"));
 	checkf(BlackboardComponent, TEXT("BlackboardComponent was null in the constructor"));
