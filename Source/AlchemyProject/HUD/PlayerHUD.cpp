@@ -10,6 +10,7 @@
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "HUD/DialogueOverlay.h"
+#include "Managers/DialogueManager.h"
 
 void APlayerHUD::AddCharacterOverlay()
 {
@@ -36,11 +37,15 @@ void APlayerHUD::AddCharacterOverlay()
 		{
 			DialogueOverlay->AddToViewport();
 			DialogueOverlay->SetVisibility(ESlateVisibility::Collapsed);
-		}
-		else
+			if(DialogueOverlay->DialogueManager) DialogueOverlay->DialogueManager->StartDialogue(0);
+		}else
 		{
 			UE_LOG(LogTemp, Error, TEXT("DialogueOverlay was nullptr"))
 		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("DialogueOverlayClass was nullptr"))
 	}
 }
 

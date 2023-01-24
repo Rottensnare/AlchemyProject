@@ -46,6 +46,7 @@ protected:
 	void TraceForObjects();
 	void ShowInfoButtonPressed();
 	void ToggleSprint();
+	void EndInteraction();
 	
 private:
 	
@@ -90,6 +91,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	AItem* TracedItemLastFrame;
+
+	UPROPERTY(VisibleAnywhere)
+	APawn* CurrentNPC;
 	
 	TSubclassOf<class AItem> ItemClass;
 
@@ -125,7 +129,8 @@ public:
 	FORCEINLINE void SetAlchemyTable(AAlchemyTable* InTable) {CurrentAlchemyTable = InTable;}
 	FORCEINLINE AAlchemyTable* GetAlchemyTable() const {return CurrentAlchemyTable;}
 	FORCEINLINE UAIPerceptionStimuliSourceComponent* GetPerceptionStimuliSourceComponent() const {return PerceptionStimuliSourceComponent;}
-	
+	FORCEINLINE APawn* GetCurrentNPC() const {return CurrentNPC;}
+	FORCEINLINE void SetCurrentNPC(APawn* InPawn) {CurrentNPC = InPawn;}
 };
 
 

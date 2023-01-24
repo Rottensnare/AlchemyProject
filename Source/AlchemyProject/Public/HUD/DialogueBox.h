@@ -23,4 +23,9 @@ class ALCHEMYPROJECT_API UDialogueBox : public UUserWidget
 public:
 	
 	void SetSelectedElement(const int32 ElementIndex);
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	class UListView* DialogueListView;
+
+	void AddToListView(TArray<class UDialogueBoxElement>& Options);
 };

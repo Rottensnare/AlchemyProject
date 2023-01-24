@@ -7,6 +7,7 @@
 #include "AI/UI/SpeechWidget.h"
 #include "AI/Utility/CustomNavModifierComponent.h"
 #include "AI/Utility/PatrolArea.h"
+#include "AlchemyProject/InventoryComponent.h"
 #include "AlchemyProject/PlayerCharacter.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Components/RichTextBlock.h"
@@ -38,6 +39,8 @@ AAIBase::AAIBase()
 	ESPSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	ESPSphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	ESPSphere->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
+
+	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
 	
 }
 
@@ -71,7 +74,7 @@ void AAIBase::BeginPlay()
 		
 		if(AIController->GetAIBlackboardComponent() == nullptr) return;
 		
-		AIController->GetAIBlackboardComponent()->SetValueAsEnum(FName("AIState"), (uint8)AIState);
+		AIController->GetAIBlackboardComponent()->SetValueAsEnum(FName("AIState"), static_cast<uint8>(AIState));
 		AIController->GetAIBlackboardComponent()->SetValueAsBool(FName("FollowPlayer"), bFollowPlayer);
 		AIController->GetAIBlackboardComponent()->SetValueAsVector(FName("OriginalPosition"), OriginalPosition);
 	}

@@ -45,6 +45,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void CreateNoise(const float InVolume, const float InMaxRange, FName InTag = NAME_None);
 
+	UFUNCTION()
+	void OnClicked_Delegate();
+
 	FGenericTeamId TeamId{FGenericTeamId(4)};
 	virtual FGenericTeamId GetGenericTeamId() const override;
 

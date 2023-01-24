@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "DialogueOverlay.h"
 #include "Blueprint/IUserObjectListEntry.h"
 #include "Blueprint/UserWidget.h"
 #include "DialogueBoxElement.generated.h"
@@ -17,5 +18,8 @@ class ALCHEMYPROJECT_API UDialogueBoxElement : public UUserWidget, public IUserO
 
 	UPROPERTY(meta = (BindWidget))
 	class URichTextBlock* RichTextBlock;
+
+	UPROPERTY(EditAnywhere)
+	FDialogueOption DialogueOption;
 	
 };

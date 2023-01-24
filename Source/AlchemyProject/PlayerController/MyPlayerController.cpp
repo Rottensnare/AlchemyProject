@@ -15,11 +15,14 @@
 #include "AlchemyProject/HUD/PlayerHUD.h"
 #include "AlchemyProject/HUD/PlayerOverlay.h"
 #include "AlchemyProject/HUD/ScrollableInventoryWidget.h"
+#include "Components/Button.h"
 #include "Components/Image.h"
 #include "Components/PawnNoiseEmitterComponent.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "Components/UniformGridPanel.h"
+#include "GameFramework/PawnMovementComponent.h"
+#include "HUD/DialogueBox.h"
 #include "HUD/DialogueOverlay.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetArrayLibrary.h"
@@ -157,7 +160,12 @@ void AMyPlayerController::ToggleDialogueOverlay()
 	UE_LOG(LogTemp, Warning, TEXT("ToggleDialogueOverlay"))
 	CurrentCharacter = CurrentCharacter == nullptr ? Cast<APlayerCharacter>(GetCharacter()) : CurrentCharacter;
 	PlayerHUD = PlayerHUD == nullptr ? Cast<APlayerHUD>(GetHUD()) : PlayerHUD;
-	if(PlayerHUD && PlayerHUD->DialogueOverlay && CurrentCharacter)
+	if(!CurrentCharacter) UE_LOG(LogTemp, Warning, TEXT("CurrentCharacter NULL"))
+	
+	if(!PlayerHUD) UE_LOG(LogTemp, Warning, TEXT("PlayerHUD NULL"))
+	else if(!PlayerHUD->DialogueOverlay) UE_LOG(LogTemp, Warning, TEXT("DialogueOverlay NULL"))
+	
+	if(PlayerHUD && PlayerHUD->DialogueOverlay && CurrentCharacter && PlayerHUD->PlayerOverlay)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("DialogueOverlay ok"))
 		if(PlayerHUD->DialogueOverlay->GetVisibility() == ESlateVisibility::Collapsed)
@@ -168,14 +176,18 @@ void AMyPlayerController::ToggleDialogueOverlay()
 			SetInputMode(InputModeUIOnly);
 			SetShowMouseCursor(true);
 			CurrentCharacter->bIsConversing = true;
+			SetIgnoreMoveInput(true);
 		}
 		else
 		{
 			PlayerHUD->DialogueOverlay->SetVisibility(ESlateVisibility::Collapsed);
+			PlayerHUD->PlayerOverlay->SetVisibility(ESlateVisibility::Visible);
 			FInputModeGameOnly InputModeGameOnly;
 			SetInputMode(InputModeGameOnly);
 			SetShowMouseCursor(false);
 			CurrentCharacter->bIsConversing = false;
+			CurrentCharacter->SetCurrentNPC(nullptr);
+			SetIgnoreMoveInput(false);
 		}
 	}
 }
@@ -343,6 +355,11 @@ void AMyPlayerController::CreateNoise(const float InVolume, const float InMaxRan
 	PawnNoiseEmitterComponent->MakeNoise(GetPawn(), InVolume, GetPawn()->GetActorLocation());
 }
 
+void AMyPlayerController::OnClicked_Delegate()
+{
+	ToggleDialogueOverlay();
+}
+
 
 FGenericTeamId AMyPlayerController::GetGenericTeamId() const
 {
@@ -357,6 +374,10 @@ void AMyPlayerController::BeginPlay()
 	if(PlayerHUD)
 	{
 		PlayerHUD->AddCharacterOverlay();
+		if(PlayerHUD->DialogueOverlay && PlayerHUD->DialogueOverlay->ExitButton)
+		{
+			PlayerHUD->DialogueOverlay->ExitButton->OnClicked.AddDynamic(this, &ThisClass::OnClicked_Delegate);
+		}
 	}
 }
 
