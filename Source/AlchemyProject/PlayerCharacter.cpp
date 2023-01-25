@@ -135,14 +135,16 @@ void APlayerCharacter::InteractButtonPressed()
 		IInteractable* Interactable = Cast<IInteractable>(TracedActor);
 		if(Interactable->Interact(this))
 		{
-			if(Cast<AAIBase>(TracedActor))
+			if(AAIBase* TempAI = Cast<AAIBase>(TracedActor))
 			{
 				
 				MyPlayerController = MyPlayerController == nullptr ? Cast<AMyPlayerController>(GetController()) : MyPlayerController;
 				if(MyPlayerController)
 				{
+					CurrentNPC = TempAI;
+					CurrentNPC_ID = TempAI->NPC_ID;
 					MyPlayerController->ToggleDialogueOverlay();
-					CurrentNPC = Cast<APawn>(TracedActor);
+					
 				}
 			}
 		}

@@ -26,6 +26,7 @@
 #include "HUD/DialogueOverlay.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetArrayLibrary.h"
+#include "Managers/DialogueManager.h"
 #include "Sound/SoundCue.h"
 
 AMyPlayerController::AMyPlayerController()
@@ -165,7 +166,7 @@ void AMyPlayerController::ToggleDialogueOverlay()
 	if(!PlayerHUD) UE_LOG(LogTemp, Warning, TEXT("PlayerHUD NULL"))
 	else if(!PlayerHUD->DialogueOverlay) UE_LOG(LogTemp, Warning, TEXT("DialogueOverlay NULL"))
 	
-	if(PlayerHUD && PlayerHUD->DialogueOverlay && CurrentCharacter && PlayerHUD->PlayerOverlay)
+	if(PlayerHUD && PlayerHUD->DialogueOverlay && PlayerHUD->DialogueOverlay->DialogueManager && CurrentCharacter && PlayerHUD->PlayerOverlay)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("DialogueOverlay ok"))
 		if(PlayerHUD->DialogueOverlay->GetVisibility() == ESlateVisibility::Collapsed)
@@ -177,6 +178,8 @@ void AMyPlayerController::ToggleDialogueOverlay()
 			SetShowMouseCursor(true);
 			CurrentCharacter->bIsConversing = true;
 			SetIgnoreMoveInput(true);
+			PlayerHUD->DialogueOverlay->DialogueManager->StartDialogue(CurrentCharacter->GetCurrentNPC_ID());
+			PlayerHUD->DialogueOverlay->DialogueBox->AddToListView(PlayerHUD->DialogueOverlay->DialogueManager->GetOptionStrings());
 		}
 		else
 		{
@@ -188,6 +191,7 @@ void AMyPlayerController::ToggleDialogueOverlay()
 			CurrentCharacter->bIsConversing = false;
 			CurrentCharacter->SetCurrentNPC(nullptr);
 			SetIgnoreMoveInput(false);
+			PlayerHUD->DialogueOverlay->DialogueBox->EmptyListView();
 		}
 	}
 }

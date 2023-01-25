@@ -37,7 +37,7 @@ void APlayerHUD::AddCharacterOverlay()
 		{
 			DialogueOverlay->AddToViewport();
 			DialogueOverlay->SetVisibility(ESlateVisibility::Collapsed);
-			if(DialogueOverlay->DialogueManager) DialogueOverlay->DialogueManager->StartDialogue(0);
+			if(DialogueOverlay->DialogueManager) DialogueOverlay->DialogueManager->StartDialogue(1);
 		}else
 		{
 			UE_LOG(LogTemp, Error, TEXT("DialogueOverlay was nullptr"))

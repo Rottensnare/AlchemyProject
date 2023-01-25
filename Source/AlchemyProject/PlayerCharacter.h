@@ -94,6 +94,8 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	APawn* CurrentNPC;
+
+	int32 CurrentNPC_ID{0};
 	
 	TSubclassOf<class AItem> ItemClass;
 
@@ -131,6 +133,7 @@ public:
 	FORCEINLINE UAIPerceptionStimuliSourceComponent* GetPerceptionStimuliSourceComponent() const {return PerceptionStimuliSourceComponent;}
 	FORCEINLINE APawn* GetCurrentNPC() const {return CurrentNPC;}
 	FORCEINLINE void SetCurrentNPC(APawn* InPawn) {CurrentNPC = InPawn;}
+	FORCEINLINE int32 GetCurrentNPC_ID() const {return CurrentNPC_ID;}
 };
 
 

@@ -15,8 +15,10 @@ UCLASS()
 class ALCHEMYPROJECT_API UDialogueBoxElement : public UUserWidget, public IUserObjectListEntry
 {
 	GENERATED_BODY()
-
-	UPROPERTY(meta = (BindWidget))
+	
+public:
+	
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	class URichTextBlock* RichTextBlock;
 
 	UPROPERTY(EditAnywhere)

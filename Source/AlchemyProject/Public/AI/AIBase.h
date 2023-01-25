@@ -173,6 +173,8 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Opinions", meta = (AllowPrivateAccess = "true"))
 	TMap<AActor*, int32> OpinionTable;
 
+	
+
 public:
 	/*******************
 	 *	FORCEINLINES
@@ -194,6 +196,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|GameplayTags")
 	FTagsToSearch TagsToSearch;
+
+	UPROPERTY(EditAnywhere)
+	int32 NPC_ID{1};
 
 
 	/***********************

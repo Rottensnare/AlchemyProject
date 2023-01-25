@@ -19,6 +19,9 @@ class ALCHEMYPROJECT_API UDialogueBox : public UUserWidget
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UDialogueBoxElement* SelectedElement;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UDialogueBoxElement> DialogueBoxElementClass;
 	
 public:
 	
@@ -28,4 +31,9 @@ public:
 	class UListView* DialogueListView;
 
 	void AddToListView(TArray<class UDialogueBoxElement>& Options);
+	void AddToListView(TArray<FString>& Options);
+	void EmptyListView();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TArray<FString> OptionStrings;
 };

@@ -24,11 +24,6 @@ void FDialogueOption::HandlePlayerChoice()
 	}
 }
 
-void FDialogueState::AssignID()
-{
-	//TODO: Check the DataTable and see if there are more than one instances of the same ID. If so, generate a new one that is available.
-}
-
 void UDialogueOverlay::NativeOnInitialized()
 {
 	DialogueManager = NewObject<UDialogueManager>();

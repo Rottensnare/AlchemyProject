@@ -44,18 +44,12 @@ struct FDialogueState : public FTableRowBase
 	GENERATED_BODY()
 
 	int32 DialogueStateID;
-
-	int32 PreviousDialogueStateID{0};
 	
 	UPROPERTY(EditAnywhere)
 	FText NPCDialogueText;
 
-	TArray<FDialogueOption> DialogueOptions;
-
-	/** Checks if this is a root dialogue state. Meaning that there aren't dialogue states before this*/
-	bool IsRootDialogueState() const {return PreviousDialogueStateID == 0 ? true : false;}
-
-	void AssignID();
+	TArray<int32> DialogueOptions;
+	
 };
 
 

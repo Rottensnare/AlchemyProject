@@ -1,0 +1,19 @@
+{
+    "Objects": [
+        {
+			"DialogueStateID": 1,
+			"NPCDialogueText": "Hello, how are you?",
+			"DialogueOptions": [1, 2]
+		},
+        {
+			"DialogueStateID": 2,
+			"NPCDialogueText": "You son of a witch!",
+			"DialogueOptions": [1, 3]
+		},
+        {
+			"DialogueStateID": 3,
+			"NPCDialogueText": "Yes? How can I help?",
+			"DialogueOptions": [2, 3]
+		}
+    ]
+}

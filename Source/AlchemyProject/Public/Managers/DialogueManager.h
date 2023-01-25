@@ -19,16 +19,29 @@ public:
 
 	UDialogueManager();
 
-	void StartDialogue(const int32 NPCId);
+	void StartDialogue(const int32 DialogueStateID);
+
+	bool GetJSON(const FString& FilePath, int32 ID);
 
 private:
 
 	FDialogueState CurrentDialogueState;
-
+	int32 CurrentDialogueStateID;
+	
+	FDialogueState PreviousDialogueState;
+	int32 PreviousDialogueStateID;
+	
 	FString NPCName;
+
+	FString DialogueFilePath_Options;
+	FString DialogueFilePath_States;
+
+	FString NPCDialogue{""};
+	TArray<FString> OptionStrings;
 
 public:
 
 	FORCEINLINE FString GetNPCName() const {return NPCName;}
-	
+	FORCEINLINE TArray<FString>& GetOptionStrings() {return OptionStrings;}
+	FORCEINLINE FString GetNPCDialogue() const {return NPCDialogue;}
 };
