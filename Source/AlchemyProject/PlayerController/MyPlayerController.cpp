@@ -17,6 +17,7 @@
 #include "AlchemyProject/HUD/ScrollableInventoryWidget.h"
 #include "Components/Button.h"
 #include "Components/Image.h"
+#include "Components/MultiLineEditableTextBox.h"
 #include "Components/PawnNoiseEmitterComponent.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
@@ -180,6 +181,7 @@ void AMyPlayerController::ToggleDialogueOverlay()
 			SetIgnoreMoveInput(true);
 			PlayerHUD->DialogueOverlay->DialogueManager->StartDialogue(CurrentCharacter->GetCurrentNPC_ID());
 			PlayerHUD->DialogueOverlay->DialogueBox->AddToListView(PlayerHUD->DialogueOverlay->DialogueManager->GetOptionStrings());
+			PlayerHUD->DialogueOverlay->MultiLineTextBox->SetText(FText::FromString(PlayerHUD->DialogueOverlay->DialogueManager->GetNPCDialogue()));
 		}
 		else
 		{
@@ -192,6 +194,7 @@ void AMyPlayerController::ToggleDialogueOverlay()
 			CurrentCharacter->SetCurrentNPC(nullptr);
 			SetIgnoreMoveInput(false);
 			PlayerHUD->DialogueOverlay->DialogueBox->EmptyListView();
+			PlayerHUD->DialogueOverlay->MultiLineTextBox->SetText(FText::GetEmpty());
 		}
 	}
 }

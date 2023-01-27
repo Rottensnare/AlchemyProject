@@ -10,10 +10,15 @@
 			"NPCDialogueText": "You son of a witch!",
 			"DialogueOptions": [1, 3]
 		},
-        {
-			"DialogueStateID": 3,
-			"NPCDialogueText": "Yes? How can I help?",
-			"DialogueOptions": [2, 3]
+			{
+				"DialogueStateID": 3,
+				"NPCDialogueText": "Yes? How can I help?",
+				"DialogueOptions": [ 2, 3 ]
+		},
+			{
+				"DialogueStateID": 4,
+				"NPCDialogueText": "You have no honor!",
+				"DialogueOptions": [ 4, 5 ]
 		}
     ]
 }

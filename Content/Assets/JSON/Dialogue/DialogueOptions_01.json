@@ -1,19 +1,29 @@
 {
-    "Objects": [
-        {
-            "DialogueID": 1,
-            "TextToDisplay": "Screw you!",
-            "NextDialogueStateID": 2
-        },
-        {
-            "DialogueID": 2,
-            "TextToDisplay": "I'm fine, thank you.",
-            "NextDialogueStateID": 3
-        },
-        {
-            "DialogueID": 3,
-            "TextToDisplay": "Yep",
-            "NextDialogueStateID": 1
-        }
-    ]
+  "Objects": [
+    {
+      "DialogueID": 1,
+      "TextToDisplay": "Screw you!",
+      "NextDialogueStateID": 2
+    },
+    {
+      "DialogueID": 2,
+      "TextToDisplay": "I'm fine, thank you.",
+      "NextDialogueStateID": 3
+    },
+    {
+      "DialogueID": 3,
+      "TextToDisplay": "Yep",
+      "NextDialogueStateID": 1
+    },
+    {
+      "DialogueID": 4,
+      "TextToDisplay": "Yeebus",
+      "NextDialogueStateID": 1
+    },
+    {
+      "DialogueID": 5,
+      "TextToDisplay": "Get out of my house!",
+      "NextDialogueStateID": 1
+    }
+  ]
 }

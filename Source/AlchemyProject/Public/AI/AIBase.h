@@ -197,7 +197,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|GameplayTags")
 	FTagsToSearch TagsToSearch;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "AI|Dialogue")
 	int32 NPC_ID{1};
 
 

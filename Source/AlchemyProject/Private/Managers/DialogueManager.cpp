@@ -13,53 +13,54 @@ UDialogueManager::UDialogueManager()
 
 void UDialogueManager::StartDialogue(const int32 DialogueStateID)
 {
-	//Load Root Dialogue options for chosen NPC.
+	//Load Dialogue for chosen NPC.
 	
+	//Check if File for Dialogue States exists
 	bool bFileExists = FPlatformFileManager::Get().GetPlatformFile().FileExists(*DialogueFilePath_States);
-	//UE_LOG(LogTemp, Display, TEXT("DialogueFilePath: %s"), *DialogueFilePath_States)
-	//UE_LOG(LogTemp, Display, TEXT("bFileExists: %d"), bFileExists)
+
+	//Load the file onto a FString
 	FString JsonString;
 	bool bLoadFileSuccess = FFileHelper::LoadFileToString(JsonString, *DialogueFilePath_States);
-	//UE_LOG(LogTemp, Display, TEXT("bLoadFileSuccess: %d"), bLoadFileSuccess)
-	//UE_LOG(LogTemp, Display, TEXT("JsonString: %s"), *JsonString)
+	
 	TSharedPtr<FJsonObject> JsonObject;
 	TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(JsonString);
+	//Deserialize JsonString to JsonObject using the JsonReader
 	bool bDeserialized = FJsonSerializer::Deserialize(JsonReader, JsonObject);
-	//if(!bDeserialized) bDeserialized = FJsonSerializer::Deserialize(TJsonReaderFactory<char16_t>::Create(JsonString), JsonObject);
-	//UE_LOG(LogTemp, Display, TEXT("bDeserialized: %d"), bDeserialized)
 	if(!JsonObject.IsValid()) return;
 
+	//Get the Objects array for later use
 	TArray<TSharedPtr<FJsonValue>> JsonArray = JsonObject->GetArrayField("Objects");
 	TArray<TSharedPtr<FJsonValue>> DialogueOptions;
-	TArray<int32> OptionIDs;
+	//TArray<int32> OptionIDs;
+
+	//Iterate over all the entries and find the one that matches with DialogueStateID
 	for(int32 i = 0; i < JsonArray.Num(); i++)
 	{
 		TSharedPtr<FJsonObject> Object = JsonArray[i]->AsObject();
 		if(Object->GetIntegerField("DialogueStateID") == DialogueStateID)
 		{
-			FString ObjectName = Object->GetStringField("NPCDialogueText");
-			//Object->TryGetArrayField("DialogueOptions", DialogueOptions);
+			//Store the Dialogue text and options
+			NPCDialogue = Object->GetStringField("NPCDialogueText");
 			DialogueOptions = Object->GetArrayField(FString("DialogueOptions"));
-			//UE_LOG(LogTemp, Warning, TEXT("String: %s"), *ObjectName)
 			PreviousDialogueStateID = CurrentDialogueStateID;
 			CurrentDialogueStateID = DialogueStateID;
-			NPCDialogue = ObjectName;
 		}
 	}
 	if(DialogueOptions.IsEmpty()) return;
 	OptionStrings.Empty();
+	// Iterate through all the options and get the data from the JSON file
 	for(const auto Option : DialogueOptions)
 	{
 		const auto OptionNumber = Option->AsNumber();
-		OptionIDs.Add(FMath::CeilToInt32(OptionNumber));
+		//OptionIDs.Add(FMath::CeilToInt32(OptionNumber));
 		GetJSON(DialogueFilePath_Options, FMath::CeilToInt32(OptionNumber));
 	}
 }
 
+/**	Used for getting the dialogue options from the corresponding JSON file */
 bool UDialogueManager::GetJSON(const FString& FilePath, int32 ID)
 {
 	bool bFileExists = FPlatformFileManager::Get().GetPlatformFile().FileExists(*FilePath);
-	//UE_LOG(LogTemp, Display, TEXT("bFileExists: %d"), bFileExists)
 	FString JsonString;
 	bool bLoadFileSuccess = FFileHelper::LoadFileToString(JsonString, *FilePath);
 	TSharedPtr<FJsonObject> JsonObject;
@@ -74,7 +75,6 @@ bool UDialogueManager::GetJSON(const FString& FilePath, int32 ID)
 		if(Object->GetIntegerField("DialogueID") == ID)
 		{
 			FString ObjectName = Object->GetStringField("TextToDisplay");
-			//UE_LOG(LogTemp, Warning, TEXT("String: %s"), *ObjectName)
 			OptionStrings.Add(ObjectName);
 		}
 	}

@@ -79,4 +79,7 @@ public:
 
 	UPROPERTY()
 	TObjectPtr<class UDialogueManager> DialogueManager;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	class UMultiLineEditableTextBox* MultiLineTextBox;
 };
