@@ -4,6 +4,7 @@
 #include "HUD/DialogueOverlay.h"
 
 #include "Components/Button.h"
+#include "HUD/DialogueBox.h"
 #include "Managers/DialogueManager.h"
 
 void FDialogueOption::AssignID()
@@ -27,6 +28,7 @@ void FDialogueOption::HandlePlayerChoice()
 void UDialogueOverlay::NativeOnInitialized()
 {
 	DialogueManager = NewObject<UDialogueManager>();
+	DialogueBox->DialogueOverlay = this;
 	
 	Super::NativeOnInitialized();
 }

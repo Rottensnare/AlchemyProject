@@ -30,6 +30,8 @@ private:
 	
 	FDialogueState PreviousDialogueState;
 	int32 PreviousDialogueStateID;
+
+	int32 NextDialogueStateID{0};
 	
 	FString NPCName;
 
@@ -37,6 +39,9 @@ private:
 	FString DialogueFilePath_States;
 
 	FString NPCDialogue{""};
+	
+	TMap<int32, FDialogueOption> CurrentDialogueOptions;
+	
 	TArray<FString> OptionStrings;
 
 public:
@@ -44,4 +49,11 @@ public:
 	FORCEINLINE FString GetNPCName() const {return NPCName;}
 	FORCEINLINE TArray<FString>& GetOptionStrings() {return OptionStrings;}
 	FORCEINLINE FString GetNPCDialogue() const {return NPCDialogue;}
+	FORCEINLINE int32 GetNextDialogueStateID() const {return NextDialogueStateID;}
+	FORCEINLINE TMap<int32, FDialogueOption>& GetCurrentDialogueOptions() {return CurrentDialogueOptions;}
+
+	void EmptyDialogueOptions();
+
+	UFUNCTION(BlueprintCallable)
+	TArray<int32> GetDialogueOptions(TArray<FDialogueOption>& OutOptions);
 };

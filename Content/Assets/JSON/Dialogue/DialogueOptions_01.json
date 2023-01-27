@@ -23,7 +23,7 @@
     {
       "DialogueID": 5,
       "TextToDisplay": "Get out of my house!",
-      "NextDialogueStateID": 1
+      "NextDialogueStateID": 0
     }
   ]
 }

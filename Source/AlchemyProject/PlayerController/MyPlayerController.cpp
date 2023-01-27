@@ -180,7 +180,8 @@ void AMyPlayerController::ToggleDialogueOverlay()
 			CurrentCharacter->bIsConversing = true;
 			SetIgnoreMoveInput(true);
 			PlayerHUD->DialogueOverlay->DialogueManager->StartDialogue(CurrentCharacter->GetCurrentNPC_ID());
-			PlayerHUD->DialogueOverlay->DialogueBox->AddToListView(PlayerHUD->DialogueOverlay->DialogueManager->GetOptionStrings());
+			//PlayerHUD->DialogueOverlay->DialogueBox->AddToListView(PlayerHUD->DialogueOverlay->DialogueManager->GetOptionStrings());
+			PlayerHUD->DialogueOverlay->DialogueBox->AddToListView(PlayerHUD->DialogueOverlay->DialogueManager->GetCurrentDialogueOptions());
 			PlayerHUD->DialogueOverlay->MultiLineTextBox->SetText(FText::FromString(PlayerHUD->DialogueOverlay->DialogueManager->GetNPCDialogue()));
 		}
 		else

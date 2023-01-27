@@ -21,7 +21,7 @@ public:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	class URichTextBlock* RichTextBlock;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FDialogueOption DialogueOption;
 	
 };

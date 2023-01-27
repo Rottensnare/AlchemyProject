@@ -48,6 +48,7 @@ void UDialogueManager::StartDialogue(const int32 DialogueStateID)
 	}
 	if(DialogueOptions.IsEmpty()) return;
 	OptionStrings.Empty();
+	EmptyDialogueOptions();
 	// Iterate through all the options and get the data from the JSON file
 	for(const auto Option : DialogueOptions)
 	{
@@ -74,11 +75,33 @@ bool UDialogueManager::GetJSON(const FString& FilePath, int32 ID)
 		if(!Object.IsValid()) continue;
 		if(Object->GetIntegerField("DialogueID") == ID)
 		{
+			FDialogueOption TempOption;
 			FString ObjectName = Object->GetStringField("TextToDisplay");
+			TempOption.TextToDisplay = FText::FromString(ObjectName);
+			TempOption.NextDialogueStateID = Object->GetNumberField("NextDialogueStateID");
 			OptionStrings.Add(ObjectName);
+			CurrentDialogueOptions.Emplace(i, TempOption);
 		}
 	}
 	
 	return true;
 	
+}
+
+void UDialogueManager::EmptyDialogueOptions()
+{
+	CurrentDialogueOptions.Empty();
+}
+
+TArray<int32> UDialogueManager::GetDialogueOptions(TArray<FDialogueOption>& OutOptions)
+{
+	TArray<FDialogueOption> TempOptions;
+	TArray<int32> ReturnInts;
+	for(const auto& Option : CurrentDialogueOptions)
+	{
+		ReturnInts.Add(Option.Key);
+		OutOptions.Add(Option.Value);
+	}
+	 
+	return ReturnInts;
 }

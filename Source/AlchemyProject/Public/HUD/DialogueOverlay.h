@@ -14,11 +14,11 @@ struct FDialogueOption : public FTableRowBase
 {
 	GENERATED_BODY()
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	int32 DialogueID;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FText TextToDisplay;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	int32 NextDialogueStateID{0};
 
 	bool LeadsToOtherDialogue() const {return NextDialogueStateID == 0 ? true : false;}
@@ -77,7 +77,7 @@ public:
 
 	auto ExitButtonPressed() -> void;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<class UDialogueManager> DialogueManager;
 
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))

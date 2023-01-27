@@ -32,8 +32,12 @@ public:
 
 	void AddToListView(TArray<class UDialogueBoxElement>& Options);
 	void AddToListView(TArray<FString>& Options);
+	void AddToListView(TMap<int32, struct FDialogueOption>& InDialogueOptions);
 	void EmptyListView();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TArray<FString> OptionStrings;
+
+	UPROPERTY(BlueprintReadOnly)
+	class UDialogueOverlay* DialogueOverlay;
 };
