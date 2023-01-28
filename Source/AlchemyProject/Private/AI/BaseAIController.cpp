@@ -79,7 +79,7 @@ void ABaseAIController::BeginPlay()
 
 void ABaseAIController::Tick(float DeltaSeconds)
 {
-	CheckStimulusTimer += DeltaSeconds;
+	CheckStimulusTimer += DeltaSeconds; //TODO: CAN BE REMOVED. FOR DEBUGGING PURPOSES
 	if(CheckStimulusTimer >= 2.f)
 	{
 		CheckStimulusTimer = 0.f;
@@ -96,24 +96,27 @@ void ABaseAIController::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 }
 
-void ABaseAIController::QueryForActors_GameplayTags(const FGameplayTagContainer& InGameplayTagContainer,
+void ABaseAIController::QueryForActors_GameplayTags(const FGameplayTagContainer& InGameplayTagContainer, const EQueryType QueryType,
 	const UEnvQuery* const InEnvQuery, APawn* InPawn, const float SearchRadius, const float MinFindRadius, const float MaxFindRadius)
 {
 	TagsToBeTested = InGameplayTagContainer;
+	CurrentQueryType = QueryType;
 	FEnvQueryRequest ActorsQueryRequest = FEnvQueryRequest(InEnvQuery, InPawn);
+
+	if(SearchRadius > 0) ActorsQueryRequest.SetFloatParam(FName("SearchRadius"), SearchRadius);
+	else ActorsQueryRequest.SetFloatParam(FName("SearchRadius"), 1000.f);
 	
-	ActorsQueryRequest.SetFloatParam(FName("SearchRadius"), SearchRadius);
-	
-	if(MinFindRadius > 0) ActorsQueryRequest.SetFloatParam(FName("MinFindRadius"), MinFindRadius);
+	if(MinFindRadius > 0 && MinFindRadius < MaxFindRadius) ActorsQueryRequest.SetFloatParam(FName("MinFindRadius"), MinFindRadius);
 	else ActorsQueryRequest.SetFloatParam(FName("MinFindRadius"), 0.f);
 	
-	if(MaxFindRadius > 0) ActorsQueryRequest.SetFloatParam(FName("MaxFindRadius"), MaxFindRadius);
-	else ActorsQueryRequest.SetFloatParam(FName("MaxFindRadius"), SearchRadius);
+	if(MaxFindRadius > 0 && MaxFindRadius > MinFindRadius) ActorsQueryRequest.SetFloatParam(FName("MaxFindRadius"), MaxFindRadius);
+	else if(SearchRadius > 0) ActorsQueryRequest.SetFloatParam(FName("MaxFindRadius"), SearchRadius);
+	else ActorsQueryRequest.SetFloatParam(FName("MaxFindRadius"), 1000.f);
 	
 	ActorsQueryRequest.Execute(EEnvQueryRunMode::AllMatching, this, &ABaseAIController::HandleQueryRequest); //TODO: Change EEnvQueryRunMode to dynamic property
 }
 
-void ABaseAIController::HandleQueryRequest(TSharedPtr<FEnvQueryResult> Result) //TODO: Need to make an interface so that this function can be used for other classes than AAIBase
+void ABaseAIController::HandleQueryRequest(TSharedPtr<FEnvQueryResult> Result)
 {
 	ClearCustomAIContainer();
 	
@@ -129,13 +132,30 @@ void ABaseAIController::HandleQueryRequest(TSharedPtr<FEnvQueryResult> Result) /
 				const IQueryable* QueryableInterface = Cast<IQueryable>(OutActor);
 				if(QueryableInterface)
 				{
-					//UE_LOG(LogTemp, Display, TEXT("First Tag: %s"), *QueryableInterface->InterfaceGameplayTagContainer.First().GetTagName().ToString())
+					FGameplayTagQuery NewQuery;
 					
-					FGameplayTagQuery NewQuery = FGameplayTagQuery::MakeQuery_MatchAnyTags(TagsToBeTested); //TODO: Change MakeQuery_MatchAnyTags to a dynamic function which can be selected from the BP
+					switch(CurrentQueryType)
+					{
+					case EQueryType::EQT_AllTags:
+						NewQuery = FGameplayTagQuery::MakeQuery_MatchAllTags(TagsToBeTested);
+						break;
+					case EQueryType::EQT_AnyTags:
+						NewQuery = FGameplayTagQuery::MakeQuery_MatchAnyTags(TagsToBeTested);
+						break;
+					case EQueryType::EQT_NoTags:
+						NewQuery = FGameplayTagQuery::MakeQuery_MatchNoTags(TagsToBeTested);
+						break;
+					case EQueryType::EQT_SingleTag:
+						NewQuery = FGameplayTagQuery::MakeQuery_MatchTag(TagsToBeTested.First());
+						break;
+					default:
+						UE_LOG(LogTemp, Warning, TEXT("Query type not valid!"))
+						break;
+					}
+					
 					bool bMatchesQuery = QueryableInterface->InterfaceGameplayTagContainer.MatchesQuery(NewQuery);
 					if(bMatchesQuery)
 					{
-						//UE_LOG(LogTemp, Display, TEXT("MatchesQuery"))
 						AddToCustomAIContainer(OutActor);
 					}
 				}
@@ -146,22 +166,20 @@ void ABaseAIController::HandleQueryRequest(TSharedPtr<FEnvQueryResult> Result) /
 	if(BlackboardComponent) BlackboardComponent->SetValueAsObject(FName("QueryActors"), CustomAIContainer);
 	
 	TagsToBeTested = FGameplayTagContainer::EmptyContainer;
+	CurrentQueryType = EQueryType::EQT_MAX;
 }
 
 UBehaviorTree* ABaseAIController::GetBehaviorTree(const FName BehaviorTreeName) const
 {
-	UE_LOG(LogTemp, Display, TEXT("GetBehaviorTree"))
 	const FString BehaviorTreeTablePath(TEXT("DataTable'/Game/Assets/Datatables/BehaviorTreeTable.BehaviorTreeTable'"));
 	// ReSharper disable once CppTooWideScope
 	const UDataTable* BehaviorTreeTableObject = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, *BehaviorTreeTablePath));
 	if(BehaviorTreeTableObject)
 	{
-		UE_LOG(LogTemp, Display, TEXT("BehaviorTreeTableObject"))
 		// ReSharper disable once CppTooWideScope
 		const FBehaviorTreeTable* TableRow = BehaviorTreeTableObject->FindRow<FBehaviorTreeTable>(FName(BehaviorTreeName), TEXT(""));
 		if(TableRow)
 		{
-			UE_LOG(LogTemp, Display, TEXT("TableRow"))
 			return TableRow->BehaviorTree;
 		}
 	}
@@ -174,14 +192,17 @@ void ABaseAIController::OnPossess(APawn* InPawn)
 
 	if(InPawn == nullptr) return;
 	
-	if(AAIBase* Enemy = Cast<AAIBase>(InPawn))
+	if(const AAIBase* const Enemy = Cast<AAIBase>(InPawn))
 	{
 		if(Enemy->GetBehaviorTree())
 		{
-			BlackboardComponent->InitializeBlackboard(*(Enemy->GetBehaviorTree()->GetBlackboardAsset()));
-			BehaviorTreeComponent->StartTree(*GetBehaviorTree("Default"), EBTExecutionMode::Looped); //TODO: Instead of "Default" make it dynamic based on Gameplay Tags
-			//RunBehaviorTree(GetBehaviorTree("Default")); //BUG: RunBehaviorTree doesn't check if the tree is running already
-			if(BehaviorTreeComponent) BehaviorTreeComponent->SetDynamicSubtree(FGameplayTag::RequestGameplayTag(FName("Subtree.Work")), GetBehaviorTree("Work"));
+			if(BlackboardComponent) BlackboardComponent->InitializeBlackboard(*(Enemy->GetBehaviorTree()->GetBlackboardAsset()));
+			if(BehaviorTreeComponent)
+			{
+				BehaviorTreeComponent->StartTree(*GetBehaviorTree("Default"), EBTExecutionMode::Looped); //TODO: Instead of "Default" make it dynamic based on Gameplay Tags
+				//RunBehaviorTree(GetBehaviorTree("Default")); //BUG: RunBehaviorTree doesn't check if the tree is running already
+				BehaviorTreeComponent->SetDynamicSubtree(FGameplayTag::RequestGameplayTag(FName("Subtree.Work")), GetBehaviorTree("Work"));
+			}
 		}
 	}
 }

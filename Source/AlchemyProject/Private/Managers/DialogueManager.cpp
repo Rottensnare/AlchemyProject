@@ -14,7 +14,7 @@ UDialogueManager::UDialogueManager()
 void UDialogueManager::StartDialogue(const int32 DialogueStateID)
 {
 	//Load Dialogue for chosen NPC.
-	
+	UE_LOG(LogTemp, Warning, TEXT("StartDialogue"))
 	//Check if File for Dialogue States exists
 	bool bFileExists = FPlatformFileManager::Get().GetPlatformFile().FileExists(*DialogueFilePath_States);
 

@@ -82,4 +82,7 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	class UMultiLineEditableTextBox* MultiLineTextBox;
+
+	UFUNCTION()
+	void OptionSelected(int32 ID);
 };

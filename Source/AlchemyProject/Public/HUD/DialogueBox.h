@@ -6,6 +6,8 @@
 #include "Blueprint/UserWidget.h"
 #include "DialogueBox.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnOptionSelected, int32, ID);
+
 /**
  * 
  */
@@ -40,4 +42,11 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 	class UDialogueOverlay* DialogueOverlay;
+
+	UFUNCTION(BlueprintCallable)
+	void OptionSelected(const int32 ID) const;
+
+	FOnOptionSelected OnOptionSelected;
+	
+	void OnOptionsUpdated();
 };

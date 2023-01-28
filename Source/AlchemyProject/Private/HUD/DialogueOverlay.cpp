@@ -4,6 +4,7 @@
 #include "HUD/DialogueOverlay.h"
 
 #include "Components/Button.h"
+#include "Components/ListView.h"
 #include "HUD/DialogueBox.h"
 #include "Managers/DialogueManager.h"
 
@@ -29,6 +30,7 @@ void UDialogueOverlay::NativeOnInitialized()
 {
 	DialogueManager = NewObject<UDialogueManager>();
 	DialogueBox->DialogueOverlay = this;
+	DialogueBox->OnOptionSelected.AddDynamic(this, &UDialogueOverlay::OptionSelected);
 	
 	Super::NativeOnInitialized();
 }
@@ -37,5 +39,17 @@ void UDialogueOverlay::ExitButtonPressed()
 {
 	ExitButton->OnClicked.Broadcast();
 	
+}
+
+void UDialogueOverlay::OptionSelected(int32 ID)
+{
+	if(DialogueBox == nullptr || DialogueBox->DialogueListView == nullptr || DialogueManager == nullptr) return;
+	
+	for(const auto& Item : DialogueBox->DialogueListView->GetListItems())
+	{
+		DialogueBox->DialogueListView->RemoveItem(Item);
+	}
+	DialogueManager->StartDialogue(ID);
+	DialogueBox->OnOptionsUpdated();
 }
 

@@ -4,8 +4,10 @@
 #include "HUD/DialogueBox.h"
 
 #include "Components/ListView.h"
+#include "Components/MultiLineEditableTextBox.h"
 #include "Components/RichTextBlock.h"
 #include "HUD/DialogueBoxElement.h"
+#include "Managers/DialogueManager.h"
 
 void UDialogueBox::SetSelectedElement(const int32 ElementIndex)
 {
@@ -49,4 +51,18 @@ void UDialogueBox::AddToListView(TMap<int32, FDialogueOption>& InDialogueOptions
 void UDialogueBox::EmptyListView()
 {
 	DialogueListView->ClearListItems();
+}
+
+void UDialogueBox::OptionSelected(const int32 ID) const
+{
+	OnOptionSelected.Broadcast(ID);
+}
+
+void UDialogueBox::OnOptionsUpdated()
+{
+	if(DialogueOverlay && DialogueOverlay->DialogueManager && DialogueOverlay->MultiLineTextBox)
+	{
+		AddToListView(DialogueOverlay->DialogueManager->GetCurrentDialogueOptions());
+		DialogueOverlay->MultiLineTextBox->SetText(FText::FromString(DialogueOverlay->DialogueManager->GetNPCDialogue()));
+	}
 }

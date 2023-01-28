@@ -3,8 +3,8 @@
         {
 			"DialogueStateID": 1,
 			"NPCDialogueText": "Hello, how are you?",
-			"DialogueOptions": [1, 2]
-		},
+			"DialogueOptions": [1, 2],
+        },
         {
 			"DialogueStateID": 2,
 			"NPCDialogueText": "You son of a witch!",
