@@ -3,6 +3,7 @@
 
 #include "Managers/DialogueManager.h"
 #include "Json.h"
+#include "AI/AIBase.h"
 
 
 UDialogueManager::UDialogueManager()
@@ -13,6 +14,8 @@ UDialogueManager::UDialogueManager()
 
 void UDialogueManager::StartDialogue(const int32 DialogueStateID)
 {
+	TestJSONRead();
+	
 	//Load Dialogue for chosen NPC.
 	UE_LOG(LogTemp, Warning, TEXT("StartDialogue"))
 	//Check if File for Dialogue States exists
@@ -30,6 +33,7 @@ void UDialogueManager::StartDialogue(const int32 DialogueStateID)
 		UE_LOG(LogTemp, Error, TEXT("LoadFileToString failed with file path %s"), *DialogueFilePath_States);
 	}
 	TSharedPtr<FJsonObject> JsonObject;
+	
 	TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(JsonString);
 	//Deserialize JsonString to JsonObject using the JsonReader
 	bool bDeserialized = FJsonSerializer::Deserialize(JsonReader, JsonObject);
@@ -38,7 +42,7 @@ void UDialogueManager::StartDialogue(const int32 DialogueStateID)
 		UE_LOG(LogTemp, Error, TEXT("StartDialogue: JsonObject was not valid"));
 		return;
 	}
-
+	
 	//Get the Objects array for later use
 	TArray<TSharedPtr<FJsonValue>> JsonArray = JsonObject->GetArrayField("Objects");
 	TArray<TSharedPtr<FJsonValue>> DialogueOptions;
@@ -122,6 +126,11 @@ bool UDialogueManager::GetJSON(const FString& FilePath, int32 ID)
 void UDialogueManager::EndDialogue()
 {
 	OnDialogueEnd.Broadcast();
+}
+
+void UDialogueManager::TestJSONRead()
+{
+	
 }
 
 void UDialogueManager::EmptyDialogueOptions()

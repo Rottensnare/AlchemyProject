@@ -3,6 +3,8 @@
 
 #include "AlchemyComponent.h"
 
+#include <string>
+
 #include "AlchemyProject/InventoryComponent.h"
 #include "AlchemyProject/PlayerCharacter.h"
 #include "AlchemyProject/Alchemy/AlchemyBase.h"
@@ -196,10 +198,16 @@ FAlchemyPackage UAlchemyComponent::CreateAlchemyPackage(const TArray<FIngredient
 	return AlchemyPackage;
 }
 
+uint32 GetTypeHash(const FProductInfo& Other)
+{
+	return FCrc::MemCrc32(&Other, sizeof(FProductInfo));
+}
+
 void UAlchemyComponent::AddAitemToInventory()
 {
 	//UE_LOG(LogTemp, Warning, TEXT("AddAitemToInventory Product quality: %s"), *UEnum::GetDisplayValueAsText(Aitem->ProductInfo.ProductQuality ).ToString())
 	const uint32 HashCode = UUserDefinedStruct::GetUserDefinedStructTypeHash(&Aitem->ProductInfo, FProductInfo::StaticStruct());
+	UE_LOG(LogTemp, Warning, TEXT("HashCode with MemCrc32: %d"), GetTypeHash(&Aitem->ProductInfo))
 	//UE_LOG(LogTemp, Warning, TEXT("HashCode: %u"), HashCode)
 	if(APotion* TempPotion = Cast<APotion>(Aitem))
 	{
@@ -207,3 +215,4 @@ void UAlchemyComponent::AddAitemToInventory()
 	}
 	
 }
+

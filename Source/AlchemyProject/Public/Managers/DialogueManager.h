@@ -27,6 +27,8 @@ public:
 
 	void EndDialogue();
 
+	void TestJSONRead();
+
 private:
 
 	FDialogueState CurrentDialogueState;

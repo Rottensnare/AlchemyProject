@@ -80,6 +80,9 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<class UDialogueManager> DialogueManager;
 
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<class UDialogueEventManager> DialogueEventManager;
+
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	class UMultiLineEditableTextBox* MultiLineTextBox;
 

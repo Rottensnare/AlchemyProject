@@ -34,7 +34,6 @@ struct FRecipeTable : public FTableRowBase
 
 	UPROPERTY(EditAnywhere)
 	float BaseSuccessChance{1.f};
-	
 };
 
 USTRUCT(BlueprintType)

@@ -6,6 +6,7 @@
 #include "Components/Button.h"
 #include "Components/ListView.h"
 #include "HUD/DialogueBox.h"
+#include "Managers/DialogueEventManager.h"
 #include "Managers/DialogueManager.h"
 
 void FDialogueOption::AssignID()
@@ -29,6 +30,7 @@ void FDialogueOption::HandlePlayerChoice()
 void UDialogueOverlay::NativeOnInitialized()
 {
 	DialogueManager = NewObject<UDialogueManager>();
+	DialogueEventManager = NewObject<UDialogueEventManager>();
 	DialogueBox->DialogueOverlay = this;
 	DialogueBox->OnOptionSelected.AddDynamic(this, &UDialogueOverlay::OptionSelected);
 	
@@ -38,7 +40,6 @@ void UDialogueOverlay::NativeOnInitialized()
 void UDialogueOverlay::ExitButtonPressed()
 {
 	ExitButton->OnClicked.Broadcast();
-	
 }
 
 void UDialogueOverlay::OptionSelected(int32 ID)
@@ -60,6 +61,17 @@ void UDialogueOverlay::OptionSelected(int32 ID)
 	else
 	{
 		DialogueManager->StartDialogue(ID);
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("ExitButtonPressed"))
+	bool bWasSuccess = false;
+	TArray<UObject*> Objects = DialogueEventManager->GetDialogueObjects("TestRow", bWasSuccess);
+	if(bWasSuccess)
+	{
+		for(const auto& Object : Objects)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Object Name is %s"), *Object->GetName())
+		}
 	}
 	
 	DialogueBox->OnOptionsUpdated();
