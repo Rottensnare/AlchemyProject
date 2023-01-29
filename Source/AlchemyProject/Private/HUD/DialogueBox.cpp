@@ -38,11 +38,14 @@ void UDialogueBox::AddToListView(TArray<FString>& Options)
 
 void UDialogueBox::AddToListView(TMap<int32, FDialogueOption>& InDialogueOptions)
 {
+	DialogueOptions.Empty();
+	
 	for(const auto& Option : InDialogueOptions)
 	{
 		UDialogueBoxElement* DialogueBoxElement = Cast<UDialogueBoxElement>(CreateWidget(this, DialogueBoxElementClass));
 		if(!DialogueBoxElement) continue;
-		UE_LOG(LogTemp, Warning, TEXT("AddToListView"))
+		DialogueOptions.Add(Option.Value);
+		UE_LOG(LogTemp, Warning, TEXT("AddToListView: Key: %d TEXT: %s"), Option.Key, *Option.Value.TextToDisplay.ToString())
 		DialogueBoxElement->DialogueOption = Option.Value;
 		DialogueListView->AddItem(DialogueBoxElement);
 	}

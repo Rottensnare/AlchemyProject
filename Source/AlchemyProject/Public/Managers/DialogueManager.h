@@ -50,7 +50,7 @@ public:
 	FORCEINLINE TArray<FString>& GetOptionStrings() {return OptionStrings;}
 	FORCEINLINE FString GetNPCDialogue() const {return NPCDialogue;}
 	FORCEINLINE int32 GetNextDialogueStateID() const {return NextDialogueStateID;}
-	FORCEINLINE TMap<int32, FDialogueOption>& GetCurrentDialogueOptions() {return CurrentDialogueOptions;}
+	FORCEINLINE TMap<int32, FDialogueOption>&GetCurrentDialogueOptions() {return CurrentDialogueOptions;}
 
 	void EmptyDialogueOptions();
 

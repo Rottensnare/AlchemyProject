@@ -48,5 +48,8 @@ public:
 
 	FOnOptionSelected OnOptionSelected;
 	
+	UPROPERTY(BlueprintReadOnly)
+	TArray<FDialogueOption> DialogueOptions;
+	
 	void OnOptionsUpdated();
 };

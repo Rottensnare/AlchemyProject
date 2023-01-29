@@ -22,11 +22,9 @@
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "Components/UniformGridPanel.h"
-#include "GameFramework/PawnMovementComponent.h"
 #include "HUD/DialogueBox.h"
 #include "HUD/DialogueOverlay.h"
 #include "Kismet/GameplayStatics.h"
-#include "Kismet/KismetArrayLibrary.h"
 #include "Managers/DialogueManager.h"
 #include "Sound/SoundCue.h"
 

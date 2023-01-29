@@ -17,16 +17,27 @@ void UDialogueManager::StartDialogue(const int32 DialogueStateID)
 	UE_LOG(LogTemp, Warning, TEXT("StartDialogue"))
 	//Check if File for Dialogue States exists
 	bool bFileExists = FPlatformFileManager::Get().GetPlatformFile().FileExists(*DialogueFilePath_States);
-
+	if(!bFileExists)
+	{
+		UE_LOG(LogTemp, Error, TEXT("File didn't exist: %s"), *DialogueFilePath_States)
+		return;
+	}
 	//Load the file onto a FString
 	FString JsonString;
 	bool bLoadFileSuccess = FFileHelper::LoadFileToString(JsonString, *DialogueFilePath_States);
-	
+	if(!bLoadFileSuccess)
+	{
+		UE_LOG(LogTemp, Error, TEXT("LoadFileToString failed with file path %s"), *DialogueFilePath_States);
+	}
 	TSharedPtr<FJsonObject> JsonObject;
 	TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(JsonString);
 	//Deserialize JsonString to JsonObject using the JsonReader
 	bool bDeserialized = FJsonSerializer::Deserialize(JsonReader, JsonObject);
-	if(!JsonObject.IsValid()) return;
+	if(!JsonObject.IsValid())
+	{
+		UE_LOG(LogTemp, Error, TEXT("StartDialogue: JsonObject was not valid"));
+		return;
+	}
 
 	//Get the Objects array for later use
 	TArray<TSharedPtr<FJsonValue>> JsonArray = JsonObject->GetArrayField("Objects");
@@ -46,7 +57,13 @@ void UDialogueManager::StartDialogue(const int32 DialogueStateID)
 			CurrentDialogueStateID = DialogueStateID;
 		}
 	}
-	if(DialogueOptions.IsEmpty()) return;
+	
+	if(DialogueOptions.IsEmpty())
+	{
+		UE_LOG(LogTemp, Error, TEXT("DialogueOptions was empty."))
+		return;
+	}
+	
 	OptionStrings.Empty();
 	EmptyDialogueOptions();
 	// Iterate through all the options and get the data from the JSON file
@@ -62,12 +79,25 @@ void UDialogueManager::StartDialogue(const int32 DialogueStateID)
 bool UDialogueManager::GetJSON(const FString& FilePath, int32 ID)
 {
 	bool bFileExists = FPlatformFileManager::Get().GetPlatformFile().FileExists(*FilePath);
+	if(!bFileExists)
+	{
+		UE_LOG(LogTemp, Error, TEXT("File didn't exist: %s"), *FilePath)
+		return false;
+	}
 	FString JsonString;
 	bool bLoadFileSuccess = FFileHelper::LoadFileToString(JsonString, *FilePath);
+	if(!bLoadFileSuccess)
+	{
+		UE_LOG(LogTemp, Error, TEXT("LoadFileToString failed with file path %s"), *FilePath);
+	}
 	TSharedPtr<FJsonObject> JsonObject;
 	TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(JsonString);
 	bool bDeserialized = FJsonSerializer::Deserialize(JsonReader, JsonObject);
-	if(!JsonObject.IsValid()) return false;
+	if(!JsonObject.IsValid())
+	{
+		UE_LOG(LogTemp, Error, TEXT("GetJSON: JsonObject was not valid"));
+		return false;
+	}
 	TArray<TSharedPtr<FJsonValue>> JsonArray = JsonObject->GetArrayField("Objects");
 	for(int32 i = 0; i < JsonArray.Num(); i++)
 	{
@@ -77,6 +107,7 @@ bool UDialogueManager::GetJSON(const FString& FilePath, int32 ID)
 		{
 			FDialogueOption TempOption;
 			FString ObjectName = Object->GetStringField("TextToDisplay");
+			TempOption.DialogueID = ID;
 			TempOption.TextToDisplay = FText::FromString(ObjectName);
 			TempOption.NextDialogueStateID = Object->GetNumberField("NextDialogueStateID");
 			OptionStrings.Add(ObjectName);
