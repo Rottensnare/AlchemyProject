@@ -53,7 +53,7 @@ void UDialogueManager::StartDialogue(const int32 DialogueStateID)
 			//Store the Dialogue text and options
 			NPCDialogue = Object->GetStringField("NPCDialogueText");
 			DialogueOptions = Object->GetArrayField(FString("DialogueOptions"));
-			PreviousDialogueStateID = CurrentDialogueStateID;
+			if(CurrentDialogueStateID > 0) PreviousDialogueStateID = CurrentDialogueStateID;
 			CurrentDialogueStateID = DialogueStateID;
 		}
 	}
@@ -117,6 +117,11 @@ bool UDialogueManager::GetJSON(const FString& FilePath, int32 ID)
 	
 	return true;
 	
+}
+
+void UDialogueManager::EndDialogue()
+{
+	OnDialogueEnd.Broadcast();
 }
 
 void UDialogueManager::EmptyDialogueOptions()

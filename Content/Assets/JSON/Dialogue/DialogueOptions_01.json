@@ -3,12 +3,12 @@
     {
       "DialogueID": 1,
       "TextToDisplay": "Screw you!",
-      "NextDialogueStateID": 2
+      "NextDialogueStateID": 0
     },
     {
       "DialogueID": 2,
       "TextToDisplay": "I'm fine, thank you.",
-      "NextDialogueStateID": 3
+      "NextDialogueStateID": -1
     },
     {
       "DialogueID": 3,
@@ -23,7 +23,7 @@
     {
       "DialogueID": 5,
       "TextToDisplay": "Get out of my house!",
-      "NextDialogueStateID": 4
+      "NextDialogueStateID": 0
     }
   ]
 }

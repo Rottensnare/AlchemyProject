@@ -85,4 +85,8 @@ public:
 
 	UFUNCTION()
 	void OptionSelected(int32 ID);
+
+private:
+
+	void RemoveItems();
 };

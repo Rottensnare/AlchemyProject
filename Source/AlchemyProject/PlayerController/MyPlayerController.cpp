@@ -380,11 +380,36 @@ void AMyPlayerController::BeginPlay()
 	if(PlayerHUD)
 	{
 		PlayerHUD->AddCharacterOverlay();
-		if(PlayerHUD->DialogueOverlay && PlayerHUD->DialogueOverlay->ExitButton)
+		if(PlayerHUD->DialogueOverlay && PlayerHUD->DialogueOverlay->ExitButton && PlayerHUD->DialogueOverlay->DialogueManager)
 		{
 			PlayerHUD->DialogueOverlay->ExitButton->OnClicked.AddDynamic(this, &ThisClass::OnClicked_Delegate);
+			PlayerHUD->DialogueOverlay->DialogueManager->OnDialogueEnd.AddDynamic(this, &AMyPlayerController::OnEndDialogue);
 		}
 	}
+}
+
+void AMyPlayerController::OnPossess(APawn* InPawn)
+{
+	/*
+	UE_LOG(LogTemp, Warning, TEXT("OnPossess"))
+	PlayerHUD = PlayerHUD == nullptr ? Cast<APlayerHUD>(GetHUD()) : PlayerHUD;
+	if(!PlayerHUD) {UE_LOG(LogTemp, Warning, TEXT("PlayerHUD not valid"))}
+	else if(!PlayerHUD->DialogueOverlay) {UE_LOG(LogTemp, Warning, TEXT("DialogueOverlay not valid"))}
+	else if(!PlayerHUD->DialogueOverlay) {UE_LOG(LogTemp, Warning, TEXT("DialogueManager not valid"))}
+	else if(PlayerHUD && PlayerHUD->DialogueOverlay && PlayerHUD->DialogueOverlay->DialogueManager)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Was valid"))
+		PlayerHUD->DialogueOverlay->DialogueManager->OnDialogueEnd.AddDynamic(this, &AMyPlayerController::OnEndDialogue);
+	}
+	*/
+	
+	Super::OnPossess(InPawn);
+}
+
+void AMyPlayerController::OnEndDialogue()
+{
+	UE_LOG(LogTemp, Warning, TEXT("OnEndDialogue"))
+	ToggleDialogueOverlay();
 }
 
 

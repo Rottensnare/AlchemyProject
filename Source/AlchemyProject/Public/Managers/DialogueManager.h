@@ -7,6 +7,8 @@
 #include "UObject/NoExportTypes.h"
 #include "DialogueManager.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDialogueEnd);
+
 /**
  * 
  */
@@ -23,10 +25,12 @@ public:
 
 	bool GetJSON(const FString& FilePath, int32 ID);
 
+	void EndDialogue();
+
 private:
 
 	FDialogueState CurrentDialogueState;
-	int32 CurrentDialogueStateID;
+	int32 CurrentDialogueStateID{0};
 	
 	FDialogueState PreviousDialogueState;
 	int32 PreviousDialogueStateID;
@@ -50,10 +54,13 @@ public:
 	FORCEINLINE TArray<FString>& GetOptionStrings() {return OptionStrings;}
 	FORCEINLINE FString GetNPCDialogue() const {return NPCDialogue;}
 	FORCEINLINE int32 GetNextDialogueStateID() const {return NextDialogueStateID;}
+	FORCEINLINE int32 GetPreviousDialogueStateID() const {return PreviousDialogueStateID;}
 	FORCEINLINE TMap<int32, FDialogueOption>&GetCurrentDialogueOptions() {return CurrentDialogueOptions;}
 
 	void EmptyDialogueOptions();
 
 	UFUNCTION(BlueprintCallable)
 	TArray<int32> GetDialogueOptions(TArray<FDialogueOption>& OutOptions);
+
+	FOnDialogueEnd OnDialogueEnd;
 };

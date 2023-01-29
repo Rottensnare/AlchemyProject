@@ -44,12 +44,32 @@ void UDialogueOverlay::ExitButtonPressed()
 void UDialogueOverlay::OptionSelected(int32 ID)
 {
 	if(DialogueBox == nullptr || DialogueBox->DialogueListView == nullptr || DialogueManager == nullptr) return;
+	RemoveItems();
+	UE_LOG(LogTemp, Warning, TEXT("ID: %d"), ID)
+	if(ID == 0)
+	{
+		DialogueManager->EndDialogue();
+		return;
+	}
 	
+	if(ID == -1 && (DialogueManager->GetPreviousDialogueStateID() > 0))
+	{
+		
+		DialogueManager->StartDialogue(DialogueManager->GetPreviousDialogueStateID());
+	}
+	else
+	{
+		DialogueManager->StartDialogue(ID);
+	}
+	
+	DialogueBox->OnOptionsUpdated();
+}
+
+void UDialogueOverlay::RemoveItems()
+{
 	for(const auto& Item : DialogueBox->DialogueListView->GetListItems())
 	{
 		DialogueBox->DialogueListView->RemoveItem(Item);
 	}
-	DialogueManager->StartDialogue(ID);
-	DialogueBox->OnOptionsUpdated();
 }
 
