@@ -4,13 +4,48 @@
 #include "Managers/DialogueEventManager.h"
 
 #include "AI/AIBase.h"
+#include "AlchemyProject/HealthComponent.h"
+#include "AlchemyProject/PlayerCharacter.h"
+#include "AlchemyProject/HUD/PlayerHUD.h"
+#include "AlchemyProject/PlayerController/MyPlayerController.h"
 #include "Engine/DataTable.h"
 #include "HUD/DialogueOverlay.h"
 
-bool UDialogueEventManager::HandleDialogueEvent(const FString& EventName)
+//TODO: This is a temporary solution
+bool UDialogueEventManager::HandleDialogueEvent(const FString& EventName, const TArray<TSoftObjectPtr<>>& EventObjects)
 {
+	TArray<FString> Arguments;
+	EventName.ParseIntoArray(Arguments, TEXT(","));
 	
+	for(const FString& Argument : Arguments)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Argument: %s"), *Argument)
+		if(Argument == FString("Heal"))
+		{
+			for(const auto& EventObject : EventObjects)
+			{
+				APlayerCharacter* PlayerChara = Cast<APlayerCharacter>(EventObject.Get());
+				if(PlayerChara)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("PlayerChara"))
+					PlayerChara->GetHealthComponent()->SetHealth(
+					FMath::Clamp(
+					PlayerChara->GetHealthComponent()->GetHealth() + FMath::Clamp(200.f , 0, 10000)
+					, 0.f
+					, PlayerChara->GetHealthComponent()->GetMaxHealth()));
 
+					//Update HUD
+					if(const AMyPlayerController* const TempController = Cast<AMyPlayerController>(PlayerChara->Controller))
+					{
+						if(APlayerHUD* const TempHUD = Cast<APlayerHUD>(TempController->GetHUD()))
+						{
+							TempHUD->UpdateHealthBar(PlayerChara->GetHealthComponent()->GetHealth(), PlayerChara->GetHealthComponent()->GetMaxHealth());
+						}
+					}
+				}
+			}
+		}
+	}
 	
 	return true;
 }

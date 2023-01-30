@@ -16,7 +16,7 @@ class ALCHEMYPROJECT_API UDialogueEventManager : public UObject
 
 public:
 
-	bool HandleDialogueEvent(const FString& EventName);
+	bool HandleDialogueEvent(const FString& EventName, const TArray<TSoftObjectPtr<>>& EventObjects);
 
 	TArray<UObject*> GetDialogueObjects(const FName& RowName, bool& bSuccess);
 };

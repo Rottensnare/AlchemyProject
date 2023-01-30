@@ -4,9 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "HUD/DialogueOverlay.h"
 #include "DialogueBox.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnOptionSelected, int32, ID);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnOptionSelected, FDialogueOption, SelectedOption);
 
 /**
  * 
@@ -44,7 +45,7 @@ public:
 	class UDialogueOverlay* DialogueOverlay;
 
 	UFUNCTION(BlueprintCallable)
-	void OptionSelected(const int32 ID) const;
+	void OptionSelected(const FDialogueOption SelectedOption) const;
 
 	FOnOptionSelected OnOptionSelected;
 	

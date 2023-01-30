@@ -383,6 +383,7 @@ void AMyPlayerController::BeginPlay()
 		if(PlayerHUD->DialogueOverlay && PlayerHUD->DialogueOverlay->ExitButton && PlayerHUD->DialogueOverlay->DialogueManager)
 		{
 			PlayerHUD->DialogueOverlay->ExitButton->OnClicked.AddDynamic(this, &ThisClass::OnClicked_Delegate);
+			PlayerHUD->DialogueOverlay->Player = Cast<APlayerCharacter>(GetPawn());
 			PlayerHUD->DialogueOverlay->DialogueManager->OnDialogueEnd.AddDynamic(this, &AMyPlayerController::OnEndDialogue);
 		}
 	}

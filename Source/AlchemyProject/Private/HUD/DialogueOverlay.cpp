@@ -43,25 +43,32 @@ void UDialogueOverlay::ExitButtonPressed()
 	ExitButton->OnClicked.Broadcast();
 }
 
-void UDialogueOverlay::OptionSelected(int32 ID)
+void UDialogueOverlay::OptionSelected(FDialogueOption SelectedOption)
 {
-	if(DialogueBox == nullptr || DialogueBox->DialogueListView == nullptr || DialogueManager == nullptr) return;
+	if(DialogueBox == nullptr || DialogueBox->DialogueListView == nullptr || DialogueManager == nullptr || DialogueEventManager == nullptr) return;
 	RemoveItems();
-	UE_LOG(LogTemp, Warning, TEXT("ID: %d"), ID)
-	if(ID == 0)
+
+	for(const auto& Argument : SelectedOption.EventArguments)
+	{
+		DialogueEventManager.Get()->HandleDialogueEvent(Argument, SelectedOption.FunctionObjects);
+	}
+	
+	
+	UE_LOG(LogTemp, Warning, TEXT("ID: %d"), SelectedOption.NextDialogueStateID)
+	if(SelectedOption.NextDialogueStateID == 0)
 	{
 		DialogueManager->EndDialogue();
 		return;
 	}
 	
-	if(ID == -1 && (DialogueManager->GetPreviousDialogueStateID() > 0))
+	if(SelectedOption.NextDialogueStateID == -1 && (DialogueManager->GetPreviousDialogueStateID() > 0))
 	{
 		
 		DialogueManager->StartDialogue(DialogueManager->GetPreviousDialogueStateID());
 	}
 	else
 	{
-		DialogueManager->StartDialogue(ID);
+		DialogueManager->StartDialogue(SelectedOption.NextDialogueStateID);
 	}
 
 	UE_LOG(LogTemp, Warning, TEXT("ExitButtonPressed"))

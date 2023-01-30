@@ -27,7 +27,9 @@
 		"NextDialogueStateID": 3,
 		"FunctionNames": [],
 		"FunctionObjects": [],
-		"EventArguments": []
+		"EventArguments": [
+			"Heal,Self,200"
+		]
 	},
 	{
 		"Name": "NewRow_1",

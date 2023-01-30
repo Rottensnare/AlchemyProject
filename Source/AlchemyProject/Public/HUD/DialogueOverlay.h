@@ -30,9 +30,9 @@ struct FDialogueOption : public FTableRowBase
 	//TODO: Make this Blueprint usable. Not really intuitive to write function names like &APlayerCharacter::DoSomething inside the editor.
 	UPROPERTY(EditAnywhere)
 	TArray<FName> FunctionNames;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TArray<TSoftObjectPtr<UObject>>FunctionObjects;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TArray<FString> EventArguments;
 
 	void HandlePlayerChoice();
@@ -91,10 +91,13 @@ public:
 	class UMultiLineEditableTextBox* MultiLineTextBox;
 
 	UFUNCTION()
-	void OptionSelected(int32 ID);
+	void OptionSelected(FDialogueOption SelectedOption);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FString RegexPatternString{"\"([^\"]*)\""};
+
+	UPROPERTY(BlueprintReadOnly)
+	class APlayerCharacter* Player;
 
 private:
 

@@ -20,7 +20,7 @@ void UDialogueManager::StartDialogue(const int32 DialogueStateID)
 	TestJSONRead();
 	
 	//Load Dialogue for chosen NPC.
-	UE_LOG(LogTemp, Warning, TEXT("StartDialogue"))
+	//UE_LOG(LogTemp, Warning, TEXT("StartDialogue"))
 	//Check if File for Dialogue States exists
 	bool bFileExists = FPlatformFileManager::Get().GetPlatformFile().FileExists(*DialogueFilePath_States);
 	if(!bFileExists)
@@ -136,6 +136,12 @@ bool UDialogueManager::GetJSON(const FString& FilePath, int32 ID)
 			
 			TempOption.TextToDisplay = FText::FromString(ObjectName);
 			TempOption.NextDialogueStateID = Object->GetNumberField("NextDialogueStateID");
+			TArray<TSharedPtr<FJsonValue>> EventArgArray = Object->GetArrayField("EventArguments");
+			for(const auto& Arg : EventArgArray)
+			{
+				TempOption.EventArguments.Add(Arg->AsString());
+				//UE_LOG(LogTemp, Warning, TEXT("Argument: %s"), *Arg->AsString())
+			}
 			OptionStrings.Add(ObjectName);
 			CurrentDialogueOptions.Emplace(i, TempOption);
 		}

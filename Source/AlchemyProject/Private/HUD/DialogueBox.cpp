@@ -56,9 +56,9 @@ void UDialogueBox::EmptyListView()
 	DialogueListView->ClearListItems();
 }
 
-void UDialogueBox::OptionSelected(const int32 ID) const
+void UDialogueBox::OptionSelected(const FDialogueOption SelectedOption) const
 {
-	OnOptionSelected.Broadcast(ID);
+	OnOptionSelected.Broadcast(SelectedOption);
 }
 
 void UDialogueBox::OnOptionsUpdated()
