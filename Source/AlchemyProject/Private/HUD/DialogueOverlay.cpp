@@ -30,6 +30,7 @@ void FDialogueOption::HandlePlayerChoice()
 void UDialogueOverlay::NativeOnInitialized()
 {
 	DialogueManager = NewObject<UDialogueManager>();
+	DialogueManager->RegexPattern = RegexPatternString;
 	DialogueEventManager = NewObject<UDialogueEventManager>();
 	DialogueBox->DialogueOverlay = this;
 	DialogueBox->OnOptionSelected.AddDynamic(this, &UDialogueOverlay::OptionSelected);

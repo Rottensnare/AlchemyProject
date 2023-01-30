@@ -14,7 +14,7 @@ struct FDialogueOption : public FTableRowBase
 {
 	GENERATED_BODY()
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly) //TODO: Make auto increment
 	int32 DialogueID;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FText TextToDisplay;
@@ -32,6 +32,8 @@ struct FDialogueOption : public FTableRowBase
 	TArray<FName> FunctionNames;
 	UPROPERTY(EditAnywhere)
 	TArray<TSoftObjectPtr<UObject>>FunctionObjects;
+	UPROPERTY(EditAnywhere)
+	TArray<FString> EventArguments;
 
 	void HandlePlayerChoice();
 	
@@ -43,11 +45,13 @@ struct FDialogueState : public FTableRowBase
 {
 	GENERATED_BODY()
 
+	UPROPERTY(EditAnywhere)
 	int32 DialogueStateID;
 	
 	UPROPERTY(EditAnywhere)
 	FText NPCDialogueText;
 
+	UPROPERTY(EditAnywhere)
 	TArray<int32> DialogueOptions;
 	
 };
@@ -88,6 +92,9 @@ public:
 
 	UFUNCTION()
 	void OptionSelected(int32 ID);
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FString RegexPatternString{"\"([^\"]*)\""};
 
 private:
 

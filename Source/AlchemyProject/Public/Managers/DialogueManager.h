@@ -50,6 +50,9 @@ private:
 	
 	TArray<FString> OptionStrings;
 
+	void AddPrefixToJSON(FString& OutJsonString);
+	void RemoveLocalizationText(FString& OutString);
+
 public:
 
 	FORCEINLINE FString GetNPCName() const {return NPCName;}
@@ -65,4 +68,6 @@ public:
 	TArray<int32> GetDialogueOptions(TArray<FDialogueOption>& OutOptions);
 
 	FOnDialogueEnd OnDialogueEnd;
+	
+	FString RegexPattern{""};
 };

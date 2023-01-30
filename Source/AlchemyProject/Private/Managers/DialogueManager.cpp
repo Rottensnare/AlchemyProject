@@ -8,10 +8,13 @@
 
 UDialogueManager::UDialogueManager()
 {
-	DialogueFilePath_Options = TEXT("C:\\Users\\Rotte\\Documents\\Unreal Projects\\AlchemyProject\\Content\\Assets\\JSON\\Dialogue\\DialogueOptions_01.json");
-	DialogueFilePath_States = TEXT("C:\\Users\\Rotte\\Documents\\Unreal Projects\\AlchemyProject\\Content\\Assets\\JSON\\Dialogue\\DialogueStates_01.json");
+	DialogueFilePath_Options = TEXT("C:\\Users\\Rotte\\Documents\\Unreal Projects\\AlchemyProject\\Content\\Assets\\JSON\\Dialogue\\DialogueOptionTable.json");
+	//DialogueFilePath_Options = TEXT("C:\\Users\\Rotte\\Documents\\Unreal JSON\\AlchemyProject\\DialogueOptionTable.json");
+	//DialogueFilePath_States = TEXT("C:\\Users\\Rotte\\Documents\\Unreal Projects\\AlchemyProject\\Content\\Assets\\JSON\\Dialogue\\DialogueStates_01.json");
+	DialogueFilePath_States = TEXT("C:\\Users\\Rotte\\Documents\\Unreal Projects\\AlchemyProject\\Content\\Assets\\JSON\\Dialogue\\DialogueStateTable.json");
 }
 
+//TODO: divide into smaller function
 void UDialogueManager::StartDialogue(const int32 DialogueStateID)
 {
 	TestJSONRead();
@@ -28,6 +31,9 @@ void UDialogueManager::StartDialogue(const int32 DialogueStateID)
 	//Load the file onto a FString
 	FString JsonString;
 	bool bLoadFileSuccess = FFileHelper::LoadFileToString(JsonString, *DialogueFilePath_States);
+	
+	AddPrefixToJSON(JsonString);
+	
 	if(!bLoadFileSuccess)
 	{
 		UE_LOG(LogTemp, Error, TEXT("LoadFileToString failed with file path %s"), *DialogueFilePath_States);
@@ -44,7 +50,7 @@ void UDialogueManager::StartDialogue(const int32 DialogueStateID)
 	}
 	
 	//Get the Objects array for later use
-	TArray<TSharedPtr<FJsonValue>> JsonArray = JsonObject->GetArrayField("Objects");
+	TArray<TSharedPtr<FJsonValue>> JsonArray = JsonObject->GetArrayField("Table");
 	TArray<TSharedPtr<FJsonValue>> DialogueOptions;
 	//TArray<int32> OptionIDs;
 
@@ -56,6 +62,7 @@ void UDialogueManager::StartDialogue(const int32 DialogueStateID)
 		{
 			//Store the Dialogue text and options
 			NPCDialogue = Object->GetStringField("NPCDialogueText");
+			RemoveLocalizationText(NPCDialogue);
 			DialogueOptions = Object->GetArrayField(FString("DialogueOptions"));
 			if(CurrentDialogueStateID > 0) PreviousDialogueStateID = CurrentDialogueStateID;
 			CurrentDialogueStateID = DialogueStateID;
@@ -79,6 +86,7 @@ void UDialogueManager::StartDialogue(const int32 DialogueStateID)
 	}
 }
 
+
 /**	Used for getting the dialogue options from the corresponding JSON file */
 bool UDialogueManager::GetJSON(const FString& FilePath, int32 ID)
 {
@@ -90,6 +98,7 @@ bool UDialogueManager::GetJSON(const FString& FilePath, int32 ID)
 	}
 	FString JsonString;
 	bool bLoadFileSuccess = FFileHelper::LoadFileToString(JsonString, *FilePath);
+	AddPrefixToJSON(JsonString);
 	if(!bLoadFileSuccess)
 	{
 		UE_LOG(LogTemp, Error, TEXT("LoadFileToString failed with file path %s"), *FilePath);
@@ -102,7 +111,7 @@ bool UDialogueManager::GetJSON(const FString& FilePath, int32 ID)
 		UE_LOG(LogTemp, Error, TEXT("GetJSON: JsonObject was not valid"));
 		return false;
 	}
-	TArray<TSharedPtr<FJsonValue>> JsonArray = JsonObject->GetArrayField("Objects");
+	TArray<TSharedPtr<FJsonValue>> JsonArray = JsonObject->GetArrayField("Table");
 	for(int32 i = 0; i < JsonArray.Num(); i++)
 	{
 		TSharedPtr<FJsonObject> Object = JsonArray[i]->AsObject();
@@ -112,6 +121,19 @@ bool UDialogueManager::GetJSON(const FString& FilePath, int32 ID)
 			FDialogueOption TempOption;
 			FString ObjectName = Object->GetStringField("TextToDisplay");
 			TempOption.DialogueID = ID;
+			
+			/** Regex not seem to be working...
+			 *
+			FRegexPattern Pattern = FRegexPattern(RegexPattern);
+			FRegexMatcher Matcher = FRegexMatcher(Pattern, ObjectName);
+			UE_LOG(LogTemp, Warning, TEXT("Regex: %d"), Matcher.GetMatchEnding())
+			UE_LOG(LogTemp, Warning, TEXT("Regex String: %s"), *Matcher.GetCaptureGroup(0));
+			
+			*/
+			
+			// Since Regex is not working, I have to do this the "hard" way
+			RemoveLocalizationText(ObjectName);
+			
 			TempOption.TextToDisplay = FText::FromString(ObjectName);
 			TempOption.NextDialogueStateID = Object->GetNumberField("NextDialogueStateID");
 			OptionStrings.Add(ObjectName);
@@ -131,6 +153,26 @@ void UDialogueManager::EndDialogue()
 void UDialogueManager::TestJSONRead()
 {
 	
+}
+
+//If not performed, Deserialization will fail.
+void UDialogueManager::AddPrefixToJSON(FString& OutJsonString)
+{
+	OutJsonString.InsertAt(0, "{\"Table\":");
+	OutJsonString.Append("}");
+}
+
+//Data table automatically inserts localization tokens/text into the string, so they have to be removed before shown on screen.
+void UDialogueManager::RemoveLocalizationText(FString& OutString)
+{
+	//UE_LOG(LogTemp, Warning, TEXT("OutString: %s"), *OutString)
+	FString Left, Right;
+	OutString.Split(",", &Left, &Right, ESearchCase::IgnoreCase, ESearchDir::FromEnd);
+	Right.ReplaceInline(TEXT("\""), TEXT(""));
+	Right.ReplaceInline(TEXT(")"), TEXT(""));
+	Right.ReplaceInline(TEXT("\\"), TEXT(""));
+	//UE_LOG(LogTemp, Warning, TEXT("Right String: %s"), *Right)
+	OutString = Right;
 }
 
 void UDialogueManager::EmptyDialogueOptions()
