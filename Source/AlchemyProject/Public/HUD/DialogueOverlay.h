@@ -3,11 +3,31 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "Blueprint/UserWidget.h"
 #include "Engine/DataTable.h"
 #include "DialogueOverlay.generated.h"
 
 DECLARE_DYNAMIC_DELEGATE(FExecuteDialogueEvent);
+
+USTRUCT(BlueprintType)
+struct FDialogueOptionRequirements
+{
+	GENERATED_BODY()
+
+	//Tags that will be checked that the player has.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FGameplayTagContainer RequiredTags;
+
+	//Tags that the player can't have
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FGameplayTagContainer ForbiddenTags;
+	
+	bool HasRequirements() const;
+	bool CheckHasAllTags(const FGameplayTagContainer InContainer) const;
+	bool CheckForbiddenTags(const FGameplayTagContainer InContainer) const;
+	
+};
 
 USTRUCT(BlueprintType)
 struct FDialogueOption : public FTableRowBase
@@ -34,7 +54,10 @@ struct FDialogueOption : public FTableRowBase
 	TArray<TSoftObjectPtr<UObject>>FunctionObjects;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TArray<FString> EventArguments;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FDialogueOptionRequirements Requirements;
 
+	//@Deprecated
 	void HandlePlayerChoice();
 	
 };
@@ -49,7 +72,7 @@ struct FDialogueState : public FTableRowBase
 	int32 DialogueStateID;
 	
 	UPROPERTY(EditAnywhere)
-	FText NPCDialogueText;
+	TArray<FText> NPCDialogueTexts;
 
 	UPROPERTY(EditAnywhere)
 	TArray<int32> DialogueOptions;

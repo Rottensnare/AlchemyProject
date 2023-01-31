@@ -123,6 +123,9 @@ private:
 	UPROPERTY()
 	class UAIPerceptionStimuliSourceComponent* PerceptionStimuliSourceComponent;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	FGameplayTagContainer GameplayTags;
+
 public:
 	
 	FORCEINLINE UInventoryComponent* GetInventoryComponent() const {return InventoryComponent;}
@@ -134,6 +137,7 @@ public:
 	FORCEINLINE APawn* GetCurrentNPC() const {return CurrentNPC;}
 	FORCEINLINE void SetCurrentNPC(APawn* InPawn) {CurrentNPC = InPawn;}
 	FORCEINLINE int32 GetCurrentNPC_ID() const {return CurrentNPC_ID;}
+	FORCEINLINE FGameplayTagContainer& GetGameplayTags() {return GameplayTags;} 
 };
 
 

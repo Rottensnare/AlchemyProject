@@ -35,7 +35,7 @@ public:
 
 	void AddToListView(TArray<class UDialogueBoxElement>& Options);
 	void AddToListView(TArray<FString>& Options);
-	void AddToListView(TMap<int32, struct FDialogueOption>& InDialogueOptions);
+	void AddToListView(TMap<int32, FDialogueOption>& InDialogueOptions, APlayerCharacter* InCharacter);
 	void EmptyListView();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
@@ -52,5 +52,5 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	TArray<FDialogueOption> DialogueOptions;
 	
-	void OnOptionsUpdated();
+	void OnOptionsUpdated(class APlayerCharacter* InCharacter);
 };

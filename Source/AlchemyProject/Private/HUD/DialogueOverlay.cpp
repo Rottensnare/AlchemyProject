@@ -9,6 +9,24 @@
 #include "Managers/DialogueEventManager.h"
 #include "Managers/DialogueManager.h"
 
+bool FDialogueOptionRequirements::HasRequirements() const
+{
+	if(RequiredTags.IsEmpty() && ForbiddenTags.IsEmpty()) return false;
+	return true;
+}
+
+bool FDialogueOptionRequirements::CheckHasAllTags(const FGameplayTagContainer InContainer) const
+{
+	const FGameplayTagQuery TagQuery = FGameplayTagQuery::MakeQuery_MatchAllTags(RequiredTags);
+	return InContainer.MatchesQuery(TagQuery);
+}
+
+bool FDialogueOptionRequirements::CheckForbiddenTags(const FGameplayTagContainer InContainer) const
+{
+	const FGameplayTagQuery TagQuery = FGameplayTagQuery::MakeQuery_MatchNoTags(RequiredTags);
+	return InContainer.MatchesQuery(TagQuery);
+}
+
 void FDialogueOption::AssignID()
 {
 	//TODO: Check the DataTable and see if there are more than one instances of the same ID. If so, generate a new one that is available.
@@ -54,7 +72,7 @@ void UDialogueOverlay::OptionSelected(FDialogueOption SelectedOption)
 	}
 	
 	
-	UE_LOG(LogTemp, Warning, TEXT("ID: %d"), SelectedOption.NextDialogueStateID)
+	//UE_LOG(LogTemp, Warning, TEXT("ID: %d"), SelectedOption.NextDialogueStateID)
 	if(SelectedOption.NextDialogueStateID == 0)
 	{
 		DialogueManager->EndDialogue();
@@ -71,18 +89,17 @@ void UDialogueOverlay::OptionSelected(FDialogueOption SelectedOption)
 		DialogueManager->StartDialogue(SelectedOption.NextDialogueStateID);
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("ExitButtonPressed"))
 	bool bWasSuccess = false;
 	TArray<UObject*> Objects = DialogueEventManager->GetDialogueObjects("TestRow", bWasSuccess);
 	if(bWasSuccess)
 	{
 		for(const auto& Object : Objects)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Object Name is %s"), *Object->GetName())
+			//UE_LOG(LogTemp, Warning, TEXT("Object Name is %s"), *Object->GetName())
 		}
 	}
 	
-	DialogueBox->OnOptionsUpdated();
+	DialogueBox->OnOptionsUpdated(Player);
 }
 
 void UDialogueOverlay::RemoveItems()

@@ -19,7 +19,7 @@ bool UDialogueEventManager::HandleDialogueEvent(const FString& EventName, const 
 	
 	for(const FString& Argument : Arguments)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Argument: %s"), *Argument)
+		//UE_LOG(LogTemp, Warning, TEXT("Argument: %s"), *Argument)
 		if(Argument == FString("Heal"))
 		{
 			for(const auto& EventObject : EventObjects)
@@ -27,7 +27,7 @@ bool UDialogueEventManager::HandleDialogueEvent(const FString& EventName, const 
 				APlayerCharacter* PlayerChara = Cast<APlayerCharacter>(EventObject.Get());
 				if(PlayerChara)
 				{
-					UE_LOG(LogTemp, Warning, TEXT("PlayerChara"))
+					//UE_LOG(LogTemp, Warning, TEXT("PlayerChara"))
 					PlayerChara->GetHealthComponent()->SetHealth(
 					FMath::Clamp(
 					PlayerChara->GetHealthComponent()->GetHealth() + FMath::Clamp(200.f , 0, 10000)
@@ -35,11 +35,12 @@ bool UDialogueEventManager::HandleDialogueEvent(const FString& EventName, const 
 					, PlayerChara->GetHealthComponent()->GetMaxHealth()));
 
 					//Update HUD
-					if(const AMyPlayerController* const TempController = Cast<AMyPlayerController>(PlayerChara->Controller))
+					if(AMyPlayerController* const TempController = Cast<AMyPlayerController>(PlayerChara->Controller))
 					{
 						if(APlayerHUD* const TempHUD = Cast<APlayerHUD>(TempController->GetHUD()))
 						{
 							TempHUD->UpdateHealthBar(PlayerChara->GetHealthComponent()->GetHealth(), PlayerChara->GetHealthComponent()->GetMaxHealth());
+							TempController->PlaySound(FName("Healing"));
 						}
 					}
 				}
@@ -69,7 +70,7 @@ TArray<UObject*> UDialogueEventManager::GetDialogueObjects(const FName& RowName,
 		for(const auto& Object : TestDataRow->FunctionObjects)
 		{
 			OutObjectArray.Add(Object.Get());
-			UE_LOG(LogTemp, Display, TEXT("Object Name: %s"), *Object.Get()->GetName())
+			//UE_LOG(LogTemp, Display, TEXT("Object Name: %s"), *Object.Get()->GetName())
 			if(AAIBase* TempAI = Cast<AAIBase>(Object.Get()))
 			{
 				

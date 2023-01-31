@@ -157,17 +157,17 @@ void AMyPlayerController::ToggleAlchemyOverlay()
 
 void AMyPlayerController::ToggleDialogueOverlay()
 {
-	UE_LOG(LogTemp, Warning, TEXT("ToggleDialogueOverlay"))
+	//UE_LOG(LogTemp, Warning, TEXT("ToggleDialogueOverlay"))
 	CurrentCharacter = CurrentCharacter == nullptr ? Cast<APlayerCharacter>(GetCharacter()) : CurrentCharacter;
 	PlayerHUD = PlayerHUD == nullptr ? Cast<APlayerHUD>(GetHUD()) : PlayerHUD;
 	if(!CurrentCharacter) UE_LOG(LogTemp, Warning, TEXT("CurrentCharacter NULL"))
 	
-	if(!PlayerHUD) UE_LOG(LogTemp, Warning, TEXT("PlayerHUD NULL"))
-	else if(!PlayerHUD->DialogueOverlay) UE_LOG(LogTemp, Warning, TEXT("DialogueOverlay NULL"))
+	//if(!PlayerHUD) UE_LOG(LogTemp, Warning, TEXT("PlayerHUD NULL"))
+	//else if(!PlayerHUD->DialogueOverlay) UE_LOG(LogTemp, Warning, TEXT("DialogueOverlay NULL"))
 	
 	if(PlayerHUD && PlayerHUD->DialogueOverlay && PlayerHUD->DialogueOverlay->DialogueManager && CurrentCharacter && PlayerHUD->PlayerOverlay)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("DialogueOverlay ok"))
+		//UE_LOG(LogTemp, Warning, TEXT("DialogueOverlay ok"))
 		if(PlayerHUD->DialogueOverlay->GetVisibility() == ESlateVisibility::Collapsed)
 		{
 			PlayerHUD->DialogueOverlay->SetVisibility(ESlateVisibility::Visible);
@@ -179,7 +179,7 @@ void AMyPlayerController::ToggleDialogueOverlay()
 			SetIgnoreMoveInput(true);
 			PlayerHUD->DialogueOverlay->DialogueManager->StartDialogue(CurrentCharacter->GetCurrentNPC_ID());
 			//PlayerHUD->DialogueOverlay->DialogueBox->AddToListView(PlayerHUD->DialogueOverlay->DialogueManager->GetOptionStrings());
-			PlayerHUD->DialogueOverlay->DialogueBox->AddToListView(PlayerHUD->DialogueOverlay->DialogueManager->GetCurrentDialogueOptions());
+			PlayerHUD->DialogueOverlay->DialogueBox->AddToListView(PlayerHUD->DialogueOverlay->DialogueManager->GetCurrentDialogueOptions(), CurrentCharacter);
 			PlayerHUD->DialogueOverlay->MultiLineTextBox->SetText(FText::FromString(PlayerHUD->DialogueOverlay->DialogueManager->GetNPCDialogue()));
 		}
 		else
@@ -409,7 +409,7 @@ void AMyPlayerController::OnPossess(APawn* InPawn)
 
 void AMyPlayerController::OnEndDialogue()
 {
-	UE_LOG(LogTemp, Warning, TEXT("OnEndDialogue"))
+	//UE_LOG(LogTemp, Warning, TEXT("OnEndDialogue"))
 	ToggleDialogueOverlay();
 }
 

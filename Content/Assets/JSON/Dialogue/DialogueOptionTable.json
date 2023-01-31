@@ -9,7 +9,20 @@
 			"/Game/ThirdPerson/Maps/ThirdPersonMap.ThirdPersonMap:PersistentLevel.BP_AIBase_C_UAID_04D9F5D43002AD5E01_1739399871",
 			"/Game/ThirdPerson/Maps/ThirdPersonMap.ThirdPersonMap:PersistentLevel.StaticMeshActor_UAID_04D9F5D43002C95D01_1944609753"
 		],
-		"EventArguments": []
+		"EventArguments": [],
+		"Requirements":
+		{
+			"RequiredTags":
+			{
+				"GameplayTags": [],
+				"ParentTags": []
+			},
+			"ForbiddenTags":
+			{
+				"GameplayTags": [],
+				"ParentTags": []
+			}
+		}
 	},
 	{
 		"Name": "NewRow",
@@ -18,7 +31,31 @@
 		"NextDialogueStateID": 2,
 		"FunctionNames": [],
 		"FunctionObjects": [],
-		"EventArguments": []
+		"EventArguments": [],
+		"Requirements":
+		{
+			"RequiredTags":
+			{
+				"GameplayTags": [
+					{
+						"TagName": "ActorStatus.HealthStatus.Injured"
+					}
+				],
+				"ParentTags": [
+					{
+						"TagName": "ActorStatus.HealthStatus"
+					},
+					{
+						"TagName": "ActorStatus"
+					}
+				]
+			},
+			"ForbiddenTags":
+			{
+				"GameplayTags": [],
+				"ParentTags": []
+			}
+		}
 	},
 	{
 		"Name": "NewRow_0",
@@ -29,7 +66,20 @@
 		"FunctionObjects": [],
 		"EventArguments": [
 			"Heal,Self,200"
-		]
+		],
+		"Requirements":
+		{
+			"RequiredTags":
+			{
+				"GameplayTags": [],
+				"ParentTags": []
+			},
+			"ForbiddenTags":
+			{
+				"GameplayTags": [],
+				"ParentTags": []
+			}
+		}
 	},
 	{
 		"Name": "NewRow_1",
@@ -38,7 +88,20 @@
 		"NextDialogueStateID": -1,
 		"FunctionNames": [],
 		"FunctionObjects": [],
-		"EventArguments": []
+		"EventArguments": [],
+		"Requirements":
+		{
+			"RequiredTags":
+			{
+				"GameplayTags": [],
+				"ParentTags": []
+			},
+			"ForbiddenTags":
+			{
+				"GameplayTags": [],
+				"ParentTags": []
+			}
+		}
 	},
 	{
 		"Name": "NewRow_2",
@@ -47,7 +110,20 @@
 		"NextDialogueStateID": 0,
 		"FunctionNames": [],
 		"FunctionObjects": [],
-		"EventArguments": []
+		"EventArguments": [],
+		"Requirements":
+		{
+			"RequiredTags":
+			{
+				"GameplayTags": [],
+				"ParentTags": []
+			},
+			"ForbiddenTags":
+			{
+				"GameplayTags": [],
+				"ParentTags": []
+			}
+		}
 	},
 	{
 		"Name": "NewRow_3",
@@ -56,6 +132,19 @@
 		"NextDialogueStateID": 0,
 		"FunctionNames": [],
 		"FunctionObjects": [],
-		"EventArguments": []
+		"EventArguments": [],
+		"Requirements":
+		{
+			"RequiredTags":
+			{
+				"GameplayTags": [],
+				"ParentTags": []
+			},
+			"ForbiddenTags":
+			{
+				"GameplayTags": [],
+				"ParentTags": []
+			}
+		}
 	}
 ]

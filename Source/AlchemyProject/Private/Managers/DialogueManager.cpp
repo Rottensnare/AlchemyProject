@@ -3,6 +3,7 @@
 
 #include "Managers/DialogueManager.h"
 #include "Json.h"
+#include "JsonObjectConverter.h"
 #include "AI/AIBase.h"
 
 
@@ -142,6 +143,17 @@ bool UDialogueManager::GetJSON(const FString& FilePath, int32 ID)
 				TempOption.EventArguments.Add(Arg->AsString());
 				//UE_LOG(LogTemp, Warning, TEXT("Argument: %s"), *Arg->AsString())
 			}
+
+			FDialogueOptionRequirements DialogueOptionRequirements;
+
+			bool bStructConstructed = FJsonObjectConverter::JsonObjectToUStruct(Object->GetObjectField("Requirements").ToSharedRef(), &DialogueOptionRequirements);
+			if(!bStructConstructed)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("FDialogueOption Struct was not able to be constructed"))
+			}
+			
+			TempOption.Requirements = DialogueOptionRequirements;
+			
 			OptionStrings.Add(ObjectName);
 			CurrentDialogueOptions.Emplace(i, TempOption);
 		}
