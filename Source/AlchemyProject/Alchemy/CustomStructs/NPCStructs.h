@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Engine/DataTable.h"
 
 #include "NPCStructs.generated.h"
 
@@ -15,16 +16,15 @@ struct FFactionOpinion
 };
 
 USTRUCT(BlueprintType)
-struct FNPCInfo 
+struct FNPCInfo : public FTableRowBase
 {
 	GENERATED_BODY()
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	int32 NPC_ID;
-	
-	//Which faction does the NPC belong to
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	uint8 FactionID;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TArray<int32> JoinedFactionIDs;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName Name;
@@ -34,8 +34,36 @@ struct FNPCInfo
 	FName LastName;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName FullName;
+
+	static bool FillData(FNPCInfo& InNPCInfo, const int32 ID);
+
+	
 };
 
+inline bool FNPCInfo::FillData(FNPCInfo& InNPCInfo, const int32 ID)
+{
+	const FString NPCInfoTablePath(TEXT("DataTable'/Game/Assets/Datatables/NPCInfoDataTable.NPCInfoDataTable'"));
+	const UDataTable* NPCInfoTableObject = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, *NPCInfoTablePath));
+	if(NPCInfoTableObject)
+	{
+		TArray<FName> RowNames = NPCInfoTableObject->GetRowNames();
+		for(const FName& RowName : RowNames)
+		{
+			const FNPCInfo* NPCRow = NPCInfoTableObject->FindRow<FNPCInfo>(RowName, "");
+			if(NPCRow)
+			{
+				if(NPCRow->NPC_ID == ID)
+				{
+					InNPCInfo = *NPCRow;
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+/*
 USTRUCT(BlueprintType)
 struct FTagsToSearch
 {
@@ -45,3 +73,4 @@ struct FTagsToSearch
 	FGameplayTagContainer SearchTagsContainer;
 	
 };
+*/

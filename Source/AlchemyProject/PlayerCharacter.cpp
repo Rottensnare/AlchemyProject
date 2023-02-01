@@ -20,6 +20,7 @@
 #include "Perception/AISense_Hearing.h"
 #include "Perception/AISense_Sight.h"
 #include "PlayerController/MyPlayerController.h"
+#include "Utility/CharacterData.h"
 
 
 // Sets default values
@@ -44,6 +45,8 @@ APlayerCharacter::APlayerCharacter()
 	PerceptionStimuliSourceComponent = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("PerceptionStimuliSourceComp"));
 	PerceptionStimuliSourceComponent->RegisterForSense(UAISense_Sight::StaticClass());
 	PerceptionStimuliSourceComponent->RegisterForSense(UAISense_Hearing::StaticClass());
+
+	//CharacterData = CreateDefaultSubobject<UCharacterData>(TEXT("CharacterData"));
 }
 
 
@@ -62,6 +65,8 @@ void APlayerCharacter::BeginPlay()
 	HeadSocket = GetMesh()->GetSocketByName("headSocket");
 
 	if(GetCharacterMovement()) DefaultWalkSpeed = GetCharacterMovement()->MaxWalkSpeed;
+
+	FNPCInfo::FillData(CharacterInfo, 0);
 }
 
 void APlayerCharacter::Tick(float DeltaTime)

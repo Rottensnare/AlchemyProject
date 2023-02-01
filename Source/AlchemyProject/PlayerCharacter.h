@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Alchemy/AlchemyItem.h"
 #include "Alchemy/Components/Potion/PotionComponent.h"
+#include "Alchemy/CustomStructs/NPCStructs.h"
 #include "GameFramework/Character.h"
 #include "PlayerCharacter.generated.h"
 
@@ -31,6 +32,12 @@ public:
 
 	UPROPERTY(VisibleAnywhere, Category = Alchemy)
 	TMap<UActorComponent*, int32> CurrentPotionComponents;
+
+	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	//class UCharacterData* CharacterData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FNPCInfo CharacterInfo;
 
 protected:
 

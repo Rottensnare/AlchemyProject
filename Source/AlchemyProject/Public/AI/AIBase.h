@@ -90,6 +90,11 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI", meta = (AllowPrivateAccess = "true"))
 	EAIState LastAIState;
 
+	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Data", meta = (AllowPrivateAccess = "true"))
+	//class UCharacterData* CharacterData;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Data", meta = (AllowPrivateAccess = "true"))
+	FNPCInfo NPCInfo;
+
 #if WITH_EDITOR
 	//Only works with Editor and changing values from the editor windows
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
@@ -186,6 +191,7 @@ public:
 	FORCEINLINE bool GetFollowPlayer() const {return bFollowPlayer;}
 	FORCEINLINE bool GetCanSeeTarget() const {return bCanSeeTarget;}
 	FORCEINLINE void SetCanSeeTarget(const bool Value) {bCanSeeTarget = Value;}
+	FORCEINLINE FNPCInfo& GetNPCInfo() {return NPCInfo;}
 
 	/***********************
 	 *	Public Variables
@@ -194,8 +200,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|GameplayTags")
 	FGameplayTagContainer GameplayTagContainer;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|GameplayTags")
-	FTagsToSearch TagsToSearch;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|GameplayTags")
+	//FTagsToSearch TagsToSearch;
 
 	UPROPERTY(EditAnywhere, Category = "AI|Dialogue")
 	int32 NPC_ID{1};

@@ -25,17 +25,25 @@ struct FFactionInfo : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FName FactionName;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	int32 NumberOfMembers{0};
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<class AAIBase*> MemberArray;
+	TArray<int32> MemberIDs;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FFactionOpinion> FactionOpinions;
-	
+
+	//Player and NPCs can be part of multiple factions
+	//This is used to make sure that they can't join factions that are mutually exclusive
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<FNPCInfo> MemberInfos;
+	TArray<int32> MutuallyExclusiveFactions;
+
+	//These are used for AI Perception.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TArray<int32> HostileFactions;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TArray<int32> NeutralFactions;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TArray<int32> FriendlyFactions;
+	
 };
 
 USTRUCT(BlueprintType)

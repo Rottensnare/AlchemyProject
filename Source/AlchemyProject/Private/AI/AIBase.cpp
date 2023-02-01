@@ -21,6 +21,7 @@
 #include "Perception/AISenseConfig.h"
 #include "Perception/AISense_Hearing.h"
 #include "Perception/AISense_Sight.h"
+#include "Utility/CharacterData.h"
 
 AAIBase::AAIBase()
 {
@@ -41,6 +42,8 @@ AAIBase::AAIBase()
 	ESPSphere->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
 
 	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
+
+	//CharacterData = CreateDefaultSubobject<UCharacterData>(TEXT("CharacterData"));
 	
 }
 
@@ -80,6 +83,7 @@ void AAIBase::BeginPlay()
 	}
 
 	IQueryable::InitializeGameplayTagContainer(GameplayTagContainer);
+	FNPCInfo::FillData(NPCInfo, NPC_ID);
 }
 
 void AAIBase::Tick(float DeltaTime)

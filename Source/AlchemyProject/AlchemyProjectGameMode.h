@@ -6,6 +6,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "AlchemyProjectGameMode.generated.h"
 
+class UFactionManager;
 UCLASS(minimalapi)
 class AAlchemyProjectGameMode : public AGameModeBase
 {
@@ -13,6 +14,15 @@ class AAlchemyProjectGameMode : public AGameModeBase
 
 public:
 	AAlchemyProjectGameMode();
+
+	static UFactionManager* FactionManager;
+
+	UFUNCTION(BlueprintCallable)
+	static UFactionManager* GetFactionManager();
+
+protected:
+
+	virtual void BeginPlay() override;
 };
 
 

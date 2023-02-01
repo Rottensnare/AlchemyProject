@@ -2,7 +2,10 @@
 
 #include "AlchemyProjectGameMode.h"
 #include "AlchemyProjectCharacter.h"
+#include "Managers/FactionManager.h"
 #include "UObject/ConstructorHelpers.h"
+
+UFactionManager* AAlchemyProjectGameMode::FactionManager = nullptr;
 
 AAlchemyProjectGameMode::AAlchemyProjectGameMode()
 {
@@ -12,4 +15,21 @@ AAlchemyProjectGameMode::AAlchemyProjectGameMode()
 	{
 		DefaultPawnClass = PlayerPawnBPClass.Class;
 	}
+}
+
+UFactionManager* AAlchemyProjectGameMode::GetFactionManager()
+{
+	return FactionManager;
+}
+
+void AAlchemyProjectGameMode::BeginPlay()
+{
+	if(!FactionManager)
+	{
+		FactionManager = NewObject<UFactionManager>();
+		FactionManager->AddToRoot();
+		FactionManager->InitFactions();
+	}
+	
+	Super::BeginPlay();
 }

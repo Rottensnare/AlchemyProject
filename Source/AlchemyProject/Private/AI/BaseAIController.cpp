@@ -60,6 +60,7 @@ ABaseAIController::ABaseAIController(const FObjectInitializer& ObjectInitializer
 
 	CustomAIContainer = CreateDefaultSubobject<UCustomAIContainer>(TEXT("CustomAIContainer"));
 	
+	
 	ABaseAIController::SetGenericTeamId(FGenericTeamId(1));
 }
 
@@ -71,6 +72,7 @@ void ABaseAIController::BeginPlay()
 	AIPerceptionComponent->OnHearingStimulusExpired.AddDynamic(this, &ABaseAIController::OnHearingStimulusExpired_Delegate);
 	
 	AIBase = Cast<AAIBase>(GetPawn());
+
 	
 	//if(GetAIBehaviorTreeComponent()) GetAIBehaviorTreeComponent()->SetDynamicSubtree(FGameplayTag::RequestGameplayTag(FName("Subtree.Work")), GetBehaviorTree("Work"));
 	
@@ -176,6 +178,7 @@ UBehaviorTree* ABaseAIController::GetBehaviorTree(const FName BehaviorTreeName) 
 	const UDataTable* BehaviorTreeTableObject = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, *BehaviorTreeTablePath));
 	if(BehaviorTreeTableObject)
 	{
+		
 		// ReSharper disable once CppTooWideScope
 		const FBehaviorTreeTable* TableRow = BehaviorTreeTableObject->FindRow<FBehaviorTreeTable>(FName(BehaviorTreeName), TEXT(""));
 		if(TableRow)
