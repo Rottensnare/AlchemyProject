@@ -5,18 +5,21 @@
 
 #include "MyAIPerceptionComponent.h"
 #include "AI/AIBase.h"
+#include "AlchemyProject/Enums/CustomDataTables.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Engine/DataTable.h"
 #include "EnvironmentQuery/EnvQuery.h"
 #include "EnvironmentQuery/EnvQueryManager.h"
+#include "Navigation/CrowdFollowingComponent.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Hearing.h"
 #include "Perception/AISenseConfig_Prediction.h"
 #include "Perception/AISenseConfig_Sight.h"
 #include "Perception/AISense_Prediction.h"
 
-ABaseAIController::ABaseAIController()
+ABaseAIController::ABaseAIController(const FObjectInitializer& ObjectInitializer) //: Super(ObjectInitializer.SetDefaultSubobjectClass<UCrowdFollowingComponent>(TEXT("PathFollowingComponent")))
 {
 	BlackboardComponent = CreateDefaultSubobject<UBlackboardComponent>(TEXT("BlackboardComponent"));
 	checkf(BlackboardComponent, TEXT("BlackboardComponent was null in the constructor"));
@@ -68,12 +71,15 @@ void ABaseAIController::BeginPlay()
 	AIPerceptionComponent->OnHearingStimulusExpired.AddDynamic(this, &ABaseAIController::OnHearingStimulusExpired_Delegate);
 	
 	AIBase = Cast<AAIBase>(GetPawn());
+	
+	//if(GetAIBehaviorTreeComponent()) GetAIBehaviorTreeComponent()->SetDynamicSubtree(FGameplayTag::RequestGameplayTag(FName("Subtree.Work")), GetBehaviorTree("Work"));
+	
 	Super::BeginPlay();
 }
 
 void ABaseAIController::Tick(float DeltaSeconds)
 {
-	CheckStimulusTimer += DeltaSeconds;
+	CheckStimulusTimer += DeltaSeconds; //TODO: CAN BE REMOVED. FOR DEBUGGING PURPOSES
 	if(CheckStimulusTimer >= 2.f)
 	{
 		CheckStimulusTimer = 0.f;
@@ -90,16 +96,27 @@ void ABaseAIController::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 }
 
-void ABaseAIController::QueryForActors_GameplayTags(const FGameplayTagContainer& InGameplayTagContainer,
-	const UEnvQuery* const InEnvQuery, APawn* InPawn, const float SearchRadius)
+void ABaseAIController::QueryForActors_GameplayTags(const FGameplayTagContainer& InGameplayTagContainer, const EQueryType QueryType,
+	const UEnvQuery* const InEnvQuery, APawn* InPawn, const float SearchRadius, const float MinFindRadius, const float MaxFindRadius)
 {
 	TagsToBeTested = InGameplayTagContainer;
+	CurrentQueryType = QueryType;
 	FEnvQueryRequest ActorsQueryRequest = FEnvQueryRequest(InEnvQuery, InPawn);
-	ActorsQueryRequest.SetFloatParam(FName("SearchRadius"), SearchRadius);
+
+	if(SearchRadius > 0) ActorsQueryRequest.SetFloatParam(FName("SearchRadius"), SearchRadius);
+	else ActorsQueryRequest.SetFloatParam(FName("SearchRadius"), 1000.f);
+	
+	if(MinFindRadius > 0 && MinFindRadius < MaxFindRadius) ActorsQueryRequest.SetFloatParam(FName("MinFindRadius"), MinFindRadius);
+	else ActorsQueryRequest.SetFloatParam(FName("MinFindRadius"), 0.f);
+	
+	if(MaxFindRadius > 0 && MaxFindRadius > MinFindRadius) ActorsQueryRequest.SetFloatParam(FName("MaxFindRadius"), MaxFindRadius);
+	else if(SearchRadius > 0) ActorsQueryRequest.SetFloatParam(FName("MaxFindRadius"), SearchRadius);
+	else ActorsQueryRequest.SetFloatParam(FName("MaxFindRadius"), 1000.f);
+	
 	ActorsQueryRequest.Execute(EEnvQueryRunMode::AllMatching, this, &ABaseAIController::HandleQueryRequest); //TODO: Change EEnvQueryRunMode to dynamic property
 }
 
-void ABaseAIController::HandleQueryRequest(TSharedPtr<FEnvQueryResult> Result) //TODO: Need to make an interface so that this function can be used for other classes than AAIBase
+void ABaseAIController::HandleQueryRequest(TSharedPtr<FEnvQueryResult> Result)
 {
 	ClearCustomAIContainer();
 	
@@ -111,14 +128,35 @@ void ABaseAIController::HandleQueryRequest(TSharedPtr<FEnvQueryResult> Result) /
 		{
 			for(AActor* OutActor : OutActors)
 			{
-				AAIBase* TempAI = Cast<AAIBase>(OutActor);
-				if(TempAI)
+				// ReSharper disable once CppTooWideScope
+				const IQueryable* QueryableInterface = Cast<IQueryable>(OutActor);
+				if(QueryableInterface)
 				{
-					FGameplayTagQuery NewQuery = FGameplayTagQuery::MakeQuery_MatchAnyTags(TagsToBeTested); //TODO: Change MakeQuery_MatchAnyTags to a dynamic function which can be selected from the BP
-					bool bMatchesQuery = TempAI->GameplayTagContainer.MatchesQuery(NewQuery);
+					FGameplayTagQuery NewQuery;
+					
+					switch(CurrentQueryType)
+					{
+					case EQueryType::EQT_AllTags:
+						NewQuery = FGameplayTagQuery::MakeQuery_MatchAllTags(TagsToBeTested);
+						break;
+					case EQueryType::EQT_AnyTags:
+						NewQuery = FGameplayTagQuery::MakeQuery_MatchAnyTags(TagsToBeTested);
+						break;
+					case EQueryType::EQT_NoTags:
+						NewQuery = FGameplayTagQuery::MakeQuery_MatchNoTags(TagsToBeTested);
+						break;
+					case EQueryType::EQT_SingleTag:
+						NewQuery = FGameplayTagQuery::MakeQuery_MatchTag(TagsToBeTested.First());
+						break;
+					default:
+						UE_LOG(LogTemp, Warning, TEXT("Query type not valid!"))
+						break;
+					}
+					
+					bool bMatchesQuery = QueryableInterface->InterfaceGameplayTagContainer.MatchesQuery(NewQuery);
 					if(bMatchesQuery)
 					{
-						AddToCustomAIContainer(TempAI);
+						AddToCustomAIContainer(OutActor);
 					}
 				}
 			}
@@ -128,6 +166,24 @@ void ABaseAIController::HandleQueryRequest(TSharedPtr<FEnvQueryResult> Result) /
 	if(BlackboardComponent) BlackboardComponent->SetValueAsObject(FName("QueryActors"), CustomAIContainer);
 	
 	TagsToBeTested = FGameplayTagContainer::EmptyContainer;
+	CurrentQueryType = EQueryType::EQT_MAX;
+}
+
+UBehaviorTree* ABaseAIController::GetBehaviorTree(const FName BehaviorTreeName) const
+{
+	const FString BehaviorTreeTablePath(TEXT("DataTable'/Game/Assets/Datatables/BehaviorTreeTable.BehaviorTreeTable'"));
+	// ReSharper disable once CppTooWideScope
+	const UDataTable* BehaviorTreeTableObject = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, *BehaviorTreeTablePath));
+	if(BehaviorTreeTableObject)
+	{
+		// ReSharper disable once CppTooWideScope
+		const FBehaviorTreeTable* TableRow = BehaviorTreeTableObject->FindRow<FBehaviorTreeTable>(FName(BehaviorTreeName), TEXT(""));
+		if(TableRow)
+		{
+			return TableRow->BehaviorTree;
+		}
+	}
+	return nullptr;
 }
 
 void ABaseAIController::OnPossess(APawn* InPawn)
@@ -136,11 +192,17 @@ void ABaseAIController::OnPossess(APawn* InPawn)
 
 	if(InPawn == nullptr) return;
 	
-	if(AAIBase* Enemy = Cast<AAIBase>(InPawn))
+	if(const AAIBase* const Enemy = Cast<AAIBase>(InPawn))
 	{
 		if(Enemy->GetBehaviorTree())
 		{
-			BlackboardComponent->InitializeBlackboard(*(Enemy->GetBehaviorTree()->GetBlackboardAsset()));
+			if(BlackboardComponent) BlackboardComponent->InitializeBlackboard(*(Enemy->GetBehaviorTree()->GetBlackboardAsset()));
+			if(BehaviorTreeComponent)
+			{
+				BehaviorTreeComponent->StartTree(*GetBehaviorTree("Default"), EBTExecutionMode::Looped); //TODO: Instead of "Default" make it dynamic based on Gameplay Tags
+				//RunBehaviorTree(GetBehaviorTree("Default")); //BUG: RunBehaviorTree doesn't check if the tree is running already
+				BehaviorTreeComponent->SetDynamicSubtree(FGameplayTag::RequestGameplayTag(FName("Subtree.Work")), GetBehaviorTree("Work"));
+			}
 		}
 	}
 }
@@ -280,8 +342,10 @@ void ABaseAIController::PostEditChangeProperty(FPropertyChangedEvent& PropertyCh
 {
 	static const FName NAME_TeamAttitudeMap_Sight = FName("TeamAttitudeMap_Sight");
 	static const FName NAME_TeamAttitudeMap_Hearing = FName("TeamAttitudeMap_Hearing");
-
-	if(PropertyChangedEvent.Property)
+	static const FName NAME_MaxAge_Sight = FName("MaxAgeSight");
+	static const FName NAME_MaxAge_Hearing = FName("MaxAgeHearing");
+	UE_LOG(LogTemp, Warning, TEXT("%s"), *PropertyChangedEvent.Property->GetName())
+	if(PropertyChangedEvent.Property) //TODO: Use switch
 	{
 		if(PropertyChangedEvent.Property->GetFName() == NAME_TeamAttitudeMap_Sight)
 		{
@@ -290,6 +354,20 @@ void ABaseAIController::PostEditChangeProperty(FPropertyChangedEvent& PropertyCh
 		else if(PropertyChangedEvent.Property->GetFName() == NAME_TeamAttitudeMap_Hearing)
 		{
 			ChangeAttitudeTowards();
+		}
+		else if(PropertyChangedEvent.Property->GetFName() == NAME_MaxAge_Sight)
+		{
+			if(PerceptionComponent == nullptr) return;
+			SenseConfig_Sight->SetMaxAge(MaxAgeSight);
+			PerceptionComponent->ConfigureSense(*SenseConfig_Sight);
+			PerceptionComponent->PostInitProperties();
+		}
+		else if(PropertyChangedEvent.Property->GetFName() == NAME_MaxAge_Hearing)
+		{
+			if(PerceptionComponent == nullptr) return;
+			SenseConfig_Hearing->SetMaxAge(MaxAgeHearing);
+			PerceptionComponent->ConfigureSense(*SenseConfig_Hearing);
+			PerceptionComponent->PostInitProperties();
 		}
 	}
 	

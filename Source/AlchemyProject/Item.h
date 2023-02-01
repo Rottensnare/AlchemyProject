@@ -7,6 +7,7 @@
 #include "Enums/EItemType.h"
 #include "GameFramework/Actor.h"
 #include "Interfaces/Pickable.h"
+#include "Interfaces/Queryable.h"
 #include "Item.generated.h"
 
 
@@ -23,7 +24,7 @@ enum class EItemState : uint8
 
 
 UCLASS()
-class ALCHEMYPROJECT_API AItem : public AActor, public IPickable
+class ALCHEMYPROJECT_API AItem : public AActor, public IPickable, public IQueryable
 {
 	GENERATED_BODY()
 	
@@ -41,7 +42,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Info|GameplayTags")
 	FGameplayTagContainer GameplayTagContainer;
-	
 	
 protected:
 
@@ -87,7 +87,6 @@ protected:
 
 private:
 
-	
 
 public:
 
@@ -98,5 +97,11 @@ public:
 	FORCEINLINE EItemState GetItemState() const {return ItemState;}
 	FORCEINLINE UStaticMeshComponent* GetItemMesh() const {return ItemMesh;}
 	FORCEINLINE EItemType GetItemType() const {return ItemType;}
-	
+
+
+	/********************
+	 * Interface overrides
+	 *******************/
+
+	//virtual void InitializeGameplayTagContainer(FGameplayTagContainer InGameplayTagContainer) override;
 };

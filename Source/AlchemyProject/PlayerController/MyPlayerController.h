@@ -26,6 +26,10 @@ public:
 	void SetInventoryGrid(int32 NumberOfSlots);
 	void UpdateInventory(const int32 Index);
 	void ToggleAlchemyOverlay();
+	void ToggleDialogueOverlay();
+	//Index 0 = PlayerOverlay, 1 = AlchemyOverlay, 2 = DialogueOverlay
+	//Choose Index you DON'T want to be set Collapsed
+	void HideOtherOverlays(const uint8 OverlayIndex);
 	
 	UFUNCTION(BlueprintCallable)
 	void SelectAlchemyIngredient(const int32 SelectedSlot);
@@ -41,6 +45,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void CreateNoise(const float InVolume, const float InMaxRange, FName InTag = NAME_None);
 
+	UFUNCTION()
+	void OnClicked_Delegate();
+
 	FGenericTeamId TeamId{FGenericTeamId(4)};
 	virtual FGenericTeamId GetGenericTeamId() const override;
 
@@ -48,6 +55,9 @@ protected:
 
 	virtual void BeginPlay() override;
 
+	virtual void OnPossess(APawn* InPawn) override;
+	UFUNCTION()
+	void OnEndDialogue();
 
 private:
 

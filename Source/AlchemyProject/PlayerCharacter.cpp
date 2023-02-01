@@ -12,6 +12,7 @@
 #include "Components/AlchemyComponent.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Engine/UserDefinedStruct.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Interfaces/Pickable.h"
 #include "Kismet/GameplayStatics.h"
@@ -59,6 +60,8 @@ void APlayerCharacter::BeginPlay()
 	GetWorldTimerManager().SetTimer(HUDInitTimer, this, &APlayerCharacter::HUDInitTimerFinished, HUDInitTime);
 	
 	HeadSocket = GetMesh()->GetSocketByName("headSocket");
+
+	if(GetCharacterMovement()) DefaultWalkSpeed = GetCharacterMovement()->MaxWalkSpeed;
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
@@ -125,11 +128,32 @@ void APlayerCharacter::InventoryButtonReleased()
 
 void APlayerCharacter::InteractButtonPressed()
 {
-	if(TracedActor == nullptr || InventoryComponent == nullptr) return;
-	//UE_LOG(LogTemp, Warning, TEXT("Traced Actor: %s"), *TracedActor->GetName())
-	if(TracedActor->Implements<UPickable>())
+	if(TracedActor == nullptr) return;
+	UE_LOG(LogTemp, Warning, TEXT("Traced Actor: %s"), *TracedActor->GetName())
+	if(TracedActor->Implements<UInteractable>())
 	{
-		if(APotion* TempPotion = Cast<APotion>(TracedActor))
+		IInteractable* Interactable = Cast<IInteractable>(TracedActor);
+		if(Interactable->Interact(this))
+		{
+			if(AAIBase* TempAI = Cast<AAIBase>(TracedActor))
+			{
+				
+				MyPlayerController = MyPlayerController == nullptr ? Cast<AMyPlayerController>(GetController()) : MyPlayerController;
+				if(MyPlayerController)
+				{
+					CurrentNPC = TempAI;
+					CurrentNPC_ID = TempAI->NPC_ID;
+					MyPlayerController->ToggleDialogueOverlay();
+					
+				}
+			}
+		}
+	}
+	else if(TracedActor->Implements<UPickable>())
+	{
+		if(InventoryComponent == nullptr) return;
+		
+		if(APotion* TempPotion = Cast<APotion>(TracedActor)) //TODO: Use interface functions
 		{
 			const uint32 HashCode = UUserDefinedStruct::GetUserDefinedStructTypeHash(&TempPotion->ProductInfo, FProductInfo::StaticStruct());
 			InventoryComponent->AddPotionToInventory(TempPotion, 1, HashCode);
@@ -141,7 +165,6 @@ void APlayerCharacter::InteractButtonPressed()
 		AItem* TempItem = Cast<AItem>(TracedActor);
 		if(TempItem)
 		{
-			
 			InventoryComponent->AddToInventory(TempItem, 1);
 			TracedActor = nullptr;
 			MyPlayerController = MyPlayerController == nullptr ? Cast<AMyPlayerController>(GetController()) : MyPlayerController;
@@ -247,7 +270,7 @@ void APlayerCharacter::TraceForObjects()
 	}
 }
 
-void APlayerCharacter::ShowInfoButtonPressed()
+void APlayerCharacter::ShowInfoButtonPressed() //TODO: Can be split into smaller functions. Some of the code here is repeated
 {
 	if(HeadSocket == nullptr) return;
 	FHitResult HitResult;
@@ -294,6 +317,39 @@ void APlayerCharacter::ShowInfoButtonPressed()
 	}
 }
 
+void APlayerCharacter::ToggleSprint()
+{
+	if(GetCharacterMovement() == nullptr) return;
+	
+	if(bSprinting)
+	{
+		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+		bSprinting = false;
+	}
+	else
+	{
+		GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+		bSprinting = true;
+	}
+	
+	
+}
+
+void APlayerCharacter::EndInteraction()
+{
+	UE_LOG(LogTemp, Warning, TEXT("EndInteraction"))
+	if(bIsConversing)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("bIsConversing"))
+		MyPlayerController = MyPlayerController == nullptr ? Cast<AMyPlayerController>(Controller) : MyPlayerController;
+		if(MyPlayerController)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("MyPlayerController"))
+			MyPlayerController->ToggleDialogueOverlay();
+		}
+	}
+}
+
 void APlayerCharacter::HUDInitTimerFinished()
 {
 	MyPlayerController = MyPlayerController == nullptr ? Cast<AMyPlayerController>(Controller) : MyPlayerController;
@@ -317,7 +373,9 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &APlayerCharacter::InteractButtonPressed);
 	PlayerInputComponent->BindAction("SweepInteract", IE_Pressed, this, &APlayerCharacter::SweepInteractButtonPressed);
 	PlayerInputComponent->BindAction("ShowInfo", IE_Pressed, this, &APlayerCharacter::ShowInfoButtonPressed);
-
+	PlayerInputComponent->BindAction("ToggleSprint", IE_Pressed, this, &APlayerCharacter::ToggleSprint);
+	PlayerInputComponent->BindAction("EndInteraction", IE_Pressed, this, &APlayerCharacter::EndInteraction);
+	
 	PlayerInputComponent->BindAxis("MoveForward", this, &ThisClass::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ThisClass::MoveRight);
 	PlayerInputComponent->BindAxis("Turn", this, &ThisClass::Turn);

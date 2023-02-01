@@ -4,11 +4,23 @@
 
 #include "CoreMinimal.h"
 #include "AIController.h"
+#include "DetourCrowdAIController.h"
 #include "GameplayTagContainer.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AIPerceptionTypes.h"
 #include "Utility/CustomAIContainer.h"
 #include "BaseAIController.generated.h"
+
+UENUM(BlueprintType)
+enum class EQueryType : uint8
+{
+	EQT_AllTags UMETA(DisplayName = "AllTags"),
+	EQT_AnyTags UMETA(DisplayName = "AnyTags"),
+	EQT_NoTags UMETA(DisplayName = "NoTags"),
+	EQT_SingleTag UMETA(DisplayName = "SingleTag"),
+	
+	EQT_MAX UMETA(DisplayName = "DefaultMax")
+};
 
 /**
  * 
@@ -20,7 +32,7 @@ class ALCHEMYPROJECT_API ABaseAIController : public AAIController
 
 public:
 
-	ABaseAIController();
+	ABaseAIController(const FObjectInitializer& ObjectInitializer);
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual ETeamAttitude::Type GetTeamAttitudeTowards(const AActor& Other) const override;
 	UFUNCTION()
@@ -86,14 +98,17 @@ protected:
 
 
 	UFUNCTION(BlueprintCallable)
-	void QueryForActors_GameplayTags(const struct FGameplayTagContainer& InGameplayTagContainer, const class UEnvQuery* const InEnvQuery, APawn* InPawn, const float SearchRadius);
+	void QueryForActors_GameplayTags(const struct FGameplayTagContainer& InGameplayTagContainer, const EQueryType QueryType, const class UEnvQuery* const InEnvQuery, APawn* InPawn, const float SearchRadius, const float MinFindRadius, const float MaxFindRadius);
 
 	void HandleQueryRequest(TSharedPtr<struct FEnvQueryResult> Result);
 
 	FGameplayTagContainer TagsToBeTested;
+	EQueryType CurrentQueryType;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	class UCustomAIContainer* CustomAIContainer;
+
+	class UBehaviorTree* GetBehaviorTree(const FName BehaviorTreeName) const;
 
 private:
 

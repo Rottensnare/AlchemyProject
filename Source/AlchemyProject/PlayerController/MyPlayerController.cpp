@@ -15,13 +15,17 @@
 #include "AlchemyProject/HUD/PlayerHUD.h"
 #include "AlchemyProject/HUD/PlayerOverlay.h"
 #include "AlchemyProject/HUD/ScrollableInventoryWidget.h"
+#include "Components/Button.h"
 #include "Components/Image.h"
+#include "Components/MultiLineEditableTextBox.h"
 #include "Components/PawnNoiseEmitterComponent.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "Components/UniformGridPanel.h"
+#include "HUD/DialogueBox.h"
+#include "HUD/DialogueOverlay.h"
 #include "Kismet/GameplayStatics.h"
-#include "Kismet/KismetArrayLibrary.h"
+#include "Managers/DialogueManager.h"
 #include "Sound/SoundCue.h"
 
 AMyPlayerController::AMyPlayerController()
@@ -151,6 +155,68 @@ void AMyPlayerController::ToggleAlchemyOverlay()
 	}
 }
 
+void AMyPlayerController::ToggleDialogueOverlay()
+{
+	//UE_LOG(LogTemp, Warning, TEXT("ToggleDialogueOverlay"))
+	CurrentCharacter = CurrentCharacter == nullptr ? Cast<APlayerCharacter>(GetCharacter()) : CurrentCharacter;
+	PlayerHUD = PlayerHUD == nullptr ? Cast<APlayerHUD>(GetHUD()) : PlayerHUD;
+	if(!CurrentCharacter) UE_LOG(LogTemp, Warning, TEXT("CurrentCharacter NULL"))
+	
+	//if(!PlayerHUD) UE_LOG(LogTemp, Warning, TEXT("PlayerHUD NULL"))
+	//else if(!PlayerHUD->DialogueOverlay) UE_LOG(LogTemp, Warning, TEXT("DialogueOverlay NULL"))
+	
+	if(PlayerHUD && PlayerHUD->DialogueOverlay && PlayerHUD->DialogueOverlay->DialogueManager && CurrentCharacter && PlayerHUD->PlayerOverlay)
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("DialogueOverlay ok"))
+		if(PlayerHUD->DialogueOverlay->GetVisibility() == ESlateVisibility::Collapsed)
+		{
+			PlayerHUD->DialogueOverlay->SetVisibility(ESlateVisibility::Visible);
+			HideOtherOverlays(2);
+			FInputModeUIOnly InputModeUIOnly;
+			SetInputMode(InputModeUIOnly);
+			SetShowMouseCursor(true);
+			CurrentCharacter->bIsConversing = true;
+			SetIgnoreMoveInput(true);
+			PlayerHUD->DialogueOverlay->DialogueManager->StartDialogue(CurrentCharacter->GetCurrentNPC_ID());
+			//PlayerHUD->DialogueOverlay->DialogueBox->AddToListView(PlayerHUD->DialogueOverlay->DialogueManager->GetOptionStrings());
+			PlayerHUD->DialogueOverlay->DialogueBox->AddToListView(PlayerHUD->DialogueOverlay->DialogueManager->GetCurrentDialogueOptions(), CurrentCharacter);
+			PlayerHUD->DialogueOverlay->MultiLineTextBox->SetText(FText::FromString(PlayerHUD->DialogueOverlay->DialogueManager->GetNPCDialogue()));
+		}
+		else
+		{
+			PlayerHUD->DialogueOverlay->SetVisibility(ESlateVisibility::Collapsed);
+			PlayerHUD->PlayerOverlay->SetVisibility(ESlateVisibility::Visible);
+			FInputModeGameOnly InputModeGameOnly;
+			SetInputMode(InputModeGameOnly);
+			SetShowMouseCursor(false);
+			CurrentCharacter->bIsConversing = false;
+			CurrentCharacter->SetCurrentNPC(nullptr);
+			SetIgnoreMoveInput(false);
+			PlayerHUD->DialogueOverlay->DialogueBox->EmptyListView();
+			PlayerHUD->DialogueOverlay->MultiLineTextBox->SetText(FText::GetEmpty());
+		}
+	}
+}
+
+void AMyPlayerController::HideOtherOverlays(const uint8 OverlayIndex)
+{
+	if(!PlayerHUD || !PlayerHUD->PlayerOverlay || !PlayerHUD->AlchemyOverlay || !PlayerHUD->DialogueOverlay) return;
+	
+	if(OverlayIndex == 0)
+	{
+		PlayerHUD->AlchemyOverlay->SetVisibility(ESlateVisibility::Collapsed);
+		PlayerHUD->DialogueOverlay->SetVisibility(ESlateVisibility::Collapsed);
+	}else if(OverlayIndex == 1)
+	{
+		PlayerHUD->PlayerOverlay->SetVisibility(ESlateVisibility::Collapsed);
+		PlayerHUD->DialogueOverlay->SetVisibility(ESlateVisibility::Collapsed);
+	}else if(OverlayIndex == 2)
+	{
+		PlayerHUD->PlayerOverlay->SetVisibility(ESlateVisibility::Collapsed);
+		PlayerHUD->AlchemyOverlay->SetVisibility(ESlateVisibility::Collapsed);
+	}
+}
+
 void AMyPlayerController::SelectAlchemyIngredient(const int32 SelectedSlot)
 {
 	CurrentCharacter = CurrentCharacter == nullptr ? Cast<APlayerCharacter>(GetCharacter()) : CurrentCharacter;
@@ -244,8 +310,8 @@ void AMyPlayerController::FindIngredients(const FName& RecipeName)
 
 	ClearAlchemySelection();
 	
-	FString RecipeDataTablePath(TEXT("DataTable'/Game/Assets/Datatables/RecipeDataTable.RecipeDataTable'"));
-	UDataTable* RecipeTableObject = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, *RecipeDataTablePath));
+	FString RecipeDataTablePath(TEXT("DataTable'/Game/Assets/Datatables/RecipeDataTable.RecipeDataTable'")); //TODO: Make this global
+	UDataTable* RecipeTableObject = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, *RecipeDataTablePath)); //TODO: Make this global as well
 	if(!RecipeTableObject) return;
 	
 	FRecipeTable* RecipeDataRow = nullptr;
@@ -268,8 +334,8 @@ void AMyPlayerController::FindIngredients(const FName& RecipeName)
 
 void AMyPlayerController::PlaySound(const FName& SFXName)
 {
-	const FString SFXDataTablePath(TEXT("DataTable'/Game/Assets/Datatables/SoundFXDataTable.SoundFXDataTable'"));
-	const UDataTable* SFXTableObject = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, *SFXDataTablePath));
+	const FString SFXDataTablePath(TEXT("DataTable'/Game/Assets/Datatables/SoundFXDataTable.SoundFXDataTable'")); //TODO: Make this global
+	const UDataTable* SFXTableObject = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, *SFXDataTablePath)); //TODO: Make this global as well
 	if(!SFXTableObject) return;
 	
 	const FSoundEffectTable* SFXDataRow = nullptr;
@@ -295,6 +361,11 @@ void AMyPlayerController::CreateNoise(const float InVolume, const float InMaxRan
 	PawnNoiseEmitterComponent->MakeNoise(GetPawn(), InVolume, GetPawn()->GetActorLocation());
 }
 
+void AMyPlayerController::OnClicked_Delegate()
+{
+	ToggleDialogueOverlay();
+}
+
 
 FGenericTeamId AMyPlayerController::GetGenericTeamId() const
 {
@@ -309,7 +380,37 @@ void AMyPlayerController::BeginPlay()
 	if(PlayerHUD)
 	{
 		PlayerHUD->AddCharacterOverlay();
+		if(PlayerHUD->DialogueOverlay && PlayerHUD->DialogueOverlay->ExitButton && PlayerHUD->DialogueOverlay->DialogueManager)
+		{
+			PlayerHUD->DialogueOverlay->ExitButton->OnClicked.AddDynamic(this, &ThisClass::OnClicked_Delegate);
+			PlayerHUD->DialogueOverlay->Player = Cast<APlayerCharacter>(GetPawn());
+			PlayerHUD->DialogueOverlay->DialogueManager->OnDialogueEnd.AddDynamic(this, &AMyPlayerController::OnEndDialogue);
+		}
 	}
+}
+
+void AMyPlayerController::OnPossess(APawn* InPawn)
+{
+	/*
+	UE_LOG(LogTemp, Warning, TEXT("OnPossess"))
+	PlayerHUD = PlayerHUD == nullptr ? Cast<APlayerHUD>(GetHUD()) : PlayerHUD;
+	if(!PlayerHUD) {UE_LOG(LogTemp, Warning, TEXT("PlayerHUD not valid"))}
+	else if(!PlayerHUD->DialogueOverlay) {UE_LOG(LogTemp, Warning, TEXT("DialogueOverlay not valid"))}
+	else if(!PlayerHUD->DialogueOverlay) {UE_LOG(LogTemp, Warning, TEXT("DialogueManager not valid"))}
+	else if(PlayerHUD && PlayerHUD->DialogueOverlay && PlayerHUD->DialogueOverlay->DialogueManager)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Was valid"))
+		PlayerHUD->DialogueOverlay->DialogueManager->OnDialogueEnd.AddDynamic(this, &AMyPlayerController::OnEndDialogue);
+	}
+	*/
+	
+	Super::OnPossess(InPawn);
+}
+
+void AMyPlayerController::OnEndDialogue()
+{
+	//UE_LOG(LogTemp, Warning, TEXT("OnEndDialogue"))
+	ToggleDialogueOverlay();
 }
 
 

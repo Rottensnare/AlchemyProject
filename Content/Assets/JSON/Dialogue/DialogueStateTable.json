@@ -1,0 +1,62 @@
+[
+	{
+		"Name": "NewRow",
+		"DialogueStateID": 1,
+		"NPCDialogueText": "NSLOCTEXT(\"[BC307F294EC54ECF8A4392BE5363D23A]\", \"7102C600403E14049C2F01BAFEF4ECA5\", \"Hello. How can I help?\")",
+		"DialogueOptions": [ 1, 2 ]
+	},
+	{
+		"Name": "NewRow_0",
+		"DialogueStateID": 2,
+		"NPCDialogueText": "NSLOCTEXT(\"[BC307F294EC54ECF8A4392BE5363D23A]\", \"4D7211E445C182EAE099A09CE7F6093C\", \"Do you need healing?\")",
+		"DialogueOptions": [ 3, 4 ]
+	},
+	{
+		"Name": "NewRow_1",
+		"DialogueStateID": 3,
+		"NPCDialogueText": "NSLOCTEXT(\"[BC307F294EC54ECF8A4392BE5363D23A]\", \"DCC73E784C3AB2A3EBAF56AC85D5CA5A\", \"That would be 500$.\")",
+		"DialogueOptions": [ 1, 5 ]
+	},
+	{
+		"Name": "NewRow_2",
+		"DialogueStateID": 4,
+		"NPCDialogueText": "NSLOCTEXT(\"[BC307F294EC54ECF8A4392BE5363D23A]\", \"3BC4EB5C4E073EF9348D029515B44574\", \"Henlo, high R yuo.\")",
+		"DialogueOptions": [ 2, 4 ]
+	},
+	{
+		"Name": "NewRow_3",
+		"DialogueStateID": 5,
+		"NPCDialogueText": "NSLOCTEXT(\"[BC307F294EC54ECF8A4392BE5363D23A]\", \"1FDEBD7944CAAD38A24C92BCC9057AB9\", \"Get out of mah huus.\")",
+		"DialogueOptions": [ 1, 6 ]
+	},
+	{
+		"Name": "NewRow_4",
+		"DialogueStateID": 6,
+		"NPCDialogueText": "NSLOCTEXT(\"[BC307F294EC54ECF8A4392BE5363D23A]\", \"4D16778B48B2F79336F0458150EA0BCF\", \"Sup\")",
+		"DialogueOptions": [ 1, 4 ]
+	},
+	{
+		"Name": "NewRow_5",
+		"DialogueStateID": 7,
+		"NPCDialogueText": "NSLOCTEXT(\"[BC307F294EC54ECF8A4392BE5363D23A]\", \"F4EC37344D5BB17C3E29EAB97D8F108B\", \"1+1=2\")",
+		"DialogueOptions": [ 3, 4 ]
+	},
+	{
+		"Name": "NewRow_6",
+		"DialogueStateID": 0,
+		"NPCDialogueText": "",
+		"DialogueOptions": []
+	},
+	{
+		"Name": "NewRow_7",
+		"DialogueStateID": 0,
+		"NPCDialogueText": "",
+		"DialogueOptions": []
+	},
+	{
+		"Name": "NewRow_8",
+		"DialogueStateID": 0,
+		"NPCDialogueText": "",
+		"DialogueOptions": []
+	}
+]

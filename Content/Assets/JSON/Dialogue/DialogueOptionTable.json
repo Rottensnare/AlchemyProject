@@ -1,0 +1,150 @@
+[
+	{
+		"Name": "TestRow",
+		"DialogueID": 1,
+		"TextToDisplay": "NSLOCTEXT(\"[E6FC7E3C4503087C030B59A46EBEB64D]\", \"244B3FEC42453A4BFFB56483D107F75B\", \"Screw You!\")",
+		"NextDialogueStateID": 0,
+		"FunctionNames": [],
+		"FunctionObjects": [
+			"/Game/ThirdPerson/Maps/ThirdPersonMap.ThirdPersonMap:PersistentLevel.BP_AIBase_C_UAID_04D9F5D43002AD5E01_1739399871",
+			"/Game/ThirdPerson/Maps/ThirdPersonMap.ThirdPersonMap:PersistentLevel.StaticMeshActor_UAID_04D9F5D43002C95D01_1944609753"
+		],
+		"EventArguments": [],
+		"Requirements":
+		{
+			"RequiredTags":
+			{
+				"GameplayTags": [],
+				"ParentTags": []
+			},
+			"ForbiddenTags":
+			{
+				"GameplayTags": [],
+				"ParentTags": []
+			}
+		}
+	},
+	{
+		"Name": "NewRow",
+		"DialogueID": 2,
+		"TextToDisplay": "NSLOCTEXT(\"[E6FC7E3C4503087C030B59A46EBEB64D]\", \"6FF5ACC6420561ED56D4088910822DC8\", \"I am injured.\")",
+		"NextDialogueStateID": 2,
+		"FunctionNames": [],
+		"FunctionObjects": [],
+		"EventArguments": [],
+		"Requirements":
+		{
+			"RequiredTags":
+			{
+				"GameplayTags": [
+					{
+						"TagName": "ActorStatus.HealthStatus.Injured"
+					}
+				],
+				"ParentTags": [
+					{
+						"TagName": "ActorStatus.HealthStatus"
+					},
+					{
+						"TagName": "ActorStatus"
+					}
+				]
+			},
+			"ForbiddenTags":
+			{
+				"GameplayTags": [],
+				"ParentTags": []
+			}
+		}
+	},
+	{
+		"Name": "NewRow_0",
+		"DialogueID": 3,
+		"TextToDisplay": "NSLOCTEXT(\"[E6FC7E3C4503087C030B59A46EBEB64D]\", \"594890BF430F40F439099183F8C5EEDF\", \"Yes.\")",
+		"NextDialogueStateID": 3,
+		"FunctionNames": [],
+		"FunctionObjects": [],
+		"EventArguments": [
+			"Heal,Self,200"
+		],
+		"Requirements":
+		{
+			"RequiredTags":
+			{
+				"GameplayTags": [],
+				"ParentTags": []
+			},
+			"ForbiddenTags":
+			{
+				"GameplayTags": [],
+				"ParentTags": []
+			}
+		}
+	},
+	{
+		"Name": "NewRow_1",
+		"DialogueID": 4,
+		"TextToDisplay": "NSLOCTEXT(\"[E6FC7E3C4503087C030B59A46EBEB64D]\", \"EDEDFE1745D435F10ED6978E880EDB65\", \"No.\")",
+		"NextDialogueStateID": -1,
+		"FunctionNames": [],
+		"FunctionObjects": [],
+		"EventArguments": [],
+		"Requirements":
+		{
+			"RequiredTags":
+			{
+				"GameplayTags": [],
+				"ParentTags": []
+			},
+			"ForbiddenTags":
+			{
+				"GameplayTags": [],
+				"ParentTags": []
+			}
+		}
+	},
+	{
+		"Name": "NewRow_2",
+		"DialogueID": 5,
+		"TextToDisplay": "NSLOCTEXT(\"[E6FC7E3C4503087C030B59A46EBEB64D]\", \"953A291C4FB93149A2226281976C49EA\", \"Here you are.\")",
+		"NextDialogueStateID": 0,
+		"FunctionNames": [],
+		"FunctionObjects": [],
+		"EventArguments": [],
+		"Requirements":
+		{
+			"RequiredTags":
+			{
+				"GameplayTags": [],
+				"ParentTags": []
+			},
+			"ForbiddenTags":
+			{
+				"GameplayTags": [],
+				"ParentTags": []
+			}
+		}
+	},
+	{
+		"Name": "NewRow_3",
+		"DialogueID": 6,
+		"TextToDisplay": "NSLOCTEXT(\"[E6FC7E3C4503087C030B59A46EBEB64D]\", \"73C8528B40C71704C9F587B078C15263\", \"Yep.\")",
+		"NextDialogueStateID": 0,
+		"FunctionNames": [],
+		"FunctionObjects": [],
+		"EventArguments": [],
+		"Requirements":
+		{
+			"RequiredTags":
+			{
+				"GameplayTags": [],
+				"ParentTags": []
+			},
+			"ForbiddenTags":
+			{
+				"GameplayTags": [],
+				"ParentTags": []
+			}
+		}
+	}
+]

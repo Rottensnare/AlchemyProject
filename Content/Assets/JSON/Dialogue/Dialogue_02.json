@@ -1,0 +1,19 @@
+{
+    "Objects": [
+        {
+            "DialogueID": 1,
+            "TextToDisplay": "I'm fine dank you.",
+            "NextDialogueStateID": 2
+        },
+        {
+            "DialogueID": 2,
+            "TextToDisplay": "I'm not good.",
+            "NextDialogueStateID": 3
+        },
+        {
+            "DialogueID": 3,
+            "TextToDisplay": "EZ PZ!",
+            "NextDialogueStateID": 0
+        }
+    ]
+}

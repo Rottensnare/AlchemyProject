@@ -23,6 +23,9 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 	bool bIsDoingAlchemy{false};
+
+	UPROPERTY(BlueprintReadWrite)
+	bool bIsConversing{false};
 	
 	void UsePotion(const TSubclassOf<UPotionComponent> InComponentClass, const EProductQuality InProductQuality);
 
@@ -42,7 +45,9 @@ protected:
 	void SweepInteractButtonPressed();
 	void TraceForObjects();
 	void ShowInfoButtonPressed();
-
+	void ToggleSprint();
+	void EndInteraction();
+	
 private:
 	
 	UPROPERTY(VisibleAnywhere)
@@ -86,6 +91,11 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	AItem* TracedItemLastFrame;
+
+	UPROPERTY(VisibleAnywhere)
+	APawn* CurrentNPC;
+
+	int32 CurrentNPC_ID{0};
 	
 	TSubclassOf<class AItem> ItemClass;
 
@@ -98,10 +108,23 @@ private:
 	UPROPERTY()
 	const USkeletalMeshSocket* HeadSocket{nullptr};
 
+	UPROPERTY(EditAnywhere, Category = "Custom Movement")
+	float SprintSpeed{600.f};
+	UPROPERTY(EditAnywhere, Category = "Custom Movement")
+	float WalkSpeed{230.f};
+	UPROPERTY(VisibleAnywhere, Category = "Custom Movement")
+	float DefaultWalkSpeed;
+
+	UPROPERTY(VisibleAnywhere, Category = "Custom Movement")
+	bool bSprinting{true};
+
 	/** Perception */
 
 	UPROPERTY()
 	class UAIPerceptionStimuliSourceComponent* PerceptionStimuliSourceComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	FGameplayTagContainer GameplayTags;
 
 public:
 	
@@ -111,7 +134,10 @@ public:
 	FORCEINLINE void SetAlchemyTable(AAlchemyTable* InTable) {CurrentAlchemyTable = InTable;}
 	FORCEINLINE AAlchemyTable* GetAlchemyTable() const {return CurrentAlchemyTable;}
 	FORCEINLINE UAIPerceptionStimuliSourceComponent* GetPerceptionStimuliSourceComponent() const {return PerceptionStimuliSourceComponent;}
-	
+	FORCEINLINE APawn* GetCurrentNPC() const {return CurrentNPC;}
+	FORCEINLINE void SetCurrentNPC(APawn* InPawn) {CurrentNPC = InPawn;}
+	FORCEINLINE int32 GetCurrentNPC_ID() const {return CurrentNPC_ID;}
+	FORCEINLINE FGameplayTagContainer& GetGameplayTags() {return GameplayTags;} 
 };
 
 

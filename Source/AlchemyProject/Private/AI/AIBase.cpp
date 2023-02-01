@@ -5,12 +5,17 @@
 
 #include "AI/BaseAIController.h"
 #include "AI/UI/SpeechWidget.h"
+#include "AI/Utility/CustomNavModifierComponent.h"
 #include "AI/Utility/PatrolArea.h"
+#include "AlchemyProject/InventoryComponent.h"
 #include "AlchemyProject/PlayerCharacter.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Components/RichTextBlock.h"
+#include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "NavAreas/NavArea_Obstacle.h"
+#include "Navigation/CrowdManager.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "Perception/AISenseConfig.h"
@@ -28,6 +33,14 @@ AAIBase::AAIBase()
 	SpeechWidgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("SpeechWidgetComp"));
 	SpeechWidgetComp->SetupAttachment(GetRootComponent());
 	SpeechWidgetComp->SetVisibility(false);
+
+	ESPSphere = CreateDefaultSubobject<USphereComponent>(TEXT("ESPSphere"));
+	ESPSphere->SetupAttachment(GetRootComponent());
+	ESPSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	ESPSphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	ESPSphere->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
+
+	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
 	
 }
 
@@ -47,20 +60,26 @@ void AAIBase::BeginPlay()
 	//PawnSensingComponent->OnSeePawn.AddDynamic(this, &AAIBase::OnSeenPawn);
 	//PawnSensingComponent->OnHearNoise.AddDynamic(this, &AAIBase::OnSomethingHeard);
 
+	ESPSphere->OnComponentBeginOverlap.AddDynamic(this, &AAIBase::OnESPBeginOverlap);
+	ESPSphere->OnComponentEndOverlap.AddDynamic(this, &AAIBase::OnESPEndOverlap);
+
 	if(GetCharacterMovement()) GetCharacterMovement()->MaxWalkSpeed = PatrolMoveSpeed;
 	OriginalPosition = GetActorLocation();
 	
 	AIController = Cast<ABaseAIController>(GetController());
 	if(AIController)
 	{
-		AIController->RunBehaviorTree(BehaviorTree);
+		//BUG: Use BehaviorTreeComponent->StartTree Instead
+		//AIController->RunBehaviorTree(BehaviorTree); //BUG: When using RunBehaviorTree in BeginPlay it won't add the instance to the UBehaviorTreeComponent::InstanceStack 
 		
 		if(AIController->GetAIBlackboardComponent() == nullptr) return;
 		
-		AIController->GetAIBlackboardComponent()->SetValueAsEnum(FName("AIState"), (uint8)AIState);
+		AIController->GetAIBlackboardComponent()->SetValueAsEnum(FName("AIState"), static_cast<uint8>(AIState));
 		AIController->GetAIBlackboardComponent()->SetValueAsBool(FName("FollowPlayer"), bFollowPlayer);
 		AIController->GetAIBlackboardComponent()->SetValueAsVector(FName("OriginalPosition"), OriginalPosition);
 	}
+
+	IQueryable::InitializeGameplayTagContainer(GameplayTagContainer);
 }
 
 void AAIBase::Tick(float DeltaTime)
@@ -120,7 +139,7 @@ void AAIBase::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent
 			SetFollowPlayer(bFollowPlayer);
 		}
 	}
-
+	
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 }
 
@@ -161,6 +180,18 @@ void AAIBase::ClearSpeechWidgetTimer()
 void AAIBase::HideSpeechWidget()
 {
 	SpeechWidgetComp->SetVisibility(false);
+}
+
+void AAIBase::OnESPBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	bESPOverlapping = true;
+}
+
+void AAIBase::OnESPEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	bESPOverlapping = false;
 }
 
 void AAIBase::SetFollowPlayer(bool Value)
@@ -213,6 +244,17 @@ void AAIBase::SetPlayerSeen(const bool bValue)
 		SetAIState(EAIState::EAIS_Patrolling);
 		GetCharacterMovement()->MaxWalkSpeed = PatrolMoveSpeed;
 	}
+}
+
+bool AAIBase::Interact(AActor* OtherActor)
+{
+	if(!bCanBeInteractedWith) return false;
+	if(bCanConverse)
+	{
+		return true;
+	}
+	
+	return IInteractable::Interact(OtherActor);
 }
 
 void AAIBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

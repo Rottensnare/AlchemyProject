@@ -9,6 +9,8 @@
 #include "AlchemyProject/Alchemy/CustomStructs/NPCStructs.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/Character.h"
+#include "Interfaces/Interactable.h"
+#include "Interfaces/Queryable.h"
 #include "UI/SpeechWidget.h"
 #include "AIBase.generated.h"
 
@@ -25,11 +27,12 @@ enum class EAIState : uint8
 	EAIS_Unconscious UMETA(DisplayName = "Unconscious"),
 	EAIS_Busy UMETA(DisplayName = "Busy"),
 	EAIS_Dead UMETA(DisplayName = "Dead"),
+	EAIS_Working UMETA(DisplayName = "Working"),
 	EAIS_MAX UMETA(DisplayName = "DefaultMax")
 };
 
 UCLASS()
-class ALCHEMYPROJECT_API AAIBase : public ACharacter 
+class ALCHEMYPROJECT_API AAIBase : public ACharacter, public IQueryable, public IInteractable
 {
 	GENERATED_BODY()
 
@@ -67,6 +70,13 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Perception|Components", meta = (AllowPrivateAccess = "true"))
 	class UAIPerceptionStimuliSourceComponent* PerceptionStimuliSourceComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory|Components", meta = (AllowPrivateAccess = "true"))
+	class UInventoryComponent* InventoryComponent;
+
+	/** Used for detecting the player very close if AI bPlayerSeen = true */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Perception|Components", meta = (AllowPrivateAccess = "true"))
+	class USphereComponent* ESPSphere;
 	
 	UPROPERTY(EditAnywhere, Category = "Behavior Tree", meta = (AllowPrivateAccess = "true"))
 	class UBehaviorTree* BehaviorTree;
@@ -96,7 +106,14 @@ protected:
 	float SpeechWidgetShowTime{4.f};
 	UFUNCTION()
 	void HideSpeechWidget();
-	
+
+	UFUNCTION()
+	void OnESPBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
+	UFUNCTION()
+	void OnESPEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	UPROPERTY(VisibleAnywhere)
+	bool bESPOverlapping{false};
 	
 private:	
 
@@ -148,13 +165,15 @@ private:
 
 	//Player can interact at least in some way, meaning that when pressing the interact button the NPC can do something.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Interaction", meta = (AllowPrivateAccess = "true"))
-	bool bCanBeInteractedWith;
+	bool bCanBeInteractedWith{true};
 	//Player can have a conversation, meaning that a dialogue widget will pop up.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Interaction", meta = (AllowPrivateAccess = "true"))
-	bool bCanConverse;
+	bool bCanConverse{true};
 	//Map that stores information about the opinion of other NPCs.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Opinions", meta = (AllowPrivateAccess = "true"))
 	TMap<AActor*, int32> OpinionTable;
+
+	
 
 public:
 	/*******************
@@ -177,6 +196,16 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|GameplayTags")
 	FTagsToSearch TagsToSearch;
+
+	UPROPERTY(EditAnywhere, Category = "AI|Dialogue")
+	int32 NPC_ID{1};
+
+
+	/***********************
+	 *	INTERFACE OVERRIDES
+	 **********************/
+
+	virtual bool Interact(AActor* OtherActor) override;
 };
 
 template <typename T>
