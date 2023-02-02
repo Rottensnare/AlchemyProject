@@ -32,8 +32,7 @@ AAIBase::AAIBase()
 	PrimaryActorTick.bCanEverTick = true;
 	
 	PerceptionStimuliSourceComponent = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("PerceptionStimuliSourceComp"));
-	PerceptionStimuliSourceComponent->RegisterForSense(UAISense_Sight::StaticClass());
-	PerceptionStimuliSourceComponent->RegisterForSense(UAISense_Hearing::StaticClass());
+	PerceptionStimuliSourceComponent->bAutoRegister = true;
 
 	SpeechWidgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("SpeechWidgetComp"));
 	SpeechWidgetComp->SetupAttachment(GetRootComponent());
@@ -88,6 +87,15 @@ void AAIBase::BeginPlay()
 
 	IQueryable::InitializeGameplayTagContainer(GameplayTagContainer);
 	FNPCInfo::FillData(NPCInfo, NPC_ID);
+}
+
+void AAIBase::PostInitializeComponents()
+{
+	PerceptionStimuliSourceComponent->RegisterForSense(UAISense_Sight::StaticClass());
+	PerceptionStimuliSourceComponent->RegisterForSense(UAISense_Hearing::StaticClass());
+	PerceptionStimuliSourceComponent->RegisterWithPerceptionSystem();
+	
+	Super::PostInitializeComponents();
 }
 
 void AAIBase::Tick(float DeltaTime)
@@ -180,13 +188,24 @@ ETeamAttitude::Type AAIBase::GetFactionAttitude(const FNPCInfo& DetectedNPCInfo)
 			}
 			if(TempFaction->GetFactionInfo().MemberIDs.Contains(NPCInfo.NPC_ID))
 			{
+				//First check if are part of any hostile factions, return Hostile if true.
+				//This is first because it is higher priority than friendly factions.
+				//TODO: Might need to create a system where it is not allowed to be part of 2 different factions that are hostile at each other
+				//TODO: This isn't an easy task, needs a lot of thought put into it, since player can be part of 2 factions that become hostile \
+				// after the player has joined them.
 				for(const int32 FactionID : DetectedNPCInfo.JoinedFactionIDs)
 				{
 					if(TempFaction->GetFactionInfo().HostileFactions.Contains(FactionID)) return ETeamAttitude::Hostile;
 				}
-				for(const auto& FactionID : DetectedNPCInfo.JoinedFactionIDs)
+				for(const int32 FactionID : DetectedNPCInfo.JoinedFactionIDs)
 				{
+					if(NPCInfo.JoinedFactionIDs.IsValidIndex(0)) UE_LOG(LogTemp, Warning, TEXT("Target FactionID: %d, Perceiver FactionID: %d"), FactionID, NPCInfo.JoinedFactionIDs[0])
+					else  UE_LOG(LogTemp, Warning, TEXT("NPCInfo.JoinedFactionIDs.IsValidIndex(0) NOT A VALID INDEX"))
+					//If part of a friendly faction, return Friendly
 					if(TempFaction->GetFactionInfo().FriendlyFactions.Contains(FactionID)) return ETeamAttitude::Friendly;
+					
+					//If are part of the same faction, return Friendly
+					if(NPCInfo.JoinedFactionIDs.Contains(FactionID)) return ETeamAttitude::Friendly;
 				}
 			}
 		}

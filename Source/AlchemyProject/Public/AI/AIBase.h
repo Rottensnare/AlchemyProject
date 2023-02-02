@@ -53,6 +53,8 @@ public:
 	ETeamAttitude::Type GetFactionAttitude(const FNPCInfo& DetectedNPCInfo) const;
 protected:
 	virtual void BeginPlay() override;
+
+	virtual void PostInitializeComponents() override;
 	
 	UFUNCTION()
 	virtual void OnSeenPawn(APawn* InPawn);
