@@ -7,6 +7,7 @@
 #include "AI/UI/SpeechWidget.h"
 #include "AI/Utility/CustomNavModifierComponent.h"
 #include "AI/Utility/PatrolArea.h"
+#include "AlchemyProject/AlchemyProjectGameMode.h"
 #include "AlchemyProject/InventoryComponent.h"
 #include "AlchemyProject/PlayerCharacter.h"
 #include "BehaviorTree/BlackboardComponent.h"
@@ -14,6 +15,8 @@
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Managers/FactionManager.h"
 #include "NavAreas/NavArea_Obstacle.h"
 #include "Navigation/CrowdManager.h"
 #include "Perception/AIPerceptionComponent.h"
@@ -22,6 +25,7 @@
 #include "Perception/AISense_Hearing.h"
 #include "Perception/AISense_Sight.h"
 #include "Utility/CharacterData.h"
+#include "Utility/Faction.h"
 
 AAIBase::AAIBase()
 {
@@ -163,6 +167,34 @@ void AAIBase::ToggleSpeechWidget(const FString InString)
 	Cast<USpeechWidget>(SpeechWidgetComp->GetWidget())->SetBlockTextEvent(InString);
 }
 
+ETeamAttitude::Type AAIBase::GetFactionAttitude(const FNPCInfo& DetectedNPCInfo) const
+{
+	AAlchemyProjectGameMode* AlchemyGameMode = Cast<AAlchemyProjectGameMode>(UGameplayStatics::GetGameMode(this));
+	if(AlchemyGameMode)
+	{
+		for(UFaction* const TempFaction : AlchemyGameMode->FactionManager->GetFactions())
+		{
+			if(!(&TempFaction->GetFactionInfo()))
+			{
+				continue;
+			}
+			if(TempFaction->GetFactionInfo().MemberIDs.Contains(NPCInfo.NPC_ID))
+			{
+				for(const int32 FactionID : DetectedNPCInfo.JoinedFactionIDs)
+				{
+					if(TempFaction->GetFactionInfo().HostileFactions.Contains(FactionID)) return ETeamAttitude::Hostile;
+				}
+				for(const auto& FactionID : DetectedNPCInfo.JoinedFactionIDs)
+				{
+					if(TempFaction->GetFactionInfo().FriendlyFactions.Contains(FactionID)) return ETeamAttitude::Friendly;
+				}
+			}
+		}
+	}
+	return ETeamAttitude::Neutral;
+	
+}
+
 void AAIBase::SetSpeechWidgetTimer()
 {
 	/*
@@ -259,6 +291,11 @@ bool AAIBase::Interact(AActor* OtherActor)
 	}
 	
 	return IInteractable::Interact(OtherActor);
+}
+
+FNPCInfo& AAIBase::GetNPCInfo()
+{
+	return NPCInfo;
 }
 
 void AAIBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

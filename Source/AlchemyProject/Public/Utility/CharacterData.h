@@ -11,6 +11,7 @@ USTRUCT()
 struct FMyStruct
 {
 	GENERATED_BODY()
+
 	
 };
 

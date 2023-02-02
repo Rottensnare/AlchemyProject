@@ -19,12 +19,13 @@ public:
 
 private:
 	
-	FFactionInfo FactionInfo;
+	
 	
 	
 public:
-
-	UFUNCTION(BlueprintCallable)
+	FFactionInfo FactionInfo;
+	
 	FORCEINLINE FFactionInfo& GetFactionInfo() {return FactionInfo;}
+	FORCEINLINE void SetFactionInfo(const FFactionInfo InFactionInfo) {FactionInfo = InFactionInfo;}
 	
 };

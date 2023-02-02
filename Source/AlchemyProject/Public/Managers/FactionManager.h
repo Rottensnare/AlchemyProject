@@ -20,9 +20,10 @@ public:
 	
 private:
 	
+	UPROPERTY(VisibleAnywhere)
 	TArray<UFaction*> Factions;
 
 public:
-	UFUNCTION(BlueprintCallable)
+
 	FORCEINLINE TArray<UFaction*>& GetFactions() {return Factions;}
 };

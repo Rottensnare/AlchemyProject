@@ -9,6 +9,7 @@
 #include "AlchemyProject/Alchemy/CustomStructs/NPCStructs.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/Character.h"
+#include "Interfaces/BaseCharacterInfo.h"
 #include "Interfaces/Interactable.h"
 #include "Interfaces/Queryable.h"
 #include "UI/SpeechWidget.h"
@@ -32,7 +33,7 @@ enum class EAIState : uint8
 };
 
 UCLASS()
-class ALCHEMYPROJECT_API AAIBase : public ACharacter, public IQueryable, public IInteractable
+class ALCHEMYPROJECT_API AAIBase : public ACharacter, public IQueryable, public IInteractable, public IBaseCharacterInfo
 {
 	GENERATED_BODY()
 
@@ -49,7 +50,7 @@ public:
 	void ClearSpeechWidgetTimer();
 	UFUNCTION()
 	void ToggleSpeechWidget(const FString InString = FString(""));
-	
+	ETeamAttitude::Type GetFactionAttitude(const FNPCInfo& DetectedNPCInfo) const;
 protected:
 	virtual void BeginPlay() override;
 	
@@ -92,8 +93,10 @@ protected:
 
 	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Data", meta = (AllowPrivateAccess = "true"))
 	//class UCharacterData* CharacterData;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Data", meta = (AllowPrivateAccess = "true"))
 	FNPCInfo NPCInfo;
+
 
 #if WITH_EDITOR
 	//Only works with Editor and changing values from the editor windows
@@ -191,7 +194,7 @@ public:
 	FORCEINLINE bool GetFollowPlayer() const {return bFollowPlayer;}
 	FORCEINLINE bool GetCanSeeTarget() const {return bCanSeeTarget;}
 	FORCEINLINE void SetCanSeeTarget(const bool Value) {bCanSeeTarget = Value;}
-	FORCEINLINE FNPCInfo& GetNPCInfo() {return NPCInfo;}
+	
 
 	/***********************
 	 *	Public Variables
@@ -212,6 +215,7 @@ public:
 	 **********************/
 
 	virtual bool Interact(AActor* OtherActor) override;
+	virtual FNPCInfo& GetNPCInfo() override;
 };
 
 template <typename T>

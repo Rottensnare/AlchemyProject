@@ -19,14 +19,13 @@ bool UFactionManager::InitFactions()
 			if(Row)
 			{
 				UFaction* Faction = NewObject<UFaction>();
-				Faction->GetFactionInfo().FactionID = Row->FactionID;
-				Faction->GetFactionInfo().FactionName = Row->FactionName;
-				Faction->GetFactionInfo().FactionOpinions = Row->FactionOpinions;
-				Faction->GetFactionInfo().FriendlyFactions = Row->FriendlyFactions;
-				Faction->GetFactionInfo().HostileFactions = Row->HostileFactions;
-				Faction->GetFactionInfo().NeutralFactions = Row->NeutralFactions;
-				Faction->GetFactionInfo().MemberIDs = Row->MemberIDs;
-				Faction->GetFactionInfo().MutuallyExclusiveFactions = Row->MutuallyExclusiveFactions;
+				if(!Faction)
+				{
+					UE_LOG(LogTemp, Error, TEXT("Coudln't create a Faction Object"))
+					continue;
+				}
+				
+				Faction->SetFactionInfo(*Row);
 				Factions.AddUnique(Faction);
 			}
 		}

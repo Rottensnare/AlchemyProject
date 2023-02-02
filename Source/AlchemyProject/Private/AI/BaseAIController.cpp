@@ -178,7 +178,6 @@ UBehaviorTree* ABaseAIController::GetBehaviorTree(const FName BehaviorTreeName) 
 	const UDataTable* BehaviorTreeTableObject = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, *BehaviorTreeTablePath));
 	if(BehaviorTreeTableObject)
 	{
-		
 		// ReSharper disable once CppTooWideScope
 		const FBehaviorTreeTable* TableRow = BehaviorTreeTableObject->FindRow<FBehaviorTreeTable>(FName(BehaviorTreeName), TEXT(""));
 		if(TableRow)
@@ -234,11 +233,18 @@ void ABaseAIController::OnTargetPerceptionUpdated_Delegate(AActor* InActor, FAIS
 {
 	//UE_LOG(LogTemp, Warning, TEXT("OnTargetPerceptionUpdated_Delegate"))
 	if(InActor == nullptr || BlackboardComponent == nullptr || AIBase == nullptr) return;
+
+	ETeamAttitude::Type AttitudeType = ETeamAttitude::Neutral;
+	if(IBaseCharacterInfo* TempInterface = Cast<IBaseCharacterInfo>(InActor))
+	{
+		AttitudeType = AIBase->GetFactionAttitude(TempInterface->GetNPCInfo());
+	}
+	
 	switch (Stimulus.Type)
 	{
 	case 0:
 		//Sight
-		if(ETeamAttitude::Hostile == GetTeamAttitudeTowards(*InActor))
+		if(ETeamAttitude::Hostile == AttitudeType)
 		{
 			
 			if(Stimulus.WasSuccessfullySensed())
@@ -266,7 +272,7 @@ void ABaseAIController::OnTargetPerceptionUpdated_Delegate(AActor* InActor, FAIS
 			//UE_LOG(LogTemp, Warning, TEXT("Stimulus Debug: %s"), *Stimulus.GetDebugDescription())
 			
 		}
-		else if(ETeamAttitude::Friendly == GetTeamAttitudeTowards(*InActor))
+		else if(ETeamAttitude::Friendly == AttitudeType)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Henlo fren."))
 		}
@@ -277,7 +283,7 @@ void ABaseAIController::OnTargetPerceptionUpdated_Delegate(AActor* InActor, FAIS
 		break;
 	case 1:
 		//Hearing
-		if(!(ETeamAttitude::Friendly == GetTeamAttitudeTowards(*InActor)))
+		if(ETeamAttitude::Hostile == AttitudeType)
 		{
 			if(AIBase->GetPlayerSeen()) break;
 			if(Stimulus.WasSuccessfullySensed())

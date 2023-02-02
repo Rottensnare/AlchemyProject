@@ -7,10 +7,11 @@
 #include "Alchemy/Components/Potion/PotionComponent.h"
 #include "Alchemy/CustomStructs/NPCStructs.h"
 #include "GameFramework/Character.h"
+#include "Interfaces/BaseCharacterInfo.h"
 #include "PlayerCharacter.generated.h"
 
 UCLASS()
-class ALCHEMYPROJECT_API APlayerCharacter : public ACharacter
+class ALCHEMYPROJECT_API APlayerCharacter : public ACharacter, public IQueryable, public IBaseCharacterInfo
 {
 	GENERATED_BODY()
 
@@ -36,8 +37,11 @@ public:
 	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	//class UCharacterData* CharacterData;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FNPCInfo CharacterInfo;
+	//UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	//FNPCInfo CharacterInfo;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Data", meta = (AllowPrivateAccess = "true"))
+	FNPCInfo NPCInfo;
 
 protected:
 
@@ -133,6 +137,7 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	FGameplayTagContainer GameplayTags;
 
+
 public:
 	
 	FORCEINLINE UInventoryComponent* GetInventoryComponent() const {return InventoryComponent;}
@@ -144,7 +149,9 @@ public:
 	FORCEINLINE APawn* GetCurrentNPC() const {return CurrentNPC;}
 	FORCEINLINE void SetCurrentNPC(APawn* InPawn) {CurrentNPC = InPawn;}
 	FORCEINLINE int32 GetCurrentNPC_ID() const {return CurrentNPC_ID;}
-	FORCEINLINE FGameplayTagContainer& GetGameplayTags() {return GameplayTags;} 
+	FORCEINLINE FGameplayTagContainer& GetGameplayTags() {return GameplayTags;}
+
+	virtual FNPCInfo& GetNPCInfo() override;
 };
 
 

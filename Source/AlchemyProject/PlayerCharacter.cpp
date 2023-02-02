@@ -66,7 +66,8 @@ void APlayerCharacter::BeginPlay()
 
 	if(GetCharacterMovement()) DefaultWalkSpeed = GetCharacterMovement()->MaxWalkSpeed;
 
-	FNPCInfo::FillData(CharacterInfo, 0);
+	FNPCInfo::FillData(NPCInfo, 0);
+	UE_LOG(LogTemp, Display, TEXT("ID: %d, Name: %s"), NPCInfo.NPC_ID, *NPCInfo.Name.ToString())
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
@@ -366,6 +367,11 @@ void APlayerCharacter::HUDInitTimerFinished()
 			MyPlayerController->SetInventoryGrid(InventoryComponent->NumberOfInventorySlots);
 		}
 	}
+}
+
+FNPCInfo& APlayerCharacter::GetNPCInfo()
+{
+	return NPCInfo;
 }
 
 
