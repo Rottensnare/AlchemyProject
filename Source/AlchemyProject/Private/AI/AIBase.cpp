@@ -83,6 +83,8 @@ void AAIBase::BeginPlay()
 		AIController->GetAIBlackboardComponent()->SetValueAsEnum(FName("AIState"), static_cast<uint8>(AIState));
 		AIController->GetAIBlackboardComponent()->SetValueAsBool(FName("FollowPlayer"), bFollowPlayer);
 		AIController->GetAIBlackboardComponent()->SetValueAsVector(FName("OriginalPosition"), OriginalPosition);
+
+		LastAIState = AIState;
 	}
 
 	IQueryable::InitializeGameplayTagContainer(GameplayTagContainer);
@@ -114,6 +116,7 @@ void AAIBase::OnSeenPawn(APawn* InPawn)
 		if(AIController == nullptr || AIController->GetAIBlackboardComponent() == nullptr) return;
 		AIController->GetAIBlackboardComponent()->SetValueAsBool(FName("PlayerSeen"), bPlayerSeen);
 		AIController->GetAIBlackboardComponent()->SetValueAsObject(FName("Target"), InPawn);
+		
 		
 		GetWorldTimerManager().ClearTimer(PlayerSeenTimer);
 		GetWorldTimerManager().SetTimer(PlayerSeenTimer,this, &ThisClass::ResetPlayerSeen, PlayerSeenTimerTime);
@@ -199,8 +202,9 @@ ETeamAttitude::Type AAIBase::GetFactionAttitude(const FNPCInfo& DetectedNPCInfo)
 				}
 				for(const int32 FactionID : DetectedNPCInfo.JoinedFactionIDs)
 				{
-					if(NPCInfo.JoinedFactionIDs.IsValidIndex(0)) UE_LOG(LogTemp, Warning, TEXT("Target FactionID: %d, Perceiver FactionID: %d"), FactionID, NPCInfo.JoinedFactionIDs[0])
-					else  UE_LOG(LogTemp, Warning, TEXT("NPCInfo.JoinedFactionIDs.IsValidIndex(0) NOT A VALID INDEX"))
+					//if(NPCInfo.JoinedFactionIDs.IsValidIndex(0)) UE_LOG(LogTemp, Warning, TEXT("Target FactionID: %d, Perceiver FactionID: %d"), FactionID, NPCInfo.JoinedFactionIDs[0])
+					//else  UE_LOG(LogTemp, Warning, TEXT("NPCInfo.JoinedFactionIDs.IsValidIndex(0) NOT A VALID INDEX"))
+					
 					//If part of a friendly faction, return Friendly
 					if(TempFaction->GetFactionInfo().FriendlyFactions.Contains(FactionID)) return ETeamAttitude::Friendly;
 					
@@ -325,6 +329,7 @@ void AAIBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AAIBase::SetAIState(EAIState NewState)
 {
+	UE_LOG(LogTemp, Warning, TEXT("SetAIState"))
 	LastAIState = AIState;
 	AIState = NewState;
 

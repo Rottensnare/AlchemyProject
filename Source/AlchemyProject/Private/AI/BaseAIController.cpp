@@ -232,7 +232,7 @@ ETeamAttitude::Type ABaseAIController::GetTeamAttitudeTowards(const AActor& Othe
 
 void ABaseAIController::OnTargetPerceptionUpdated_Delegate(AActor* InActor, FAIStimulus Stimulus)
 {
-	UE_LOG(LogTemp, Warning, TEXT("OnTargetPerceptionUpdated_Delegate"))
+	//UE_LOG(LogTemp, Warning, TEXT("OnTargetPerceptionUpdated_Delegate"))
 	if(InActor == nullptr || BlackboardComponent == nullptr || AIBase == nullptr) return;
 
 	ETeamAttitude::Type AttitudeType = ETeamAttitude::Neutral;
@@ -325,7 +325,7 @@ void ABaseAIController::OnTargetPerceptionUpdated_Delegate(AActor* InActor, FAIS
 
 void ABaseAIController::OnTargetPerceptionInfoUpdated_Delegate(const FActorPerceptionUpdateInfo& UpdateInfo)
 {
-	UE_LOG(LogTemp, Warning, TEXT("OnTargetPerceptionInfoUpdated_Delegate"))
+	//UE_LOG(LogTemp, Warning, TEXT("OnTargetPerceptionInfoUpdated_Delegate"))
 }
 
 void ABaseAIController::OnSightStimulusExpired_Delegate()
@@ -335,7 +335,7 @@ void ABaseAIController::OnSightStimulusExpired_Delegate()
 	BlackboardComponent->SetValueAsBool(FName("PlayerSeen"), false);
 	AIBase->SetPlayerSeen(false);
 	AIBase->ToggleSpeechWidget("Target got away.");
-	AIBase->SetAIState(EAIState::EAIS_Patrolling); //TODO: Need to make this the state the AI was before the chain of events.
+	AIBase->SetAIState(AIBase->GetLastAIState()); //TODO: Need to make this the state the AI was before the chain of events.
 }
 
 void ABaseAIController::OnHearingStimulusExpired_Delegate()
@@ -343,13 +343,13 @@ void ABaseAIController::OnHearingStimulusExpired_Delegate()
 	if(!AIBase->GetPlayerSeen())
 	{
 		AIBase->ToggleSpeechWidget("Must have been wind.");
-		AIBase->SetAIState(EAIState::EAIS_Patrolling);
+		AIBase->SetAIState(AIBase->GetLastAIState());
 	}
 }
 
 void ABaseAIController::OnPerceptionUpdated_Delegate(const TArray<AActor*>& UpdatedActors)
 {
-	UE_LOG(LogTemp, Warning, TEXT("OnPerceptionUpdated_Delegate"))
+	//UE_LOG(LogTemp, Warning, TEXT("OnPerceptionUpdated_Delegate"))
 }
 
 void ABaseAIController::ChangeAttitudeTowards()

@@ -196,6 +196,7 @@ public:
 	FORCEINLINE bool GetFollowPlayer() const {return bFollowPlayer;}
 	FORCEINLINE bool GetCanSeeTarget() const {return bCanSeeTarget;}
 	FORCEINLINE void SetCanSeeTarget(const bool Value) {bCanSeeTarget = Value;}
+	FORCEINLINE EAIState GetLastAIState() const {return LastAIState;}
 	
 
 	/***********************

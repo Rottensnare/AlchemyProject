@@ -23,7 +23,7 @@ void UInventoryWidget::CreateInventoryGrid(const int32 NumberOfElements)
 	if(PlayerCharacter == nullptr || PlayerCharacter->GetInventoryComponent() == nullptr) return;
 	
 	
-	UE_LOG(LogTemp, Warning, TEXT("Creating Inventory Grid"))
+	//UE_LOG(LogTemp, Warning, TEXT("Creating Inventory Grid"))
 	if(InventorySlotClass && InfoBoxClass)
 	{
 		ComboSelections.Add("Use");
