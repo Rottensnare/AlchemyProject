@@ -5,26 +5,19 @@
 
 #include "AI/BaseAIController.h"
 #include "AI/UI/SpeechWidget.h"
-#include "AI/Utility/CustomNavModifierComponent.h"
 #include "AI/Utility/PatrolArea.h"
 #include "AlchemyProject/AlchemyProjectGameMode.h"
 #include "AlchemyProject/InventoryComponent.h"
 #include "AlchemyProject/PlayerCharacter.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "Components/RichTextBlock.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Managers/FactionManager.h"
-#include "NavAreas/NavArea_Obstacle.h"
-#include "Navigation/CrowdManager.h"
-#include "Perception/AIPerceptionComponent.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
-#include "Perception/AISenseConfig.h"
 #include "Perception/AISense_Hearing.h"
 #include "Perception/AISense_Sight.h"
-#include "Utility/CharacterData.h"
 #include "Utility/Faction.h"
 
 AAIBase::AAIBase()
@@ -300,7 +293,7 @@ void AAIBase::SetPlayerSeen(const bool bValue)
 	}
 	else
 	{
-		SetAIState(EAIState::EAIS_Patrolling);
+		SetAIState(GetLastAIState());
 		GetCharacterMovement()->MaxWalkSpeed = PatrolMoveSpeed;
 	}
 }
