@@ -27,4 +27,6 @@ public:
 	FGameplayTagContainer InterfaceGameplayTagContainer;
 
 	virtual void InitializeGameplayTagContainer(FGameplayTagContainer InGameplayTagContainer);
+
+	virtual FGameplayTagContainer& GetGameplayTagContainer();
 };

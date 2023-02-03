@@ -62,6 +62,11 @@ void AItem::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 }
 
+FGameplayTagContainer& AItem::GetGameplayTagContainer()
+{
+	return GameplayTagContainer;
+}
+
 void AItem::UpdatePopUp()
 {
 	if(ItemPopUp)

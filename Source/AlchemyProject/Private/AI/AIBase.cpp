@@ -314,6 +314,11 @@ FNPCInfo& AAIBase::GetNPCInfo()
 	return NPCInfo;
 }
 
+FGameplayTagContainer& AAIBase::GetGameplayTagContainer()
+{
+	return GameplayTagContainer;
+}
+
 void AAIBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -322,7 +327,7 @@ void AAIBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AAIBase::SetAIState(EAIState NewState)
 {
-	UE_LOG(LogTemp, Warning, TEXT("SetAIState"))
+	//UE_LOG(LogTemp, Warning, TEXT("SetAIState"))
 	LastAIState = AIState;
 	AIState = NewState;
 

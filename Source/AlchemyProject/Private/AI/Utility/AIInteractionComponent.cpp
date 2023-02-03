@@ -31,7 +31,7 @@ void UAIInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType
 	
 }
 
-bool UAIInteractionComponent::ExecuteFunctionality_Implementation()
+bool UAIInteractionComponent::ExecuteFunctionality_Implementation(AActor* InActor)
 {
 	return true;
 }

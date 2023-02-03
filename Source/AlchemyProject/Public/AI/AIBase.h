@@ -32,7 +32,7 @@ enum class EAIState : uint8
 	EAIS_MAX UMETA(DisplayName = "DefaultMax")
 };
 
-UCLASS()
+UCLASS(AutoCollapseCategories = ("Perception"))
 class ALCHEMYPROJECT_API AAIBase : public ACharacter, public IQueryable, public IInteractable, public IBaseCharacterInfo
 {
 	GENERATED_BODY()
@@ -219,6 +219,7 @@ public:
 
 	virtual bool Interact(AActor* OtherActor) override;
 	virtual FNPCInfo& GetNPCInfo() override;
+	virtual FGameplayTagContainer& GetGameplayTagContainer() override;
 };
 
 template <typename T>

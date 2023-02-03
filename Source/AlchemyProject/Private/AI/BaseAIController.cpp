@@ -132,7 +132,7 @@ void ABaseAIController::HandleQueryRequest(TSharedPtr<FEnvQueryResult> Result)
 			for(AActor* OutActor : OutActors)
 			{
 				// ReSharper disable once CppTooWideScope
-				const IQueryable* QueryableInterface = Cast<IQueryable>(OutActor);
+				IQueryable* QueryableInterface = Cast<IQueryable>(OutActor);
 				if(QueryableInterface)
 				{
 					FGameplayTagQuery NewQuery;
@@ -156,15 +156,16 @@ void ABaseAIController::HandleQueryRequest(TSharedPtr<FEnvQueryResult> Result)
 						break;
 					}
 					
-					bool bMatchesQuery = QueryableInterface->InterfaceGameplayTagContainer.MatchesQuery(NewQuery);
+					bool bMatchesQuery = QueryableInterface->GetGameplayTagContainer().MatchesQuery(NewQuery);
 					if(bMatchesQuery)
 					{
 						AddToCustomAIContainer(OutActor);
-					}
+					} else UE_LOG(LogTemp, Display, TEXT("bMatchesQuery was false"))
 				}
 			}
-		}
-	}
+		}else UE_LOG(LogTemp, Display, TEXT("OutActors was Empty"))
+	} else UE_LOG(LogTemp, Display, TEXT("Result was unsuccessful"))
+	
 	UE_LOG(LogTemp, Display, TEXT("Number of Matches: %d"), CustomAIContainer->ActorContainer.Num())
 	if(BlackboardComponent) BlackboardComponent->SetValueAsObject(FName("QueryActors"), CustomAIContainer);
 	
@@ -277,7 +278,7 @@ void ABaseAIController::OnTargetPerceptionUpdated_Delegate(AActor* InActor, FAIS
 		{
 			if(Stimulus.WasSuccessfullySensed())
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Henlo fren."))
+				//UE_LOG(LogTemp, Warning, TEXT("Henlo fren."))
 			}
 			else
 			{
@@ -288,7 +289,7 @@ void ABaseAIController::OnTargetPerceptionUpdated_Delegate(AActor* InActor, FAIS
 		{
 			if(Stimulus.WasSuccessfullySensed())
 			{
-				UE_LOG(LogTemp, Warning, TEXT("I have no strong feelings one way or the other."))
+				//UE_LOG(LogTemp, Warning, TEXT("I have no strong feelings one way or the other."))
 			}
 			else
 			{

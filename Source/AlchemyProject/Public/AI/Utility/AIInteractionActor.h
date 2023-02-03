@@ -5,10 +5,11 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "GameFramework/Actor.h"
+#include "Interfaces/Queryable.h"
 #include "AIInteractionActor.generated.h"
 
 UCLASS()
-class ALCHEMYPROJECT_API AAIInteractionActor : public AActor
+class ALCHEMYPROJECT_API AAIInteractionActor : public AActor, public IQueryable
 {
 	GENERATED_BODY()
 	
@@ -16,7 +17,12 @@ public:
 	
 	AAIInteractionActor();
 
-	bool ExecuteInteraction(const FGameplayTagContainer& InContainer);
+	UFUNCTION(BlueprintCallable)
+	bool ExecuteInteraction(const FGameplayTagContainer& InContainer, AActor* InActor);
+
+protected:
+
+	virtual void PostInitializeComponents() override;
 	
 private:
 
@@ -41,4 +47,8 @@ public:
 	FORCEINLINE UBoxComponent* GetInteractionArea() const {return InteractionArea;}
 	FORCEINLINE UAIInteractionComponent* GetAIInteractionComponent() const {return AIInteractionComponent;}
 	FORCEINLINE void SetAIInteractionComponent(UAIInteractionComponent* NewComponent) {AIInteractionComponent = NewComponent;}
+
+	virtual FGameplayTagContainer& GetGameplayTagContainer() override;
 };
+
+
