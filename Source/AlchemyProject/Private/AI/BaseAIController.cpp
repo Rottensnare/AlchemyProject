@@ -31,10 +31,10 @@ ABaseAIController::ABaseAIController(const FObjectInitializer& ObjectInitializer
 	
 	SenseConfig_Sight = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SenseConfig_Sight"));
 	SenseConfig_Sight->DetectionByAffiliation.bDetectEnemies = true;
-	SenseConfig_Sight->DetectionByAffiliation.bDetectFriendlies = false;
+	SenseConfig_Sight->DetectionByAffiliation.bDetectFriendlies = true;
 	SenseConfig_Sight->DetectionByAffiliation.bDetectNeutrals = true;
 	TeamAttitudeMap_Sight.Emplace(ETeamAttitude::Hostile, true);
-	TeamAttitudeMap_Sight.Emplace(ETeamAttitude::Friendly, false);
+	TeamAttitudeMap_Sight.Emplace(ETeamAttitude::Friendly, true);
 	TeamAttitudeMap_Sight.Emplace(ETeamAttitude::Neutral, true);
 	SenseConfig_Sight->SightRadius = MaxSightRadius;
 	SenseConfig_Sight->PeripheralVisionAngleDegrees = PeripheralVisionAngle;
@@ -43,11 +43,11 @@ ABaseAIController::ABaseAIController(const FObjectInitializer& ObjectInitializer
 	
 	SenseConfig_Hearing = CreateDefaultSubobject<UAISenseConfig_Hearing>(TEXT("SenseConfig_Hearing"));
 	SenseConfig_Hearing->DetectionByAffiliation.bDetectEnemies = true;
-	SenseConfig_Hearing->DetectionByAffiliation.bDetectFriendlies = false;
+	SenseConfig_Hearing->DetectionByAffiliation.bDetectFriendlies = true;
 	SenseConfig_Hearing->DetectionByAffiliation.bDetectNeutrals = true;
 	SenseConfig_Hearing->SetMaxAge(MaxAgeHearing);
 	TeamAttitudeMap_Hearing.Emplace(ETeamAttitude::Hostile, true);
-	TeamAttitudeMap_Hearing.Emplace(ETeamAttitude::Friendly, false);
+	TeamAttitudeMap_Hearing.Emplace(ETeamAttitude::Friendly, true);
 	TeamAttitudeMap_Hearing.Emplace(ETeamAttitude::Neutral, true);
 
 	SenseConfig_Prediction = CreateDefaultSubobject<UAISenseConfig_Prediction>(TEXT("SenseConfig_Prediction"));
@@ -60,17 +60,20 @@ ABaseAIController::ABaseAIController(const FObjectInitializer& ObjectInitializer
 
 	CustomAIContainer = CreateDefaultSubobject<UCustomAIContainer>(TEXT("CustomAIContainer"));
 	
+	
 	ABaseAIController::SetGenericTeamId(FGenericTeamId(1));
 }
 
 void ABaseAIController::BeginPlay()
 {
 	AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &ABaseAIController::OnTargetPerceptionUpdated_Delegate);
+	AIPerceptionComponent->OnPerceptionUpdated.AddDynamic(this, &ABaseAIController::OnPerceptionUpdated_Delegate);
 	AIPerceptionComponent->OnTargetPerceptionInfoUpdated.AddDynamic(this, &ThisClass::OnTargetPerceptionInfoUpdated_Delegate);
 	AIPerceptionComponent->OnSightStimulusExpired.AddDynamic(this, &ABaseAIController::OnSightStimulusExpired_Delegate);
 	AIPerceptionComponent->OnHearingStimulusExpired.AddDynamic(this, &ABaseAIController::OnHearingStimulusExpired_Delegate);
 	
 	AIBase = Cast<AAIBase>(GetPawn());
+
 	
 	//if(GetAIBehaviorTreeComponent()) GetAIBehaviorTreeComponent()->SetDynamicSubtree(FGameplayTag::RequestGameplayTag(FName("Subtree.Work")), GetBehaviorTree("Work"));
 	
@@ -129,7 +132,7 @@ void ABaseAIController::HandleQueryRequest(TSharedPtr<FEnvQueryResult> Result)
 			for(AActor* OutActor : OutActors)
 			{
 				// ReSharper disable once CppTooWideScope
-				const IQueryable* QueryableInterface = Cast<IQueryable>(OutActor);
+				IQueryable* QueryableInterface = Cast<IQueryable>(OutActor);
 				if(QueryableInterface)
 				{
 					FGameplayTagQuery NewQuery;
@@ -153,15 +156,16 @@ void ABaseAIController::HandleQueryRequest(TSharedPtr<FEnvQueryResult> Result)
 						break;
 					}
 					
-					bool bMatchesQuery = QueryableInterface->InterfaceGameplayTagContainer.MatchesQuery(NewQuery);
+					bool bMatchesQuery = QueryableInterface->GetGameplayTagContainer().MatchesQuery(NewQuery);
 					if(bMatchesQuery)
 					{
 						AddToCustomAIContainer(OutActor);
-					}
+					} else UE_LOG(LogTemp, Display, TEXT("bMatchesQuery was false"))
 				}
 			}
-		}
-	}
+		}else UE_LOG(LogTemp, Display, TEXT("OutActors was Empty"))
+	} else UE_LOG(LogTemp, Display, TEXT("Result was unsuccessful"))
+	
 	UE_LOG(LogTemp, Display, TEXT("Number of Matches: %d"), CustomAIContainer->ActorContainer.Num())
 	if(BlackboardComponent) BlackboardComponent->SetValueAsObject(FName("QueryActors"), CustomAIContainer);
 	
@@ -231,11 +235,18 @@ void ABaseAIController::OnTargetPerceptionUpdated_Delegate(AActor* InActor, FAIS
 {
 	//UE_LOG(LogTemp, Warning, TEXT("OnTargetPerceptionUpdated_Delegate"))
 	if(InActor == nullptr || BlackboardComponent == nullptr || AIBase == nullptr) return;
+
+	ETeamAttitude::Type AttitudeType = ETeamAttitude::Neutral;
+	if(IBaseCharacterInfo* TempInterface = Cast<IBaseCharacterInfo>(InActor))
+	{
+		AttitudeType = AIBase->GetFactionAttitude(TempInterface->GetNPCInfo());
+	}
+	
 	switch (Stimulus.Type)
 	{
 	case 0:
 		//Sight
-		if(ETeamAttitude::Hostile == GetTeamAttitudeTowards(*InActor))
+		if(ETeamAttitude::Hostile == AttitudeType)
 		{
 			
 			if(Stimulus.WasSuccessfullySensed())
@@ -263,18 +274,32 @@ void ABaseAIController::OnTargetPerceptionUpdated_Delegate(AActor* InActor, FAIS
 			//UE_LOG(LogTemp, Warning, TEXT("Stimulus Debug: %s"), *Stimulus.GetDebugDescription())
 			
 		}
-		else if(ETeamAttitude::Friendly == GetTeamAttitudeTowards(*InActor))
+		else if(ETeamAttitude::Friendly == AttitudeType)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Henlo fren."))
+			if(Stimulus.WasSuccessfullySensed())
+			{
+				//UE_LOG(LogTemp, Warning, TEXT("Henlo fren."))
+			}
+			else
+			{
+				
+			}
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("I have no strong feelings one way or the other."))
+			if(Stimulus.WasSuccessfullySensed())
+			{
+				//UE_LOG(LogTemp, Warning, TEXT("I have no strong feelings one way or the other."))
+			}
+			else
+			{
+				
+			}
 		}
 		break;
 	case 1:
 		//Hearing
-		if(!(ETeamAttitude::Friendly == GetTeamAttitudeTowards(*InActor)))
+		if(ETeamAttitude::Hostile == AttitudeType)
 		{
 			if(AIBase->GetPlayerSeen()) break;
 			if(Stimulus.WasSuccessfullySensed())
@@ -311,7 +336,7 @@ void ABaseAIController::OnSightStimulusExpired_Delegate()
 	BlackboardComponent->SetValueAsBool(FName("PlayerSeen"), false);
 	AIBase->SetPlayerSeen(false);
 	AIBase->ToggleSpeechWidget("Target got away.");
-	AIBase->SetAIState(EAIState::EAIS_Patrolling); //TODO: Need to make this the state the AI was before the chain of events.
+	AIBase->SetAIState(AIBase->GetLastAIState()); //TODO: Need to make this the state the AI was before the chain of events.
 }
 
 void ABaseAIController::OnHearingStimulusExpired_Delegate()
@@ -319,8 +344,13 @@ void ABaseAIController::OnHearingStimulusExpired_Delegate()
 	if(!AIBase->GetPlayerSeen())
 	{
 		AIBase->ToggleSpeechWidget("Must have been wind.");
-		AIBase->SetAIState(EAIState::EAIS_Patrolling);
+		AIBase->SetAIState(AIBase->GetLastAIState());
 	}
+}
+
+void ABaseAIController::OnPerceptionUpdated_Delegate(const TArray<AActor*>& UpdatedActors)
+{
+	//UE_LOG(LogTemp, Warning, TEXT("OnPerceptionUpdated_Delegate"))
 }
 
 void ABaseAIController::ChangeAttitudeTowards()

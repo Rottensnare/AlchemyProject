@@ -104,4 +104,5 @@ public:
 	 *******************/
 
 	//virtual void InitializeGameplayTagContainer(FGameplayTagContainer InGameplayTagContainer) override;
+	virtual FGameplayTagContainer& GetGameplayTagContainer() override;
 };

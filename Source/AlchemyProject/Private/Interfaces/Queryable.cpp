@@ -9,3 +9,8 @@ void IQueryable::InitializeGameplayTagContainer(FGameplayTagContainer InGameplay
 	//UE_LOG(LogTemp, Warning, TEXT("IQueryable First Tag: %s"), *InGameplayTagContainer.First().GetTagName().ToString())
 	InterfaceGameplayTagContainer = InGameplayTagContainer;
 }
+
+FGameplayTagContainer& IQueryable::GetGameplayTagContainer()
+{
+	return InterfaceGameplayTagContainer;
+}

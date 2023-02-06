@@ -5,11 +5,13 @@
 #include "CoreMinimal.h"
 #include "Alchemy/AlchemyItem.h"
 #include "Alchemy/Components/Potion/PotionComponent.h"
+#include "Alchemy/CustomStructs/NPCStructs.h"
 #include "GameFramework/Character.h"
+#include "Interfaces/BaseCharacterInfo.h"
 #include "PlayerCharacter.generated.h"
 
 UCLASS()
-class ALCHEMYPROJECT_API APlayerCharacter : public ACharacter
+class ALCHEMYPROJECT_API APlayerCharacter : public ACharacter, public IQueryable, public IBaseCharacterInfo
 {
 	GENERATED_BODY()
 
@@ -31,6 +33,15 @@ public:
 
 	UPROPERTY(VisibleAnywhere, Category = Alchemy)
 	TMap<UActorComponent*, int32> CurrentPotionComponents;
+
+	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	//class UCharacterData* CharacterData;
+
+	//UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	//FNPCInfo CharacterInfo;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Data", meta = (AllowPrivateAccess = "true"))
+	FNPCInfo NPCInfo;
 
 protected:
 
@@ -120,11 +131,12 @@ private:
 
 	/** Perception */
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Perception|Components", meta = (AllowPrivateAccess = "true"))
 	class UAIPerceptionStimuliSourceComponent* PerceptionStimuliSourceComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	FGameplayTagContainer GameplayTags;
+
 
 public:
 	
@@ -137,7 +149,9 @@ public:
 	FORCEINLINE APawn* GetCurrentNPC() const {return CurrentNPC;}
 	FORCEINLINE void SetCurrentNPC(APawn* InPawn) {CurrentNPC = InPawn;}
 	FORCEINLINE int32 GetCurrentNPC_ID() const {return CurrentNPC_ID;}
-	FORCEINLINE FGameplayTagContainer& GetGameplayTags() {return GameplayTags;} 
+	FORCEINLINE FGameplayTagContainer& GetGameplayTags() {return GameplayTags;}
+
+	virtual FNPCInfo& GetNPCInfo() override;
 };
 
 

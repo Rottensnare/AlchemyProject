@@ -3,13 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameplayTagContainer.h"
+#include "AlchemyProject/Alchemy/CustomStructs/NPCStructs.h"
 #include "UObject/Interface.h"
-#include "Queryable.generated.h"
+#include "BaseCharacterInfo.generated.h"
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
-class UQueryable : public UInterface
+class UBaseCharacterInfo : public UInterface
 {
 	GENERATED_BODY()
 };
@@ -17,16 +17,17 @@ class UQueryable : public UInterface
 /**
  * 
  */
-class ALCHEMYPROJECT_API IQueryable
+class ALCHEMYPROJECT_API IBaseCharacterInfo
 {
 	GENERATED_BODY()
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
+
 	
-	FGameplayTagContainer InterfaceGameplayTagContainer;
+	virtual FNPCInfo& GetNPCInfo();
 
-	virtual void InitializeGameplayTagContainer(FGameplayTagContainer InGameplayTagContainer);
+private:
 
-	virtual FGameplayTagContainer& GetGameplayTagContainer();
+	FNPCInfo DummyNPCInfo;
 };

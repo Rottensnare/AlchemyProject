@@ -43,6 +43,9 @@ public:
 	void OnSightStimulusExpired_Delegate();
 	UFUNCTION()
 	void OnHearingStimulusExpired_Delegate();
+	UFUNCTION()
+	void OnPerceptionUpdated_Delegate(const TArray<AActor*>& UpdatedActors);
+	
 	
 	void ChangeAttitudeTowards();
 

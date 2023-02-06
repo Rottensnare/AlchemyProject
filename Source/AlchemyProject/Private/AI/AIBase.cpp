@@ -5,30 +5,27 @@
 
 #include "AI/BaseAIController.h"
 #include "AI/UI/SpeechWidget.h"
-#include "AI/Utility/CustomNavModifierComponent.h"
 #include "AI/Utility/PatrolArea.h"
+#include "AlchemyProject/AlchemyProjectGameMode.h"
 #include "AlchemyProject/InventoryComponent.h"
 #include "AlchemyProject/PlayerCharacter.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "Components/RichTextBlock.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "NavAreas/NavArea_Obstacle.h"
-#include "Navigation/CrowdManager.h"
-#include "Perception/AIPerceptionComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Managers/FactionManager.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
-#include "Perception/AISenseConfig.h"
 #include "Perception/AISense_Hearing.h"
 #include "Perception/AISense_Sight.h"
+#include "Utility/Faction.h"
 
 AAIBase::AAIBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	
 	PerceptionStimuliSourceComponent = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("PerceptionStimuliSourceComp"));
-	PerceptionStimuliSourceComponent->RegisterForSense(UAISense_Sight::StaticClass());
-	PerceptionStimuliSourceComponent->RegisterForSense(UAISense_Hearing::StaticClass());
+	PerceptionStimuliSourceComponent->bAutoRegister = true;
 
 	SpeechWidgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("SpeechWidgetComp"));
 	SpeechWidgetComp->SetupAttachment(GetRootComponent());
@@ -41,6 +38,8 @@ AAIBase::AAIBase()
 	ESPSphere->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
 
 	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
+
+	//CharacterData = CreateDefaultSubobject<UCharacterData>(TEXT("CharacterData"));
 	
 }
 
@@ -77,9 +76,21 @@ void AAIBase::BeginPlay()
 		AIController->GetAIBlackboardComponent()->SetValueAsEnum(FName("AIState"), static_cast<uint8>(AIState));
 		AIController->GetAIBlackboardComponent()->SetValueAsBool(FName("FollowPlayer"), bFollowPlayer);
 		AIController->GetAIBlackboardComponent()->SetValueAsVector(FName("OriginalPosition"), OriginalPosition);
+
+		LastAIState = AIState;
 	}
 
 	IQueryable::InitializeGameplayTagContainer(GameplayTagContainer);
+	FNPCInfo::FillData(NPCInfo, NPC_ID);
+}
+
+void AAIBase::PostInitializeComponents()
+{
+	PerceptionStimuliSourceComponent->RegisterForSense(UAISense_Sight::StaticClass());
+	PerceptionStimuliSourceComponent->RegisterForSense(UAISense_Hearing::StaticClass());
+	PerceptionStimuliSourceComponent->RegisterWithPerceptionSystem();
+	
+	Super::PostInitializeComponents();
 }
 
 void AAIBase::Tick(float DeltaTime)
@@ -98,6 +109,7 @@ void AAIBase::OnSeenPawn(APawn* InPawn)
 		if(AIController == nullptr || AIController->GetAIBlackboardComponent() == nullptr) return;
 		AIController->GetAIBlackboardComponent()->SetValueAsBool(FName("PlayerSeen"), bPlayerSeen);
 		AIController->GetAIBlackboardComponent()->SetValueAsObject(FName("Target"), InPawn);
+		
 		
 		GetWorldTimerManager().ClearTimer(PlayerSeenTimer);
 		GetWorldTimerManager().SetTimer(PlayerSeenTimer,this, &ThisClass::ResetPlayerSeen, PlayerSeenTimerTime);
@@ -157,6 +169,46 @@ void AAIBase::ToggleSpeechWidget(const FString InString)
 	}
 	
 	Cast<USpeechWidget>(SpeechWidgetComp->GetWidget())->SetBlockTextEvent(InString);
+}
+
+ETeamAttitude::Type AAIBase::GetFactionAttitude(const FNPCInfo& DetectedNPCInfo) const
+{
+	AAlchemyProjectGameMode* AlchemyGameMode = Cast<AAlchemyProjectGameMode>(UGameplayStatics::GetGameMode(this));
+	if(AlchemyGameMode)
+	{
+		for(UFaction* const TempFaction : AlchemyGameMode->FactionManager->GetFactions())
+		{
+			if(!(&TempFaction->GetFactionInfo()))
+			{
+				continue;
+			}
+			if(TempFaction->GetFactionInfo().MemberIDs.Contains(NPCInfo.NPC_ID))
+			{
+				//First check if are part of any hostile factions, return Hostile if true.
+				//This is first because it is higher priority than friendly factions.
+				//TODO: Might need to create a system where it is not allowed to be part of 2 different factions that are hostile at each other
+				//TODO: This isn't an easy task, needs a lot of thought put into it, since player can be part of 2 factions that become hostile \
+				// after the player has joined them.
+				for(const int32 FactionID : DetectedNPCInfo.JoinedFactionIDs)
+				{
+					if(TempFaction->GetFactionInfo().HostileFactions.Contains(FactionID)) return ETeamAttitude::Hostile;
+				}
+				for(const int32 FactionID : DetectedNPCInfo.JoinedFactionIDs)
+				{
+					//if(NPCInfo.JoinedFactionIDs.IsValidIndex(0)) UE_LOG(LogTemp, Warning, TEXT("Target FactionID: %d, Perceiver FactionID: %d"), FactionID, NPCInfo.JoinedFactionIDs[0])
+					//else  UE_LOG(LogTemp, Warning, TEXT("NPCInfo.JoinedFactionIDs.IsValidIndex(0) NOT A VALID INDEX"))
+					
+					//If part of a friendly faction, return Friendly
+					if(TempFaction->GetFactionInfo().FriendlyFactions.Contains(FactionID)) return ETeamAttitude::Friendly;
+					
+					//If are part of the same faction, return Friendly
+					if(NPCInfo.JoinedFactionIDs.Contains(FactionID)) return ETeamAttitude::Friendly;
+				}
+			}
+		}
+	}
+	return ETeamAttitude::Neutral;
+	
 }
 
 void AAIBase::SetSpeechWidgetTimer()
@@ -241,7 +293,7 @@ void AAIBase::SetPlayerSeen(const bool bValue)
 	}
 	else
 	{
-		SetAIState(EAIState::EAIS_Patrolling);
+		SetAIState(GetLastAIState());
 		GetCharacterMovement()->MaxWalkSpeed = PatrolMoveSpeed;
 	}
 }
@@ -257,6 +309,16 @@ bool AAIBase::Interact(AActor* OtherActor)
 	return IInteractable::Interact(OtherActor);
 }
 
+FNPCInfo& AAIBase::GetNPCInfo()
+{
+	return NPCInfo;
+}
+
+FGameplayTagContainer& AAIBase::GetGameplayTagContainer()
+{
+	return GameplayTagContainer;
+}
+
 void AAIBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -265,6 +327,7 @@ void AAIBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AAIBase::SetAIState(EAIState NewState)
 {
+	//UE_LOG(LogTemp, Warning, TEXT("SetAIState"))
 	LastAIState = AIState;
 	AIState = NewState;
 

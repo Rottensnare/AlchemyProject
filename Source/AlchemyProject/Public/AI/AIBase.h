@@ -9,6 +9,7 @@
 #include "AlchemyProject/Alchemy/CustomStructs/NPCStructs.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/Character.h"
+#include "Interfaces/BaseCharacterInfo.h"
 #include "Interfaces/Interactable.h"
 #include "Interfaces/Queryable.h"
 #include "UI/SpeechWidget.h"
@@ -31,8 +32,8 @@ enum class EAIState : uint8
 	EAIS_MAX UMETA(DisplayName = "DefaultMax")
 };
 
-UCLASS()
-class ALCHEMYPROJECT_API AAIBase : public ACharacter, public IQueryable, public IInteractable
+UCLASS(AutoCollapseCategories = ("Perception"))
+class ALCHEMYPROJECT_API AAIBase : public ACharacter, public IQueryable, public IInteractable, public IBaseCharacterInfo
 {
 	GENERATED_BODY()
 
@@ -49,9 +50,11 @@ public:
 	void ClearSpeechWidgetTimer();
 	UFUNCTION()
 	void ToggleSpeechWidget(const FString InString = FString(""));
-	
+	ETeamAttitude::Type GetFactionAttitude(const FNPCInfo& DetectedNPCInfo) const;
 protected:
 	virtual void BeginPlay() override;
+
+	virtual void PostInitializeComponents() override;
 	
 	UFUNCTION()
 	virtual void OnSeenPawn(APawn* InPawn);
@@ -89,6 +92,13 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI", meta = (AllowPrivateAccess = "true"))
 	EAIState LastAIState;
+
+	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Data", meta = (AllowPrivateAccess = "true"))
+	//class UCharacterData* CharacterData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Data", meta = (AllowPrivateAccess = "true"))
+	FNPCInfo NPCInfo;
+
 
 #if WITH_EDITOR
 	//Only works with Editor and changing values from the editor windows
@@ -186,6 +196,8 @@ public:
 	FORCEINLINE bool GetFollowPlayer() const {return bFollowPlayer;}
 	FORCEINLINE bool GetCanSeeTarget() const {return bCanSeeTarget;}
 	FORCEINLINE void SetCanSeeTarget(const bool Value) {bCanSeeTarget = Value;}
+	FORCEINLINE EAIState GetLastAIState() const {return LastAIState;}
+	
 
 	/***********************
 	 *	Public Variables
@@ -194,8 +206,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|GameplayTags")
 	FGameplayTagContainer GameplayTagContainer;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|GameplayTags")
-	FTagsToSearch TagsToSearch;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|GameplayTags")
+	//FTagsToSearch TagsToSearch;
 
 	UPROPERTY(EditAnywhere, Category = "AI|Dialogue")
 	int32 NPC_ID{1};
@@ -206,6 +218,8 @@ public:
 	 **********************/
 
 	virtual bool Interact(AActor* OtherActor) override;
+	virtual FNPCInfo& GetNPCInfo() override;
+	virtual FGameplayTagContainer& GetGameplayTagContainer() override;
 };
 
 template <typename T>
