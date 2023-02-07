@@ -77,6 +77,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory|Components", meta = (AllowPrivateAccess = "true"))
 	class UInventoryComponent* InventoryComponent;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI", meta = (AllowPrivateAccess = "true"))
+	class UNavigationInvokerComponent* NavigationInvokerComponent;
+
 	/** Used for detecting the player very close if AI bPlayerSeen = true */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Perception|Components", meta = (AllowPrivateAccess = "true"))
 	class USphereComponent* ESPSphere;
@@ -130,7 +133,7 @@ private:
 	bool bPlayerSeen{false};
 	bool bCanSeeTarget{false};
 	bool bSomethingHeard{false};
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "AI|Movement", meta = (AllowPrivateAccess = "true") )
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "AI|Movement", meta = (AllowPrivateAccess = "true"))
 	bool bFollowPlayer{false};
 	void SetFollowPlayer(bool Value);
 	

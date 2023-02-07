@@ -3,6 +3,7 @@
 
 #include "AlchemyProject/Public/AI/AIBase.h"
 
+#include "NavigationInvokerComponent.h"
 #include "AI/BaseAIController.h"
 #include "AI/UI/SpeechWidget.h"
 #include "AI/Utility/PatrolArea.h"
@@ -26,6 +27,8 @@ AAIBase::AAIBase()
 	
 	PerceptionStimuliSourceComponent = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("PerceptionStimuliSourceComp"));
 	PerceptionStimuliSourceComponent->bAutoRegister = true;
+
+	NavigationInvokerComponent = CreateDefaultSubobject<UNavigationInvokerComponent>(TEXT("NavigationInvokerComp"));
 
 	SpeechWidgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("SpeechWidgetComp"));
 	SpeechWidgetComp->SetupAttachment(GetRootComponent());
