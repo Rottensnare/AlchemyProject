@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SplineComponentVisualizer.h"
 #include "GameFramework/Actor.h"
 #include "RoadSpline.generated.h"
 
@@ -25,6 +24,8 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class URoadSplineComponent* SplineComponent;
+
+	FName RoadName {NAME_None};
 
 	
 public:

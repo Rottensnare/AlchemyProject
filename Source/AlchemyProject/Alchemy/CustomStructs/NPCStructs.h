@@ -63,6 +63,17 @@ inline bool FNPCInfo::FillData(FNPCInfo& InNPCInfo, const int32 ID)
 	return false;
 }
 
+//Stores all the roads in the game
+USTRUCT(BlueprintType)
+struct FRoadInfo : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TSoftObjectPtr<class ARoadSpline> RoadSpline;
+	
+};
+
 /*
 USTRUCT(BlueprintType)
 struct FTagsToSearch

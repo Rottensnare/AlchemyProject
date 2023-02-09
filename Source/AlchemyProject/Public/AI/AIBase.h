@@ -102,6 +102,13 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Data", meta = (AllowPrivateAccess = "true"))
 	FNPCInfo NPCInfo;
 
+	//Current road names that the AI will follow
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Utility", meta = (AllowPrivateAccess = "true"))
+	TArray<FName> RoadNames;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AI|Utility", meta = (AllowPrivateAccess = "true"))
+	class ARoadSpline* CurrentRoad;
+
 
 #if WITH_EDITOR
 	//Only works with Editor and changing values from the editor windows
