@@ -210,6 +210,9 @@ public:
 	FORCEINLINE bool GetCanSeeTarget() const {return bCanSeeTarget;}
 	FORCEINLINE void SetCanSeeTarget(const bool Value) {bCanSeeTarget = Value;}
 	FORCEINLINE EAIState GetLastAIState() const {return LastAIState;}
+	FORCEINLINE TArray<FName>& GetRoadNames() {return RoadNames;};
+	FORCEINLINE FName& GetCurrentRoadName() {return CurrentRoadName;}
+	FORCEINLINE ARoadSpline* GetCurrentRoad() const {return CurrentRoad;}
 	
 
 	/***********************
