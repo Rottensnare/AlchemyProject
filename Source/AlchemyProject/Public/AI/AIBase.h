@@ -109,6 +109,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AI|Utility", meta = (AllowPrivateAccess = "true"))
 	class ARoadSpline* CurrentRoad;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AI|Utility", meta = (AllowPrivateAccess = "true"))
+	FName CurrentRoadName;
+
 
 #if WITH_EDITOR
 	//Only works with Editor and changing values from the editor windows
