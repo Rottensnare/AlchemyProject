@@ -3,9 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "EdMode.h"
+#include "SplineComponentVisualizer.h"
 #include "GameFramework/Actor.h"
 #include "RoadSpline.generated.h"
+
 
 UCLASS()
 class ALCHEMYPROJECT_API ARoadSpline : public AActor
@@ -25,8 +26,12 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class URoadSplineComponent* SplineComponent;
 
+	
 public:
 	
 	FORCEINLINE URoadSplineComponent* GetSplineComponent() const {return SplineComponent;}
+	
+	UFUNCTION(BlueprintCallable)
+	FVector GetSplinePointPosition() const; 
 
 };
