@@ -21,6 +21,9 @@ struct FActorNavPackage
 	UPROPERTY(BlueprintReadOnly)
 	int32 NextRoadMoveDir = 0;
 
+	UPROPERTY(BlueprintReadOnly)
+	int32 NextRoadSplineIndex = 0;
+
 	UPROPERTY(BlueprintReadWrite)
 	bool bFollowingRoad = false;
 
@@ -46,15 +49,7 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class URoadSplineComponent* SplineComponent;
 
-	FName RoadName {NAME_None};
 
-	//Stores the current spline point index for each actor using the road.
-	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	TMap<AActor*, int32> ActorSplineIndexMap;
-	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	TMap<AActor*, int32> ActorMoveDirMap;
-	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	TMap<AActor*, FActorNavPackage> ActorNavPackages;
 	
 public:
 	
@@ -68,5 +63,15 @@ public:
 	FVector FindClosestSplinePoint(AActor* InActor);
 	UFUNCTION(BlueprintCallable)
 	FVector FindNextSplinePoint(AActor* InActor, bool& bSuccess);
+
+	bool GetNextRoad(AActor* InActor);
+
+	FName RoadName {NAME_None};
+
+	//Stores the current spline point index for each actor using the road.
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	TMap<AActor*, int32> ActorSplineIndexMap;
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	TMap<AActor*, FActorNavPackage> ActorNavPackages;
 
 };

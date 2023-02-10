@@ -102,6 +102,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Data", meta = (AllowPrivateAccess = "true"))
 	FNPCInfo NPCInfo;
 
+	
+	/** NAVIGATION */
+	
 	//Current road names that the AI will follow
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Utility", meta = (AllowPrivateAccess = "true"))
 	TArray<FName> RoadNames;
@@ -111,6 +114,12 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AI|Utility", meta = (AllowPrivateAccess = "true"))
 	FName CurrentRoadName;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AI|Utility", meta = (AllowPrivateAccess = "true"))
+	int32 CurrentRoadIndex{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Utility", meta = (AllowPrivateAccess = "true"))
+	AActor* NavDestination{nullptr};
 
 
 #if WITH_EDITOR
@@ -213,7 +222,9 @@ public:
 	FORCEINLINE TArray<FName>& GetRoadNames() {return RoadNames;};
 	FORCEINLINE FName& GetCurrentRoadName() {return CurrentRoadName;}
 	FORCEINLINE ARoadSpline* GetCurrentRoad() const {return CurrentRoad;}
-	
+	FORCEINLINE int32 GetCurrentRoadIndex() const {return CurrentRoadIndex;}
+	FORCEINLINE void SetCurrentRoad(ARoadSpline* InRoadSpline);
+	FORCEINLINE AActor* GetNavDestination() const {return NavDestination;}
 
 	/***********************
 	 *	Public Variables

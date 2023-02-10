@@ -301,6 +301,13 @@ void AAIBase::SetPlayerSeen(const bool bValue)
 	}
 }
 
+void AAIBase::SetCurrentRoad(ARoadSpline* InRoadSpline)
+{
+	CurrentRoad = InRoadSpline;
+	CurrentRoadIndex++;
+	if(GetRoadNames().IsValidIndex(CurrentRoadIndex)) CurrentRoadName = GetRoadNames()[CurrentRoadIndex];
+}
+
 bool AAIBase::Interact(AActor* OtherActor)
 {
 	if(!bCanBeInteractedWith) return false;
