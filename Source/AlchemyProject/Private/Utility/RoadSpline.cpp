@@ -31,10 +31,10 @@ FVector ARoadSpline::GetSplinePointPosition() const
 }
 
 // Called after FindClosestSplinePoint and before calling FindNextSplinePoint
-int32 ARoadSpline::GetMoveDirection(AActor* InActor)
+FActorNavPackage ARoadSpline::GetActorNavPackage(AActor* InActor)
 {
 	AAIBase* BaseAI = Cast<AAIBase>(InActor);
-	if(BaseAI == nullptr) return 0;
+	if(BaseAI == nullptr) return FActorNavPackage();
 	int32 Index = 0;
 	FVector NextRoadFirstEndPoint = FVector::ZeroVector;
 	FVector NextRoadSecondEndPoint = FVector::ZeroVector;
@@ -73,11 +73,45 @@ int32 ARoadSpline::GetMoveDirection(AActor* InActor)
 	}
 
 	//Find the move direction
-	//TODO: current wont work well
+	// TODO: current wont work well
 	// TODO get the spline point that is closest to one of the end points of the next road.
 	// TODO compare the spline point index with the current index.
 	// TODO save the spline point index that was the closest and switch roads when current index is the same as the saved one
+	// TODO Might need to create a struct that holds data like MoveDir and Spline point goal index
+
+	float MinDistance = 100000.f;
+	int32 ClosestIndex = 0;
+	int32 NextRoadMoveDir = 0;
 	
+	for(int32 i = 0; i < GetSplineComponent()->GetNumberOfSplinePoints(); i++)
+	{
+		if(UKismetMathLibrary::Vector_Distance(NextRoadFirstEndPoint, GetSplineComponent()->GetLocationAtSplinePoint(i, ESplineCoordinateSpace::World)) < ClosestDistance)
+		{
+			ClosestDistance = UKismetMathLibrary::Vector_Distance(NextRoadFirstEndPoint, GetSplineComponent()->GetLocationAtSplinePoint(i, ESplineCoordinateSpace::World));
+			ClosestIndex = i;
+			NextRoadMoveDir = 1;
+		}
+		if(UKismetMathLibrary::Vector_Distance(NextRoadSecondEndPoint, GetSplineComponent()->GetLocationAtSplinePoint(i, ESplineCoordinateSpace::World)) < ClosestDistance)
+		{
+			ClosestDistance = UKismetMathLibrary::Vector_Distance(NextRoadFirstEndPoint, GetSplineComponent()->GetLocationAtSplinePoint(i, ESplineCoordinateSpace::World));
+			ClosestIndex = i;
+			NextRoadMoveDir = -1;
+		}
+	}
+	if(ActorSplineIndexMap.Contains(BaseAI))
+	{
+		OutDirection = ActorSplineIndexMap[BaseAI] < ClosestIndex ? 1 : -1;
+	}
+	
+	
+	FActorNavPackage NavPackage = FActorNavPackage(OutDirection, ClosestIndex, NextRoadMoveDir);
+	NavPackage.bFollowingRoad = true;
+	ActorNavPackages.Emplace(InActor, NavPackage);
+	
+	return NavPackage;
+
+	
+	/**
 	int32 CurrentSplinePointIndex = 0;
 	if(ActorSplineIndexMap.Contains(BaseAI)) CurrentSplinePointIndex = ActorSplineIndexMap[BaseAI];
 	FVector TempPos = GetSplineComponent()->GetLocationAtSplinePoint(CurrentSplinePointIndex + 1, ESplineCoordinateSpace::World);
@@ -108,6 +142,8 @@ int32 ARoadSpline::GetMoveDirection(AActor* InActor)
 	}
 	ActorMoveDirMap.Emplace(BaseAI, OutDirection);
 	return OutDirection;
+	
+	*/
 }
 
 FVector ARoadSpline::FindClosestSplinePoint(AActor* InActor)
@@ -118,12 +154,14 @@ FVector ARoadSpline::FindClosestSplinePoint(AActor* InActor)
 	int32 ClosestPointIndex = 0;
 	float ClosestDistance = 100000.f;
 	
-	for(const int32 ID : GetSplineComponent()->GetNumberOfSplinePoints())
+	for(int32 i = 0; i < GetSplineComponent()->GetNumberOfSplinePoints(); i++)
 	{
-		if(const float TempDist = UKismetMathLibrary::Vector_Distance(BaseAI->GetActorLocation(), GetSplineComponent()->GetLocationAtSplinePoint(ID, ESplineCoordinateSpace::World)) < ClosestDistance)
+		const float TempDist = UKismetMathLibrary::Vector_Distance(BaseAI->GetActorLocation(), GetSplineComponent()->GetLocationAtSplinePoint(i, ESplineCoordinateSpace::World));
+		
+		if(TempDist < ClosestDistance)
 		{
 			ClosestDistance = TempDist;
-			ClosestPointIndex = ID;
+			ClosestPointIndex = i;
 		}
 	}
 
@@ -137,12 +175,14 @@ FVector ARoadSpline::FindNextSplinePoint(AActor* InActor, bool& bSuccess)
 	AAIBase* BaseAI = Cast<AAIBase>(InActor);
 	if(BaseAI == nullptr)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("BaseAI == nullptr"))
 		bSuccess = false;
 		return FVector();
 	}
 
-	if(!ActorSplineIndexMap.Contains(BaseAI) || !ActorMoveDirMap.Contains(BaseAI))
+	if(!ActorSplineIndexMap.Contains(BaseAI) || !ActorNavPackages.Contains(BaseAI))
 	{
+		UE_LOG(LogTemp, Warning, TEXT("BaseAI not part of the ActorSplineIndexMap or the ActorNavPackages"))
 		bSuccess = false;
 		return FVector();
 	}
@@ -150,11 +190,35 @@ FVector ARoadSpline::FindNextSplinePoint(AActor* InActor, bool& bSuccess)
 	//Got to the end of the road
 	if(GetSplineComponent()->GetNumberOfSplinePoints() == ActorSplineIndexMap[BaseAI])
 	{
+		UE_LOG(LogTemp, Warning, TEXT("end of the road"))
 		bSuccess = true;
 		return FVector();
 	}
-	
-	return GetSplineComponent()->GetLocationAtSplinePoint(ActorSplineIndexMap[BaseAI] + ActorMoveDirMap[BaseAI], ESplineCoordinateSpace::World);
+	if(ActorSplineIndexMap[BaseAI] == ActorNavPackages[BaseAI].SwitchRoadSplineIndex)
+	{
+		// Switch to the next road
+		bSuccess = true;
+		UE_LOG(LogTemp, Warning, TEXT("Switching Roads"))
+	}
+
+	bSuccess = true;
+	FVector OutVector = FVector::ZeroVector;
+	if(ActorNavPackages[BaseAI].MoveDir == 1)
+	{
+		OutVector = GetSplineComponent()->GetLocationAtSplinePoint(ActorSplineIndexMap[BaseAI] + 1, ESplineCoordinateSpace::World);
+		ActorSplineIndexMap.Emplace(BaseAI, ActorSplineIndexMap[BaseAI] + 1);
+	}
+	else if (ActorNavPackages[BaseAI].MoveDir == -1)
+	{
+		OutVector = GetSplineComponent()->GetLocationAtSplinePoint(ActorSplineIndexMap[BaseAI] - 1, ESplineCoordinateSpace::World);
+		ActorSplineIndexMap.Emplace(BaseAI, ActorSplineIndexMap[BaseAI] - 1);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Movement direction was invalid"))
+	}
+
+	return OutVector;
 }
 
 
