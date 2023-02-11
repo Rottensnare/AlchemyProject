@@ -44,6 +44,7 @@ public:
 	
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	UFUNCTION(BlueprintCallable)
 	virtual void SetAIState(EAIState NewState);
 	
 	void SetSpeechWidgetTimer();
@@ -225,6 +226,7 @@ public:
 	FORCEINLINE int32 GetCurrentRoadIndex() const {return CurrentRoadIndex;}
 	FORCEINLINE void SetCurrentRoad(ARoadSpline* InRoadSpline);
 	FORCEINLINE AActor* GetNavDestination() const {return NavDestination;}
+	FORCEINLINE void SetNavDestination(AActor* InActor) {NavDestination = InActor;}
 
 	/***********************
 	 *	Public Variables

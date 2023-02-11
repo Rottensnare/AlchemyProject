@@ -24,7 +24,7 @@ void ARoadSpline::BeginPlay()
 	
 }
 
-//Doesn't do anything anymore.
+//DEPRECATED Doesn't do anything anymore.
 FVector ARoadSpline::GetSplinePointPosition() const
 {
 	return FVector();
@@ -75,7 +75,8 @@ FActorNavPackage ARoadSpline::GetActorNavPackage(AActor* InActor)
 	else if(BaseAI->GetNavDestination()) // If NavDestination is valid
 	{
 		bHasNextRoad = false;
-		const FName TempName = BaseAI->GetRoadNames()[BaseAI->GetCurrentRoadIndex() + 1 ];
+		FName TempName = NAME_None;
+		if(BaseAI->GetRoadNames().IsValidIndex(BaseAI->GetCurrentRoadIndex())) TempName = BaseAI->GetRoadNames()[BaseAI->GetCurrentRoadIndex()];
 		const FString RoadInfoTablePath(TEXT("DataTable'/Game/Assets/Datatables/RoadInfoDataTable.RoadInfoDataTable'"));
 		// ReSharper disable once CppTooWideScope
 		const UDataTable* RoadInfoTableObject = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, *RoadInfoTablePath));
@@ -107,15 +108,13 @@ FActorNavPackage ARoadSpline::GetActorNavPackage(AActor* InActor)
 		else ClosestIndex = 0;
 	}
 	
-	//Find the move direction
-	// TODO: current wont work well
-	// TODO get the spline point that is closest to one of the end points of the next road.
-	// TODO compare the spline point index with the current index.
-	// TODO save the spline point index that was the closest and switch roads when current index is the same as the saved one
-	// TODO Might need to create a struct that holds data like MoveDir and Spline point goal index
-
+	// Find the move direction
+	// NOTE get the spline point that is closest to one of the end points of the next road.
+	// NOTE compare the spline point index with the current index.
+	// NOTE save the spline point index that was the closest and switch roads when current index is the same as the saved one
 	
-
+	
+	//If next road exists
 	if(bHasNextRoad)
 	{
 		for(int32 i = 0; i < GetSplineComponent()->GetNumberOfSplinePoints(); i++)
@@ -143,51 +142,25 @@ FActorNavPackage ARoadSpline::GetActorNavPackage(AActor* InActor)
 	
 	
 	FActorNavPackage NavPackage = FActorNavPackage(OutDirection, ClosestIndex, NextRoadMoveDir);
-	if(NextRoadMoveDir == 1) NavPackage.NextRoadSplineIndex = 0;
-	else if(NextRoadMoveDir == -1) NavPackage.NextRoadSplineIndex = NextRoadLastIndex;
+	if(bHasNextRoad)
+	{
+		if(NextRoadMoveDir == 1) NavPackage.NextRoadSplineIndex = 0;
+		else if(NextRoadMoveDir == -1) NavPackage.NextRoadSplineIndex = NextRoadLastIndex;
+	}
+	else NavPackage.NextRoadSplineIndex = -1; 
+	
 	NavPackage.bFollowingRoad = true;
 	ActorNavPackages.Emplace(InActor, NavPackage);
 	
 	return NavPackage;
-
-	
-	/**
-	int32 CurrentSplinePointIndex = 0;
-	if(ActorSplineIndexMap.Contains(BaseAI)) CurrentSplinePointIndex = ActorSplineIndexMap[BaseAI];
-	FVector TempPos = GetSplineComponent()->GetLocationAtSplinePoint(CurrentSplinePointIndex + 1, ESplineCoordinateSpace::World);
-	float TempDist = UKismetMathLibrary::Vector_Distance(NextRoadFirstEndPoint, TempPos);
-	float TempDist2 = UKismetMathLibrary::Vector_Distance(NextRoadSecondEndPoint, TempPos);
-	if(TempDist < ClosestDistance)
-	{
-		ClosestDistance = TempDist;
-		OutDirection = -1;
-	}
-	if(TempDist2 < ClosestDistance)
-	{
-		ClosestDistance = TempDist2;
-		OutDirection = -1;
-	}
-	TempPos = GetSplineComponent()->GetLocationAtSplinePoint(CurrentSplinePointIndex - 1, ESplineCoordinateSpace::World);
-	TempDist = UKismetMathLibrary::Vector_Distance(NextRoadFirstEndPoint, TempPos);
-	TempDist2 = UKismetMathLibrary::Vector_Distance(NextRoadSecondEndPoint, TempPos);
-	if(TempDist < ClosestDistance)
-	{
-		ClosestDistance = TempDist;
-		OutDirection = 1;
-	}
-	if(TempDist2 < ClosestDistance)
-	{
-		ClosestDistance = TempDist2;
-		OutDirection = 1;
-	}
-	ActorMoveDirMap.Emplace(BaseAI, OutDirection);
-	return OutDirection;
-	
-	*/
 }
 
 FVector ARoadSpline::FindClosestSplinePoint(AActor* InActor)
 {
+	//NOTE: This function is called at the start of road movement behavior
+	//NOTE: Returns the closest spline point location of the first road and saves the index
+
+	
 	AAIBase* BaseAI = Cast<AAIBase>(InActor);
 	if(BaseAI == nullptr) return FVector();
 
@@ -212,6 +185,10 @@ FVector ARoadSpline::FindClosestSplinePoint(AActor* InActor)
 
 FVector ARoadSpline::FindNextSplinePoint(AActor* InActor, bool& bSuccess)
 {
+	//NOTE: This function first checks if the AI should switch roads, then if it is at the end of the road
+	//NOTE: If no, it gets the next spline point index and updates the ActorSplineIndexMap and returns the next location
+	//NOTE: When switching roads, it calls GetNextRoad() and returns the start location of the new road
+	
 	AAIBase* BaseAI = Cast<AAIBase>(InActor);
 	if(BaseAI == nullptr)
 	{
@@ -228,30 +205,51 @@ FVector ARoadSpline::FindNextSplinePoint(AActor* InActor, bool& bSuccess)
 		bSuccess = false;
 		return FVector();
 	}
-	
+
+	// Switch to the next road
 	if(ActorSplineIndexMap[BaseAI] == ActorNavPackages[BaseAI].SwitchRoadSplineIndex)
 	{
-		// Switch to the next road
+		
 		bSuccess = true;
-		GetNextRoad(BaseAI);
-		OutVector = BaseAI->GetCurrentRoad()->GetSplineComponent()->GetLocationAtSplinePoint(ActorNavPackages[BaseAI].NextRoadSplineIndex, ESplineCoordinateSpace::World);
-		UE_LOG(LogTemp, Warning, TEXT("Switching Roads"))
-		ActorNavPackages.Remove(BaseAI);
-		ActorSplineIndexMap.Remove(BaseAI);
-		return OutVector;
+		bool bNextRoad = GetNextRoad(BaseAI);
+		if(bNextRoad)
+		{
+			OutVector = BaseAI->GetCurrentRoad()->GetSplineComponent()->GetLocationAtSplinePoint(ActorNavPackages[BaseAI].NextRoadSplineIndex, ESplineCoordinateSpace::World);
+			UE_LOG(LogTemp, Warning, TEXT("Switching Roads: %d"), bNextRoad)
+			//Remove the actor from the maps of this road.
+			ActorNavPackages.Remove(BaseAI);
+			ActorSplineIndexMap.Remove(BaseAI);
+			return OutVector;
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Reached Destination"))
+			BaseAI->SetCurrentRoad(nullptr);
+			ActorNavPackages.Remove(BaseAI);
+			ActorSplineIndexMap.Remove(BaseAI);
+			BaseAI->SetNavDestination(nullptr);
+			return FVector();
+		}
 	}
 
 	// Got to the end of the road
+	// 2 checks to make sure we are at the end of the road and not at the start, because it depends on the AI move direction
 	if(ActorNavPackages[BaseAI].MoveDir == 1 && (GetSplineComponent()->GetNumberOfSplinePoints() - 1) == ActorSplineIndexMap[BaseAI])
 	{
-		UE_LOG(LogTemp, Warning, TEXT("end of the road"))
+		UE_LOG(LogTemp, Warning, TEXT("End of the road"))
 		bSuccess = true;
+		BaseAI->SetCurrentRoad(nullptr);
+		ActorNavPackages.Remove(BaseAI);
+		ActorSplineIndexMap.Remove(BaseAI);
 		return FVector();
 	}
 	if(ActorNavPackages[BaseAI].MoveDir == -1 && 0 == ActorSplineIndexMap[BaseAI])
 	{
-		UE_LOG(LogTemp, Warning, TEXT("end of the road"))
+		UE_LOG(LogTemp, Warning, TEXT("End of the road"))
 		bSuccess = true;
+		BaseAI->SetCurrentRoad(nullptr);
+		ActorNavPackages.Remove(BaseAI);
+		ActorSplineIndexMap.Remove(BaseAI);
 		return FVector();
 	}
 	
@@ -277,6 +275,14 @@ FVector ARoadSpline::FindNextSplinePoint(AActor* InActor, bool& bSuccess)
 
 bool ARoadSpline::GetNextRoad(AActor* InActor)
 {
+	// NOTE Takes an AActor* but only actually accepts BaseAI
+	// NOTE This will be changed in the future to accept other actors too
+
+	// NOTE: This function finds the next for the passed in actor
+	// NOTE: Sets the current road to the next road
+	// NOTE: Adds the actor to the ActorNavPackages map of the next road
+	// NOTE: Lastly it calls GetActorNavPackage
+	
 	AAIBase* BaseAI = Cast<AAIBase>(InActor);
 	if(BaseAI == nullptr) return false;
 	FName NextRoad = NAME_None;

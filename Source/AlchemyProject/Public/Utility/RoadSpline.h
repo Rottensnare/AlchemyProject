@@ -64,6 +64,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	FVector FindNextSplinePoint(AActor* InActor, bool& bSuccess);
 
+	// Explanation in the Cpp file
 	bool GetNextRoad(AActor* InActor);
 
 	FName RoadName {NAME_None};
