@@ -162,7 +162,7 @@ FVector ARoadSpline::FindClosestSplinePoint(AActor* InActor)
 
 	
 	AAIBase* BaseAI = Cast<AAIBase>(InActor);
-	if(BaseAI == nullptr) return FVector();
+	if(BaseAI == nullptr) return FVector(0.f);
 
 	int32 ClosestPointIndex = 0;
 	float ClosestDistance = 100000.f;
@@ -194,7 +194,7 @@ FVector ARoadSpline::FindNextSplinePoint(AActor* InActor, bool& bSuccess)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("BaseAI == nullptr"))
 		bSuccess = false;
-		return FVector();
+		return FVector(0.f);
 	}
 	
 	FVector OutVector = FVector::ZeroVector;
@@ -203,7 +203,7 @@ FVector ARoadSpline::FindNextSplinePoint(AActor* InActor, bool& bSuccess)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("BaseAI not part of the ActorSplineIndexMap or the ActorNavPackages"))
 		bSuccess = false;
-		return FVector();
+		return FVector(0.f);
 	}
 
 	// Switch to the next road
@@ -228,7 +228,7 @@ FVector ARoadSpline::FindNextSplinePoint(AActor* InActor, bool& bSuccess)
 			ActorNavPackages.Remove(BaseAI);
 			ActorSplineIndexMap.Remove(BaseAI);
 			BaseAI->SetNavDestination(nullptr);
-			return FVector();
+			return FVector(0.f);
 		}
 	}
 
@@ -241,7 +241,7 @@ FVector ARoadSpline::FindNextSplinePoint(AActor* InActor, bool& bSuccess)
 		BaseAI->SetCurrentRoad(nullptr);
 		ActorNavPackages.Remove(BaseAI);
 		ActorSplineIndexMap.Remove(BaseAI);
-		return FVector();
+		return FVector(0.f);
 	}
 	if(ActorNavPackages[BaseAI].MoveDir == -1 && 0 == ActorSplineIndexMap[BaseAI])
 	{
@@ -250,7 +250,7 @@ FVector ARoadSpline::FindNextSplinePoint(AActor* InActor, bool& bSuccess)
 		BaseAI->SetCurrentRoad(nullptr);
 		ActorNavPackages.Remove(BaseAI);
 		ActorSplineIndexMap.Remove(BaseAI);
-		return FVector();
+		return FVector(0.f);
 	}
 	
 	bSuccess = true;

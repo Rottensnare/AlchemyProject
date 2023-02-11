@@ -12,6 +12,7 @@
 #include "Engine/DataTable.h"
 #include "EnvironmentQuery/EnvQuery.h"
 #include "EnvironmentQuery/EnvQueryManager.h"
+#include "Kismet/GameplayStatics.h"
 #include "Navigation/CrowdFollowingComponent.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Hearing.h"
@@ -333,6 +334,8 @@ void ABaseAIController::OnSightStimulusExpired_Delegate()
 {
 	if(BlackboardComponent == nullptr || AIBase == nullptr) return;
 	
+	if(AIBase->GetAIState() == EAIState::EAIS_Moving) return; //NOTE Temporary fix
+	
 	BlackboardComponent->SetValueAsBool(FName("PlayerSeen"), false);
 	AIBase->SetPlayerSeen(false);
 	AIBase->ToggleSpeechWidget("Target got away.");
@@ -341,6 +344,10 @@ void ABaseAIController::OnSightStimulusExpired_Delegate()
 
 void ABaseAIController::OnHearingStimulusExpired_Delegate()
 {
+	if(BlackboardComponent == nullptr || AIBase == nullptr) return;
+	
+	if(AIBase->GetAIState() == EAIState::EAIS_Moving) return; //NOTE Temporary fix
+	
 	if(!AIBase->GetPlayerSeen())
 	{
 		AIBase->ToggleSpeechWidget("Must have been wind.");
@@ -425,6 +432,7 @@ void ABaseAIController::ShowAIInfo()
 		AIPerceptionComponent->GetActorsPerception(Ector, PerceptionBlueprintInfo);
 		GEngine->AddOnScreenDebugMessage(0, 3.f, FColor::Cyan, FString::Printf(TEXT("Currently Perceived Actor: %s, Is Hostile: %d"), *Ector->GetName(), PerceptionBlueprintInfo.bIsHostile));
 	}
+	
 }
 
 
