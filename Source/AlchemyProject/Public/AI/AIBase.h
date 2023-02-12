@@ -206,7 +206,12 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Opinions", meta = (AllowPrivateAccess = "true"))
 	TMap<AActor*, int32> OpinionTable;
 
-	
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class AAlchemyProjectGameMode* AlchemyProjectGameMode;
+
+	UFUNCTION(BlueprintCallable)
+	void GetGameMode();
 
 public:
 	/*******************
@@ -221,6 +226,7 @@ public:
 	FORCEINLINE void SetCanSeeTarget(const bool Value) {bCanSeeTarget = Value;}
 	FORCEINLINE EAIState GetLastAIState() const {return LastAIState;}
 	FORCEINLINE TArray<FName>& GetRoadNames() {return RoadNames;};
+	FORCEINLINE void SetRoadNames(const TArray<FName>& InRoadNames) {RoadNames = InRoadNames;};
 	FORCEINLINE FName& GetCurrentRoadName() {return CurrentRoadName;}
 	FORCEINLINE ARoadSpline* GetCurrentRoad() const {return CurrentRoad;}
 	FORCEINLINE int32 GetCurrentRoadIndex() const {return CurrentRoadIndex;}

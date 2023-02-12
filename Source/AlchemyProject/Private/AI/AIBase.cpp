@@ -285,6 +285,11 @@ void AAIBase::RemoveFromActorsOfInterest(AActor* InActor)
 	ActorsOfInterest.Remove(InActor);
 }
 
+void AAIBase::GetGameMode()
+{
+	AlchemyProjectGameMode = Cast<AAlchemyProjectGameMode>(GetWorld()->GetAuthGameMode());
+}
+
 void AAIBase::SetPlayerSeen(const bool bValue)
 {
 	bPlayerSeen = bValue;

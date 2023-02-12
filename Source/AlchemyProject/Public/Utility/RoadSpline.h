@@ -31,6 +31,25 @@ struct FActorNavPackage
 	FActorNavPackage(){};
 };
 
+/**	This is used for calculating the optimal route */
+USTRUCT()
+struct FRoadNavigationData
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	class ARoadSpline* NearestRoadToDestination{nullptr};
+
+	UPROPERTY()
+	ARoadSpline* NearestRoadToActor{nullptr};
+
+	int32 NearestIndexToActor = 0;
+	int32 NearestIndexToDestination = 0;
+
+	
+};
+
+
 UCLASS()
 class ALCHEMYPROJECT_API ARoadSpline : public AActor
 {
@@ -49,7 +68,8 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class URoadSplineComponent* SplineComponent;
 
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	TArray<ARoadSpline*> RoadConnectionsToBeAdded;
 	
 public:
 	
@@ -74,5 +94,15 @@ public:
 	TMap<AActor*, int32> ActorSplineIndexMap;
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TMap<AActor*, FActorNavPackage> ActorNavPackages;
+
+	static FVector GetNearestRoadSplinePoint(AActor* InActor);
+	
+	TMap<ARoadSpline*, TArray<ARoadSpline*>> RoadConnections;
+	
+
+	UFUNCTION(BlueprintCallable)
+	void ShowRoadConnections();
+
+
 
 };

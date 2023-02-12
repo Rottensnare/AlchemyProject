@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "Managers/NavigationManager.h"
 #include "AlchemyProjectGameMode.generated.h"
 
 class UFactionManager;
@@ -19,6 +20,12 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	static UFactionManager* GetFactionManager();
+
+	UPROPERTY()
+	UNavigationManager* NavigationManager;
+
+	UFUNCTION(BlueprintCallable)
+	UNavigationManager* GetNavigationManager();
 
 protected:
 

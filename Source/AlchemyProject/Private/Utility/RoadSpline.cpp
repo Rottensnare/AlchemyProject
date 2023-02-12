@@ -4,6 +4,7 @@
 #include "Utility/RoadSpline.h"
 
 #include "AI/AIBase.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Utility/RoadSplineComponent.h"
 
@@ -14,7 +15,9 @@ ARoadSpline::ARoadSpline()
 	PrimaryActorTick.bCanEverTick = false;
 
 	SplineComponent = CreateDefaultSubobject<URoadSplineComponent>(TEXT("SplineComponent"));
-
+	if(GetRootComponent()) SplineComponent->SetupAttachment(GetRootComponent());
+	else SetRootComponent(SplineComponent);
+	
 }
 
 
@@ -309,4 +312,43 @@ bool ARoadSpline::GetNextRoad(AActor* InActor)
 	}
 	
 	return false;
+}
+
+FVector ARoadSpline::GetNearestRoadSplinePoint(AActor* InActor)
+{
+	if(InActor == nullptr) return FVector(0.f);
+	FVector OutPosition = FVector(0.f);
+	TArray<AActor*> OutActors;
+	float DistanceToNearestActor;
+	UGameplayStatics::GetAllActorsOfClass(InActor, ARoadSpline::StaticClass(), OutActors);
+	AActor* NearestActor = UGameplayStatics::FindNearestActor(InActor->GetActorLocation(), OutActors, DistanceToNearestActor);
+	ARoadSpline* NearestRoad = Cast<ARoadSpline>(NearestActor);
+	
+	int32 ClosestPointIndex = 0;
+	float ClosestDistance = 100000.f;
+	
+	for(int32 i = 0; i < NearestRoad->GetSplineComponent()->GetNumberOfSplinePoints(); i++)
+	{
+		const float TempDist = UKismetMathLibrary::Vector_Distance(InActor->GetActorLocation(), NearestRoad->GetSplineComponent()->GetLocationAtSplinePoint(i, ESplineCoordinateSpace::World));
+		
+		if(TempDist < ClosestDistance)
+		{
+			ClosestDistance = TempDist;
+			ClosestPointIndex = i;
+		}
+	}
+
+	OutPosition = NearestRoad->GetSplineComponent()->GetLocationAtSplinePoint(ClosestPointIndex, ESplineCoordinateSpace::World);
+	
+	return OutPosition;
+}
+
+void ARoadSpline::ShowRoadConnections()
+{
+	/*
+	for(const auto Something : RoadConnections)
+	{
+		if(IsValid(Something.Key)) UE_LOG(LogTemp, Warning, TEXT("RoadName: %s"), *Something.Key->GetName())
+	}
+	*/
 }
