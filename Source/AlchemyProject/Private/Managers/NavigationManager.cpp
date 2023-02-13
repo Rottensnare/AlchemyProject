@@ -4,7 +4,10 @@
 #include "Managers/NavigationManager.h"
 
 #include "AI/AIBase.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Utility/RoadSpline.h"
+#include "Utility/RoadSplineComponent.h"
 
 bool UNavigationManager::CalculateRequiredRoads(AAIBase* InActor, ARoadSpline* StartRoad, ARoadSpline* EndRoad, TArray<FRoadInfo>& OutRoadInfos)
 {
@@ -117,11 +120,12 @@ bool UNavigationManager::CalculateRequiredRoads(AAIBase* InActor, ARoadSpline* S
 						{
 							UE_LOG(LogTemp, Warning, TEXT("RoadInfo.RoadSpline.Get() == EndRoadInfo.RoadSpline.Get()"))
 							OutRoads.AddUnique(RoadInfo);
-							FRoadInfo& RoadToAdd = RoadInfo;
+							FRoadInfo RoadToAdd = RoadInfo;
 							while(RoadToAdd.RoadSpline.Get() != StartRoadInfo.RoadSpline.Get())
 							{
 								UE_LOG(LogTemp, Warning, TEXT("RoadToAdd: %s, StartRoadInfo: %s"), *RoadToAdd.RoadSpline.Get()->GetName(), *StartRoadInfo.RoadSpline.Get()->GetName())
-								OutRoads.AddUnique(VisitedRoads[RoadToAdd]);
+
+								OutRoads.AddUnique(VisitedRoads[RoadToAdd]); //NOTE This gave an error
 								RoadToAdd = VisitedRoads[RoadToAdd];
 							}
 							bFoundRoute = true;
@@ -141,8 +145,20 @@ bool UNavigationManager::CalculateRequiredRoads(AAIBase* InActor, ARoadSpline* S
 		}
 	}
 	
+	if(OutRoads.IsEmpty()) return false;
+	
+	Algo::Reverse(OutRoads);
 	OutRoadInfos = OutRoads;
-	return false;
+	
+	BaseAI->GetRoadNames().Empty();
+	TArray<FName> RoadNames;
+	for(const FRoadInfo& RoadInfo : OutRoadInfos)
+	{
+		RoadNames.AddUnique(RoadInfo.RoadSpline->RoadName);
+	}
+	BaseAI->SetRoadNames(RoadNames);
+	
+	return true;
 	
 }
 
@@ -202,4 +218,34 @@ bool UNavigationManager::InitRoads()
 	
 	return true;
 	
+}
+
+ARoadSpline* UNavigationManager::GetNearestRoadSplinePoint(const AActor* const InActor, FVector& OutSplinePointPosition)
+{
+	if(InActor == nullptr) return nullptr;
+	OutSplinePointPosition = FVector(0.f);
+	TArray<AActor*> OutActors;
+	float DistanceToNearestActor;
+	UGameplayStatics::GetAllActorsOfClass(InActor, ARoadSpline::StaticClass(), OutActors);
+	AActor* NearestActor = UGameplayStatics::FindNearestActor(InActor->GetActorLocation(), OutActors, DistanceToNearestActor);
+	ARoadSpline* NearestRoad = Cast<ARoadSpline>(NearestActor);
+	if(NearestRoad == nullptr) return nullptr;
+	
+	int32 ClosestPointIndex = 0;
+	float ClosestDistance = 100000.f;
+	
+	for(int32 i = 0; i < NearestRoad->GetSplineComponent()->GetNumberOfSplinePoints(); i++)
+	{
+		const float TempDist = UKismetMathLibrary::Vector_Distance(InActor->GetActorLocation(), NearestRoad->GetSplineComponent()->GetLocationAtSplinePoint(i, ESplineCoordinateSpace::World));
+		
+		if(TempDist < ClosestDistance)
+		{
+			ClosestDistance = TempDist;
+			ClosestPointIndex = i;
+		}
+	}
+
+	OutSplinePointPosition = NearestRoad->GetSplineComponent()->GetLocationAtSplinePoint(ClosestPointIndex, ESplineCoordinateSpace::World);
+	
+	return NearestRoad;
 }

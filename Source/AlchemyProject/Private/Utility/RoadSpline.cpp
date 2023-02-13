@@ -314,7 +314,7 @@ bool ARoadSpline::GetNextRoad(AActor* InActor)
 	return false;
 }
 
-FVector ARoadSpline::GetNearestRoadSplinePoint(AActor* InActor)
+FVector ARoadSpline::GetNearestRoadSplinePoint(const AActor* const InActor, const ARoadSpline* OutRoadSpline)
 {
 	if(InActor == nullptr) return FVector(0.f);
 	FVector OutPosition = FVector(0.f);
@@ -323,6 +323,9 @@ FVector ARoadSpline::GetNearestRoadSplinePoint(AActor* InActor)
 	UGameplayStatics::GetAllActorsOfClass(InActor, ARoadSpline::StaticClass(), OutActors);
 	AActor* NearestActor = UGameplayStatics::FindNearestActor(InActor->GetActorLocation(), OutActors, DistanceToNearestActor);
 	ARoadSpline* NearestRoad = Cast<ARoadSpline>(NearestActor);
+	if(NearestRoad == nullptr) return OutPosition;
+
+	OutRoadSpline = NearestRoad;
 	
 	int32 ClosestPointIndex = 0;
 	float ClosestDistance = 100000.f;

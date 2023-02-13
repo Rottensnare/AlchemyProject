@@ -207,6 +207,7 @@ private:
 	TMap<AActor*, int32> OpinionTable;
 
 
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class AAlchemyProjectGameMode* AlchemyProjectGameMode;
 

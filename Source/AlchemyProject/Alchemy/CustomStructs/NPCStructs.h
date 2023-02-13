@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "Engine/DataTable.h"
+#include "Engine/UserDefinedStruct.h"
 
 #include "NPCStructs.generated.h"
 
@@ -99,7 +100,8 @@ struct FRoadInfo : public FTableRowBase
 
 FORCEINLINE uint32 GetTypeHash(const FRoadInfo& MidiTime)
 {
-	uint32 Hash = FCrc::MemCrc32(&MidiTime, sizeof(FRoadInfo));
+	const uint32 Hash = UUserDefinedStruct::GetUserDefinedStructTypeHash(&MidiTime, FRoadInfo::StaticStruct());
+	//uint32 Hash = FCrc::MemCrc32(&MidiTime, sizeof(FRoadInfo));
 	return Hash;
 }
 

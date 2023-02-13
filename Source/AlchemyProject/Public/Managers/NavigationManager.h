@@ -36,4 +36,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TArray<FRoadInfo> RoadInfos;
 	
+	UFUNCTION(BlueprintCallable)
+	ARoadSpline* GetNearestRoadSplinePoint(const AActor* const InActor, FVector& OutSplinePointPosition);
+	
 };

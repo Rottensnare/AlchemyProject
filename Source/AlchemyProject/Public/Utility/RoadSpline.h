@@ -87,6 +87,7 @@ public:
 	// Explanation in the Cpp file
 	bool GetNextRoad(AActor* InActor);
 
+	UPROPERTY(EditAnywhere)
 	FName RoadName {NAME_None};
 
 	//Stores the current spline point index for each actor using the road.
@@ -95,7 +96,8 @@ public:
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TMap<AActor*, FActorNavPackage> ActorNavPackages;
 
-	static FVector GetNearestRoadSplinePoint(AActor* InActor);
+	//DEPRECATED This has been moved to the NavigationManager Class
+	static FVector GetNearestRoadSplinePoint(const AActor* const InActor, const ARoadSpline* OutRoadSpline = nullptr);
 	
 	TMap<ARoadSpline*, TArray<ARoadSpline*>> RoadConnections;
 	
