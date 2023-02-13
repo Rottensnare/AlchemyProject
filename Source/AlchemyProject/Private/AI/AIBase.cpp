@@ -214,6 +214,16 @@ ETeamAttitude::Type AAIBase::GetFactionAttitude(const FNPCInfo& DetectedNPCInfo)
 	
 }
 
+void AAIBase::DestinationReached()
+{
+	NavDestination = nullptr;
+	bRoadsFound = false;
+	CurrentRoad = nullptr;
+	CurrentRoadIndex = -1;
+	CurrentRoadName = NAME_None;
+	RoadNames.Empty();
+}
+
 void AAIBase::SetSpeechWidgetTimer()
 {
 	/*

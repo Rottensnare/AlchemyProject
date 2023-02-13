@@ -52,6 +52,8 @@ public:
 	UFUNCTION()
 	void ToggleSpeechWidget(const FString InString = FString(""));
 	ETeamAttitude::Type GetFactionAttitude(const FNPCInfo& DetectedNPCInfo) const;
+	void DestinationReached();
+	
 protected:
 	virtual void BeginPlay() override;
 
@@ -121,6 +123,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Utility", meta = (AllowPrivateAccess = "true"))
 	AActor* NavDestination{nullptr};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AI|Utility", meta = (AllowPrivateAccess = "true"))
+	bool bRoadsFound = false;
 
 
 #if WITH_EDITOR
@@ -234,6 +239,7 @@ public:
 	FORCEINLINE void SetCurrentRoad(ARoadSpline* InRoadSpline);
 	FORCEINLINE AActor* GetNavDestination() const {return NavDestination;}
 	FORCEINLINE void SetNavDestination(AActor* InActor) {NavDestination = InActor;}
+	FORCEINLINE void SetRoadsFound(const bool bFound) {bRoadsFound = bFound;}
 
 	/***********************
 	 *	Public Variables

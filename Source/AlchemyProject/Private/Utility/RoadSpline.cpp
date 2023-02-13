@@ -227,10 +227,9 @@ FVector ARoadSpline::FindNextSplinePoint(AActor* InActor, bool& bSuccess)
 		else
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Reached Destination"))
-			BaseAI->SetCurrentRoad(nullptr);
 			ActorNavPackages.Remove(BaseAI);
 			ActorSplineIndexMap.Remove(BaseAI);
-			BaseAI->SetNavDestination(nullptr);
+			BaseAI->DestinationReached();
 			return FVector(0.f);
 		}
 	}
@@ -241,18 +240,18 @@ FVector ARoadSpline::FindNextSplinePoint(AActor* InActor, bool& bSuccess)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("End of the road"))
 		bSuccess = true;
-		BaseAI->SetCurrentRoad(nullptr);
 		ActorNavPackages.Remove(BaseAI);
 		ActorSplineIndexMap.Remove(BaseAI);
+		BaseAI->DestinationReached();
 		return FVector(0.f);
 	}
 	if(ActorNavPackages[BaseAI].MoveDir == -1 && 0 == ActorSplineIndexMap[BaseAI])
 	{
 		UE_LOG(LogTemp, Warning, TEXT("End of the road"))
 		bSuccess = true;
-		BaseAI->SetCurrentRoad(nullptr);
 		ActorNavPackages.Remove(BaseAI);
 		ActorSplineIndexMap.Remove(BaseAI);
+		BaseAI->DestinationReached();
 		return FVector(0.f);
 	}
 	
