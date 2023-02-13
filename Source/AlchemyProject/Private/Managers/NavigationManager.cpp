@@ -18,6 +18,15 @@ bool UNavigationManager::CalculateRequiredRoads(AAIBase* InActor, ARoadSpline* S
 	{
 		RoadConnectionContainer.RoadSplines.Add(StartRoad);
 		RoadsToFollowMap.Emplace(InActor, RoadConnectionContainer);
+		for(FRoadInfo& RoadInfo : RoadInfos)
+		{
+			if (RoadInfo.RoadSpline.Get() == StartRoad)
+			{
+				OutRoadInfos.Emplace(RoadInfo);
+				break;
+			}
+		}
+		return true;
 	}
 	
 	FRoadInfo StartRoadInfo;
@@ -91,33 +100,44 @@ bool UNavigationManager::CalculateRequiredRoads(AAIBase* InActor, ARoadSpline* S
 			{
 				for(FRoadInfo& RoadInfo: FirstRoadInfoContainer.RoadInfos)
 				{
-					if(!VisitedRoads.Contains(RoadInfo))
+					bool bVisited = false;
+					for(const auto& VisitedRoad : VisitedRoads)
 					{
+						if(VisitedRoad.Key.RoadSpline.Get() == RoadInfo.RoadSpline.Get())
+						{
+							bVisited = true;
+						}
+					}
+					if(!bVisited)
+					{
+						UE_LOG(LogTemp, Warning, TEXT("!VisitedRoads: RoadInfo: %s, EndRoadInfo: %s"), *RoadInfo.RoadSpline.Get()->GetName(), *EndRoadInfo.RoadSpline.Get()->GetName())
 						RoadsToVisit.Enqueue(RoadInfo);
 						VisitedRoads.Add(RoadInfo, CurrentRoad);
-						if(RoadInfo == EndRoadInfo)
+						if(RoadInfo.RoadSpline.Get() == EndRoadInfo.RoadSpline.Get())
 						{
-							OutRoads.Add(RoadInfo);
-							FRoadInfo RoadToAdd = RoadInfo;
-							while(RoadToAdd != StartRoadInfo)
+							UE_LOG(LogTemp, Warning, TEXT("RoadInfo.RoadSpline.Get() == EndRoadInfo.RoadSpline.Get()"))
+							OutRoads.AddUnique(RoadInfo);
+							FRoadInfo& RoadToAdd = RoadInfo;
+							while(RoadToAdd.RoadSpline.Get() != StartRoadInfo.RoadSpline.Get())
 							{
-								OutRoads.Add(VisitedRoads[RoadToAdd]);
+								UE_LOG(LogTemp, Warning, TEXT("RoadToAdd: %s, StartRoadInfo: %s"), *RoadToAdd.RoadSpline.Get()->GetName(), *StartRoadInfo.RoadSpline.Get()->GetName())
+								OutRoads.AddUnique(VisitedRoads[RoadToAdd]);
 								RoadToAdd = VisitedRoads[RoadToAdd];
 							}
 							bFoundRoute = true;
-						}
-					}
+						}//else UE_LOG(LogTemp, Warning, TEXT("RoadInfo != EndRoadInfo"))
+					}else UE_LOG(LogTemp, Warning, TEXT("Contains:  %s"), *RoadInfo.RoadSpline.Get()->GetName())
 				}
 			}
 			
-		}else UE_LOG(LogTemp, Warning, TEXT("RoadConnectionMap.Contains(CurrentRoad) == false"))
+		}//else UE_LOG(LogTemp, Warning, TEXT("RoadConnectionMap.Contains(CurrentRoad) == false"))
 	}
 
 	for(const auto& Rood : OutRoads)
 	{
 		if(Rood.RoadSpline)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Road Name: %s"), *Rood.RoadSpline->RoadName.ToString())
+			//UE_LOG(LogTemp, Warning, TEXT("Road Name: %s"), *Rood.RoadSpline->RoadName.ToString())
 		}
 	}
 	
