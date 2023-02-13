@@ -13,7 +13,14 @@
 
 class ARoadSpline;
 
+USTRUCT()
+struct FSplinePointLocContainer
+{
+	GENERATED_BODY()
 
+	TArray<FVector> SplinePointLocations;
+	
+};
 
 UCLASS()
 class ALCHEMYPROJECT_API UNavigationManager : public UObject
@@ -27,6 +34,9 @@ public:
 	
 	bool InitRoads();
 
+	UFUNCTION(BlueprintCallable)
+	void FillAllSplinePointsMap(const AActor* const ContextActor);
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TMap<AActor*, FRoadConnectionContainer> RoadsToFollowMap;
 
@@ -35,8 +45,14 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TArray<FRoadInfo> RoadInfos;
+
+	UPROPERTY(VisibleAnywhere)
+	TMap<ARoadSpline*, FSplinePointLocContainer> AllSplinePointsMap;
 	
 	UFUNCTION(BlueprintCallable)
 	ARoadSpline* GetNearestRoadSplinePoint(const AActor* const InActor, FVector& OutSplinePointPosition);
+
+	UFUNCTION(BlueprintCallable)
+	TMap<int32, int32> GetRoadSwitchIndex(ARoadSpline* CurrentRoad, ARoadSpline* NextRoad);
 	
 };

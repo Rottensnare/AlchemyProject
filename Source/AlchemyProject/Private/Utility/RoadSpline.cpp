@@ -4,6 +4,7 @@
 #include "Utility/RoadSpline.h"
 
 #include "AI/AIBase.h"
+#include "AlchemyProject/AlchemyProjectGameMode.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Utility/RoadSplineComponent.h"
@@ -59,6 +60,8 @@ FActorNavPackage ARoadSpline::GetActorNavPackage(AActor* InActor)
 	// If there is a next road
 	if(BaseAI->GetRoadNames().IsValidIndex(BaseAI->GetCurrentRoadIndex() + 1 ))
 	{
+		UE_LOG(LogTemp, Warning, TEXT("IsValidIndex(BaseAI->GetCurrentRoadIndex() + 1 )"))
+		
 		const FName TempName = BaseAI->GetRoadNames()[BaseAI->GetCurrentRoadIndex() + 1 ];
 		const FString RoadInfoTablePath(TEXT("DataTable'/Game/Assets/Datatables/RoadInfoDataTable.RoadInfoDataTable'"));
 		// ReSharper disable once CppTooWideScope
@@ -77,6 +80,7 @@ FActorNavPackage ARoadSpline::GetActorNavPackage(AActor* InActor)
 	}
 	else if(BaseAI->GetNavDestination()) // If NavDestination is valid
 	{
+		UE_LOG(LogTemp, Warning, TEXT("BaseAI->GetNavDestination()"))
 		bHasNextRoad = false;
 		FName TempName = NAME_None;
 		if(BaseAI->GetRoadNames().IsValidIndex(BaseAI->GetCurrentRoadIndex())) TempName = BaseAI->GetRoadNames()[BaseAI->GetCurrentRoadIndex()];
@@ -145,12 +149,42 @@ FActorNavPackage ARoadSpline::GetActorNavPackage(AActor* InActor)
 	
 	
 	FActorNavPackage NavPackage = FActorNavPackage(OutDirection, ClosestIndex, NextRoadMoveDir);
+	//NOTE Under Rework.	Might be deprecated see function GetRoadSwitchIndex()
 	if(bHasNextRoad)
 	{
 		if(NextRoadMoveDir == 1) NavPackage.NextRoadSplineIndex = 0;
 		else if(NextRoadMoveDir == -1) NavPackage.NextRoadSplineIndex = NextRoadLastIndex;
 	}
 	else NavPackage.NextRoadSplineIndex = -1; 
+	// NOTE End of Rework
+
+	if(bHasNextRoad)
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("Trying to calculate next road index"))
+		int32 NextRoadIndex = 0;
+		int32 NextRoadSwitchIndex = -1;
+		TMap<int32, int32> RoadSwitchIndexMap;
+		
+		for(FRoadInfo& RoadInfo : BaseAI->GetCurrentRoadInfos())
+		{
+			if(RoadInfo.RoadSpline.Get() == BaseAI->GetCurrentRoad())
+			{
+				NextRoadIndex++;
+				//UE_LOG(LogTemp, Warning, TEXT("NextRoadIndex: %d"), NextRoadIndex)
+				break;
+			}
+			NextRoadIndex++;
+		}
+		if(BaseAI->AlchemyProjectGameMode && BaseAI->AlchemyProjectGameMode->NavigationManager && BaseAI->GetCurrentRoadInfos().IsValidIndex(NextRoadIndex))
+		{
+			//UE_LOG(LogTemp, Warning, TEXT("BaseAI->GetCurrentRoadInfos().IsValidIndex(NextRoadIndex)"))
+			RoadSwitchIndexMap = BaseAI->AlchemyProjectGameMode->NavigationManager->GetRoadSwitchIndex(BaseAI->GetCurrentRoad(),BaseAI->GetCurrentRoadInfos()[NextRoadIndex].RoadSpline.Get());
+		}
+		TMap<int32, int32>::TConstIterator Iterator = RoadSwitchIndexMap.CreateConstIterator();
+		//UE_LOG(LogTemp, Error, TEXT("NextRoadSwitchIndex: %d"), Iterator.Key())
+		NavPackage.SwitchRoadSplineIndex =  Iterator.Key();
+		NavPackage.NextRoadSplineIndex = Iterator.Value();
+	}
 	
 	NavPackage.bFollowingRoad = true;
 	ActorNavPackages.Emplace(InActor, NavPackage);

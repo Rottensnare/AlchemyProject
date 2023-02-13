@@ -114,7 +114,7 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AI|Utility", meta = (AllowPrivateAccess = "true"))
 	class ARoadSpline* CurrentRoad;
-
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AI|Utility", meta = (AllowPrivateAccess = "true"))
 	FName CurrentRoadName;
 
@@ -126,6 +126,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AI|Utility", meta = (AllowPrivateAccess = "true"))
 	bool bRoadsFound = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AI|Utility", meta = (AllowPrivateAccess = "true"))
+	TArray<FRoadInfo> CurrentRoadInfos;
 
 
 #if WITH_EDITOR
@@ -210,12 +213,7 @@ private:
 	//Map that stores information about the opinion of other NPCs.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Opinions", meta = (AllowPrivateAccess = "true"))
 	TMap<AActor*, int32> OpinionTable;
-
-
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	class AAlchemyProjectGameMode* AlchemyProjectGameMode;
-
 	UFUNCTION(BlueprintCallable)
 	void GetGameMode();
 
@@ -240,6 +238,7 @@ public:
 	FORCEINLINE AActor* GetNavDestination() const {return NavDestination;}
 	FORCEINLINE void SetNavDestination(AActor* InActor) {NavDestination = InActor;}
 	FORCEINLINE void SetRoadsFound(const bool bFound) {bRoadsFound = bFound;}
+	FORCEINLINE TArray<FRoadInfo>& GetCurrentRoadInfos() {return CurrentRoadInfos;}
 
 	/***********************
 	 *	Public Variables
@@ -254,6 +253,8 @@ public:
 	UPROPERTY(EditAnywhere, Category = "AI|Dialogue")
 	int32 NPC_ID{1};
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class AAlchemyProjectGameMode* AlchemyProjectGameMode;
 
 	/***********************
 	 *	INTERFACE OVERRIDES

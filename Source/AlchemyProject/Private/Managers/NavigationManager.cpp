@@ -14,7 +14,7 @@ bool UNavigationManager::CalculateRequiredRoads(AAIBase* InActor, ARoadSpline* S
 	UE_LOG(LogTemp, Warning, TEXT("CalculateRequiredRoads"))
 	AAIBase* BaseAI = Cast<AAIBase>(InActor);
 	if(BaseAI == nullptr) return false;
-	UE_LOG(LogTemp, Warning, TEXT("BaseAI ok"))
+	//UE_LOG(LogTemp, Warning, TEXT("BaseAI ok"))
 	FRoadConnectionContainer RoadConnectionContainer;
 	
 	if(StartRoad == EndRoad)
@@ -29,6 +29,15 @@ bool UNavigationManager::CalculateRequiredRoads(AAIBase* InActor, ARoadSpline* S
 				break;
 			}
 		}
+
+		BaseAI->GetRoadNames().Empty();
+		TArray<FName> RoadNames;
+		for(const FRoadInfo& RoadInfo : OutRoadInfos)
+		{
+			RoadNames.AddUnique(RoadInfo.RoadSpline->RoadName);
+		}
+		BaseAI->SetRoadNames(RoadNames);
+		
 		return true;
 	}
 	
@@ -38,24 +47,24 @@ bool UNavigationManager::CalculateRequiredRoads(AAIBase* InActor, ARoadSpline* S
 	{
 		if (RoadInfo.RoadSpline.Get() == StartRoad)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("== StartRoad"))
+			//UE_LOG(LogTemp, Warning, TEXT("== StartRoad"))
 			StartRoadInfo = RoadInfo;
 		}
 		if (RoadInfo.RoadSpline.Get() == EndRoad)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("== EndRoad"))
+			//UE_LOG(LogTemp, Warning, TEXT("== EndRoad"))
 			EndRoadInfo = RoadInfo;
 		}
 		if (StartRoadInfo.RoadSpline != nullptr && EndRoadInfo.RoadSpline != nullptr)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("StartRoadInfo != nullptr && EndRoadInfo != nullptr"))
+			//UE_LOG(LogTemp, Warning, TEXT("StartRoadInfo != nullptr && EndRoadInfo != nullptr"))
 			break;
 		}
 	}
 	
 	if (StartRoadInfo.RoadSpline == nullptr || EndRoadInfo.RoadSpline == nullptr) return false;
 
-	UE_LOG(LogTemp, Warning, TEXT("StartRoadInfo != nullptr && EndRoadInfo != nullptr"))
+	//UE_LOG(LogTemp, Warning, TEXT("StartRoadInfo != nullptr && EndRoadInfo != nullptr"))
 	// First FRoadInfo* is the road that was visited and the second one in the array is the FRoadInfo* that the road was visited from
 	TMap<FRoadInfo, FRoadInfo> VisitedRoads;
 	TQueue<FRoadInfo> RoadsToVisit;
@@ -66,13 +75,13 @@ bool UNavigationManager::CalculateRequiredRoads(AAIBase* InActor, ARoadSpline* S
 	bool bFoundRoute = false;
 	for(auto& Entry : RoadConnectionMap)
 	{
-		if(Entry.Key.RoadSpline.Get()) UE_LOG(LogTemp, Warning, TEXT("RoadConnectionMap: RoadName: %s"), *Entry.Key.RoadSpline.Get()->GetName())
+		//if(Entry.Key.RoadSpline.Get()) UE_LOG(LogTemp, Warning, TEXT("RoadConnectionMap: RoadName: %s"), *Entry.Key.RoadSpline.Get()->GetName())
 	}
 	while(!RoadsToVisit.IsEmpty())
 	{
 		FRoadInfo CurrentRoad;
 		RoadsToVisit.Dequeue(CurrentRoad);
-		if(CurrentRoad.RoadSpline) UE_LOG(LogTemp, Warning, TEXT("CurrentRoad Name: %s"), *CurrentRoad.RoadSpline->GetName())
+		//if(CurrentRoad.RoadSpline) UE_LOG(LogTemp, Warning, TEXT("CurrentRoad Name: %s"), *CurrentRoad.RoadSpline->GetName())
 		
 		bool bContains = false;
 		for(const auto& Temp : RoadConnectionMap)
@@ -86,7 +95,7 @@ bool UNavigationManager::CalculateRequiredRoads(AAIBase* InActor, ARoadSpline* S
 		
 		if(bContains)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("bContains"))
+			//UE_LOG(LogTemp, Warning, TEXT("bContains"))
 			
 			FRoadInfo FirstRoadInfo;
 			FRoadInfoContainer FirstRoadInfoContainer;
@@ -113,24 +122,24 @@ bool UNavigationManager::CalculateRequiredRoads(AAIBase* InActor, ARoadSpline* S
 					}
 					if(!bVisited)
 					{
-						UE_LOG(LogTemp, Warning, TEXT("!VisitedRoads: RoadInfo: %s, EndRoadInfo: %s"), *RoadInfo.RoadSpline.Get()->GetName(), *EndRoadInfo.RoadSpline.Get()->GetName())
+						//UE_LOG(LogTemp, Warning, TEXT("!VisitedRoads: RoadInfo: %s, EndRoadInfo: %s"), *RoadInfo.RoadSpline.Get()->GetName(), *EndRoadInfo.RoadSpline.Get()->GetName())
 						RoadsToVisit.Enqueue(RoadInfo);
 						VisitedRoads.Add(RoadInfo, CurrentRoad);
 						if(RoadInfo.RoadSpline.Get() == EndRoadInfo.RoadSpline.Get())
 						{
-							UE_LOG(LogTemp, Warning, TEXT("RoadInfo.RoadSpline.Get() == EndRoadInfo.RoadSpline.Get()"))
+							//UE_LOG(LogTemp, Warning, TEXT("RoadInfo.RoadSpline.Get() == EndRoadInfo.RoadSpline.Get()"))
 							OutRoads.AddUnique(RoadInfo);
 							FRoadInfo RoadToAdd = RoadInfo;
 							while(RoadToAdd.RoadSpline.Get() != StartRoadInfo.RoadSpline.Get())
 							{
-								UE_LOG(LogTemp, Warning, TEXT("RoadToAdd: %s, StartRoadInfo: %s"), *RoadToAdd.RoadSpline.Get()->GetName(), *StartRoadInfo.RoadSpline.Get()->GetName())
+								//UE_LOG(LogTemp, Warning, TEXT("RoadToAdd: %s, StartRoadInfo: %s"), *RoadToAdd.RoadSpline.Get()->GetName(), *StartRoadInfo.RoadSpline.Get()->GetName())
 
-								OutRoads.AddUnique(VisitedRoads[RoadToAdd]); //NOTE This gave an error
+								OutRoads.AddUnique(VisitedRoads[RoadToAdd]); //NOTE This gave an error because GetTypeHash was using FCrc::MemCrc32
 								RoadToAdd = VisitedRoads[RoadToAdd];
 							}
 							bFoundRoute = true;
 						}//else UE_LOG(LogTemp, Warning, TEXT("RoadInfo != EndRoadInfo"))
-					}else UE_LOG(LogTemp, Warning, TEXT("Contains:  %s"), *RoadInfo.RoadSpline.Get()->GetName())
+					}//else UE_LOG(LogTemp, Warning, TEXT("Contains:  %s"), *RoadInfo.RoadSpline.Get()->GetName())
 				}
 			}
 			
@@ -180,8 +189,8 @@ bool UNavigationManager::InitRoads()
 		for(const FRoadInfo Temp : TempRoadInfos)
 		{
 			//Storing for later use
-			if(Temp.RoadSpline) UE_LOG(LogTemp, Warning, TEXT("Road to be added: %s"), *Temp.RoadSpline->GetName())
-			else UE_LOG(LogTemp, Warning, TEXT("Road spline was nullptr"))
+			//if(Temp.RoadSpline) UE_LOG(LogTemp, Warning, TEXT("Road to be added: %s"), *Temp.RoadSpline->GetName())
+			//else UE_LOG(LogTemp, Warning, TEXT("Road spline was nullptr"))
 			RoadInfos.Add(Temp);
 		}
 		for (FRoadInfo RoadInfo : TempRoadInfos)
@@ -191,7 +200,7 @@ bool UNavigationManager::InitRoads()
 			FRoadInfoContainer RoadInfoContainer;
 			for (TSoftObjectPtr<ARoadSpline>& RoadSpline : RoadInfo.RoadConnections.RoadSplines)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("RoadInfo: %s, Connected Road: %s"), *RoadInfo.RoadSpline->GetName(), *RoadSpline.Get()->GetName())
+				//UE_LOG(LogTemp, Warning, TEXT("RoadInfo: %s, Connected Road: %s"), *RoadInfo.RoadSpline->GetName(), *RoadSpline.Get()->GetName())
 				TArray<FRoadInfo>::ElementType* ConnectedRoadInfo = TempRoadInfos.FindByPredicate([&](const FRoadInfo Info)
 				{
 					return Info.RoadSpline == RoadSpline;
@@ -213,39 +222,99 @@ bool UNavigationManager::InitRoads()
 
 	for(auto& Entry : RoadConnectionMap)
 	{
-		if(Entry.Key.RoadSpline.Get()) UE_LOG(LogTemp, Warning, TEXT("RoadConnectionMap: RoadName: %s"), *Entry.Key.RoadSpline.Get()->GetName())
+		//if(Entry.Key.RoadSpline.Get()) UE_LOG(LogTemp, Warning, TEXT("RoadConnectionMap: RoadName: %s"), *Entry.Key.RoadSpline.Get()->GetName())
 	}
 	
 	return true;
 	
 }
 
+void UNavigationManager::FillAllSplinePointsMap(const AActor* const ContextActor)
+{
+	//UE_LOG(LogTemp, Warning, TEXT("FillAllSplinePointsMap"))
+	AllSplinePointsMap.Empty();
+	TArray<AActor*> RoadSplinesArray;
+	
+	UGameplayStatics::GetAllActorsOfClass(ContextActor, ARoadSpline::StaticClass(), RoadSplinesArray);
+	for(AActor* RoadActor : RoadSplinesArray)
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("RoadActor: %s"), *RoadActor->GetName())
+		ARoadSpline* Road = Cast<ARoadSpline>(RoadActor);
+		if(Road && Road->GetSplineComponent())
+		{
+			FSplinePointLocContainer SplinePointLocContainer;
+			for(int32 i = 0; i < Road->GetSplineComponent()->GetNumberOfSplinePoints(); i++)
+			{
+				SplinePointLocContainer.SplinePointLocations.Add(Road->GetSplineComponent()->GetLocationAtSplinePoint(i, ESplineCoordinateSpace::World));
+			}
+			//UE_LOG(LogTemp, Warning, TEXT("Road: %s, NumOfPoints: %d"), *Road->GetName(), SplinePointLocContainer.SplinePointLocations.Num())
+			AllSplinePointsMap.Emplace(Road, SplinePointLocContainer);
+		}
+	}
+}
+
 ARoadSpline* UNavigationManager::GetNearestRoadSplinePoint(const AActor* const InActor, FVector& OutSplinePointPosition)
 {
 	if(InActor == nullptr) return nullptr;
 	OutSplinePointPosition = FVector(0.f);
-	TArray<AActor*> OutActors;
-	float DistanceToNearestActor;
-	UGameplayStatics::GetAllActorsOfClass(InActor, ARoadSpline::StaticClass(), OutActors);
-	AActor* NearestActor = UGameplayStatics::FindNearestActor(InActor->GetActorLocation(), OutActors, DistanceToNearestActor);
-	ARoadSpline* NearestRoad = Cast<ARoadSpline>(NearestActor);
-	if(NearestRoad == nullptr) return nullptr;
 	
+	ARoadSpline* ClosestRoad = nullptr;
 	int32 ClosestPointIndex = 0;
 	float ClosestDistance = 100000.f;
 	
-	for(int32 i = 0; i < NearestRoad->GetSplineComponent()->GetNumberOfSplinePoints(); i++)
+	for(const auto& Something : AllSplinePointsMap)
 	{
-		const float TempDist = UKismetMathLibrary::Vector_Distance(InActor->GetActorLocation(), NearestRoad->GetSplineComponent()->GetLocationAtSplinePoint(i, ESplineCoordinateSpace::World));
-		
-		if(TempDist < ClosestDistance)
+		int32 Index = 0;
+		for(const FVector& TempVector : Something.Value.SplinePointLocations)
 		{
-			ClosestDistance = TempDist;
-			ClosestPointIndex = i;
+			const float TempDist = UKismetMathLibrary::Vector_Distance(TempVector, InActor->GetActorLocation());
+			
+			if(TempDist < ClosestDistance)
+			{
+				ClosestPointIndex = Index;
+				ClosestDistance = TempDist;
+				ClosestRoad = Something.Key;
+			}
+			Index++;
+		}
+	}
+	
+	if(ClosestRoad && ClosestRoad->GetSplineComponent())
+	{
+		OutSplinePointPosition = ClosestRoad->GetSplineComponent()->GetLocationAtSplinePoint(ClosestPointIndex, ESplineCoordinateSpace::World);
+	}
+	
+	
+	return ClosestRoad;
+}
+// First int32 is for the current road, the other is for the next
+TMap<int32,int32> UNavigationManager::GetRoadSwitchIndex(ARoadSpline* CurrentRoad, ARoadSpline* NextRoad)
+{
+	TMap<int32, int32> OutMap;
+	int32 OutIndex = -1;
+	if(AllSplinePointsMap.Contains(CurrentRoad) && AllSplinePointsMap.Contains(NextRoad))
+	{
+		float ClosestDistance = 1000000.f;
+		int32 Index = 0;
+		for(const FVector& VectorCurrent : AllSplinePointsMap[CurrentRoad].SplinePointLocations)
+		{
+			int32 NextIndex = 0;
+			for(const FVector& VectorNext : AllSplinePointsMap[NextRoad].SplinePointLocations)
+			{
+				const float TempDist = UKismetMathLibrary::Vector_Distance(VectorCurrent, VectorNext);
+				
+				if(TempDist < ClosestDistance)
+				{
+					OutMap.Empty();
+					OutMap.Emplace(Index, NextIndex);
+					
+					ClosestDistance = TempDist;
+				}
+				NextIndex++;
+			}
+			Index++;
 		}
 	}
 
-	OutSplinePointPosition = NearestRoad->GetSplineComponent()->GetLocationAtSplinePoint(ClosestPointIndex, ESplineCoordinateSpace::World);
-	
-	return NearestRoad;
+	return OutMap;
 }
