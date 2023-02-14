@@ -101,6 +101,7 @@ struct FRoadInfo : public FTableRowBase
 FORCEINLINE uint32 GetTypeHash(const FRoadInfo& MidiTime)
 {
 	const uint32 Hash = UUserDefinedStruct::GetUserDefinedStructTypeHash(&MidiTime, FRoadInfo::StaticStruct());
+	//NOTE Maybe try MidiTime.RoadSpline.Get() for the FCrc::MemCrc32
 	//uint32 Hash = FCrc::MemCrc32(&MidiTime, sizeof(FRoadInfo));
 	return Hash;
 }

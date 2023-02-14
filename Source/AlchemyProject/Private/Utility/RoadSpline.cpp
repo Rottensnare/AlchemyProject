@@ -27,6 +27,32 @@ void ARoadSpline::BeginPlay()
 	Super::BeginPlay();
 	
 }
+// Calculates the move direction of for the AI by comparing its current spline index to the switch index for the next road
+// Returns 1 if the road switch index is bigger than the current spline index for the AI, otherwise returns -1
+int32 ARoadSpline::CalculateMoveDirection(AAIBase* const AIBase, const int32 NextRoadIndex)
+{
+	if(AIBase == nullptr) return 0;
+	
+	if(AIBase->GetCurrentRoadInfos().IsValidIndex(NextRoadIndex))
+	{
+		const TMap<int32, int32> RoadSwitchIndexMap =
+			AIBase->AlchemyProjectGameMode->NavigationManager->GetRoadSwitchIndex(
+				AIBase->GetCurrentRoad(),
+				AIBase->GetCurrentRoadInfos()[NextRoadIndex].RoadSpline.Get());
+		
+		const TMap<int32, int32>::TConstIterator Iterator = RoadSwitchIndexMap.CreateConstIterator();
+		if(Iterator.Key() > ActorSplineIndexMap[AIBase]) return 1;
+		return -1;
+	}
+	else
+	{
+		// NOTE Something has gone wrong if the UE_LOG is printed. NextRoadIndex should always be valid if this function is called.
+		
+		UE_LOG(LogTemp, Error, TEXT("CalculateMoveDirection: NextRoadIndex was invalid"))
+		checkNoEntry()
+		return 1;
+	}
+}
 
 //DEPRECATED Doesn't do anything anymore.
 FVector ARoadSpline::GetSplinePointPosition() const
@@ -120,8 +146,8 @@ FActorNavPackage ARoadSpline::GetActorNavPackage(AActor* InActor)
 	// NOTE compare the spline point index with the current index.
 	// NOTE save the spline point index that was the closest and switch roads when current index is the same as the saved one
 	
-	
-	//If next road exists
+	//NOTE Under Rework.
+	//If next road exists //Probably deprecated
 	if(bHasNextRoad)
 	{
 		for(int32 i = 0; i < GetSplineComponent()->GetNumberOfSplinePoints(); i++)
@@ -141,7 +167,8 @@ FActorNavPackage ARoadSpline::GetActorNavPackage(AActor* InActor)
 			}
 		}
 	}
-	
+
+	//This is used when actor doesn't have next road, i.e. NavDestination is on the current road.
 	if(ActorSplineIndexMap.Contains(BaseAI))
 	{
 		OutDirection = ActorSplineIndexMap[BaseAI] < ClosestIndex ? 1 : -1;
@@ -149,7 +176,7 @@ FActorNavPackage ARoadSpline::GetActorNavPackage(AActor* InActor)
 	
 	
 	FActorNavPackage NavPackage = FActorNavPackage(OutDirection, ClosestIndex, NextRoadMoveDir);
-	//NOTE Under Rework.	Might be deprecated see function GetRoadSwitchIndex()
+	// Might be deprecated see function GetRoadSwitchIndex()
 	if(bHasNextRoad)
 	{
 		if(NextRoadMoveDir == 1) NavPackage.NextRoadSplineIndex = 0;
@@ -161,6 +188,7 @@ FActorNavPackage ARoadSpline::GetActorNavPackage(AActor* InActor)
 	if(bHasNextRoad)
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("Trying to calculate next road index"))
+		
 		int32 NextRoadIndex = 0;
 		int32 NextRoadSwitchIndex = -1;
 		TMap<int32, int32> RoadSwitchIndexMap;
@@ -180,10 +208,15 @@ FActorNavPackage ARoadSpline::GetActorNavPackage(AActor* InActor)
 			//UE_LOG(LogTemp, Warning, TEXT("BaseAI->GetCurrentRoadInfos().IsValidIndex(NextRoadIndex)"))
 			RoadSwitchIndexMap = BaseAI->AlchemyProjectGameMode->NavigationManager->GetRoadSwitchIndex(BaseAI->GetCurrentRoad(),BaseAI->GetCurrentRoadInfos()[NextRoadIndex].RoadSpline.Get());
 		}
+		else NextRoadIndex = -1; // If there is no next road
+		
 		TMap<int32, int32>::TConstIterator Iterator = RoadSwitchIndexMap.CreateConstIterator();
 		//UE_LOG(LogTemp, Error, TEXT("NextRoadSwitchIndex: %d"), Iterator.Key())
 		NavPackage.SwitchRoadSplineIndex =  Iterator.Key();
 		NavPackage.NextRoadSplineIndex = Iterator.Value();
+		NavPackage.MoveDir = CalculateMoveDirection(BaseAI, NextRoadIndex);
+
+			
 	}
 	
 	NavPackage.bFollowingRoad = true;

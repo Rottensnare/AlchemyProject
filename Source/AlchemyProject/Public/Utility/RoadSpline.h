@@ -49,6 +49,7 @@ struct FRoadNavigationData
 	
 };
 
+// NOTE Move most of the logic to the new NavigationManager class. 
 
 UCLASS()
 class ALCHEMYPROJECT_API ARoadSpline : public AActor
@@ -70,6 +71,8 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	TArray<ARoadSpline*> RoadConnectionsToBeAdded;
+
+	int32 CalculateMoveDirection(class AAIBase* const AIBase, const int32 NextRoadIndex);
 	
 public:
 	
