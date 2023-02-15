@@ -3,7 +3,7 @@
 Developed with Unreal Engine 5 using both C++ and Blueprints
 Vast majority of the project is done in C++
 
-My primary goal in creating this project was to demonstrate my ability to solve game development problems independently, while also allowing myself the opportunity to work on something that I personally enjoy. 
+My primary goal in creating this project was to demonstrate my ability to solve game development problems independently, while also allowing myself the opportunity to work on something that I personally enjoy. It should be noteworthy that this project displays a fraction of my capabilities regarding Unreal and game development. Most of my projects are not on GitHub or they are private. The Blaster project, which is publicly available on my GitHub, is primarily focused on multiplayer and shooter mechanics.
 
 Videos for this project are found on YouTube: https://www.youtube.com/@strangejams7230
 
@@ -27,3 +27,11 @@ Note: The current inventory system will be reworked so that there is no limit on
 
 5. The AI in its current form can have simple conversations with the player, can execute work related behavior, like "gathering" alchemy ingredients, chase hostiles, search for hostiles, patrol and move to locations using the road network. All of this is done using behavior trees, dynamic sub-trees, behavior tree tasks, decorators, services and EQS. AI road movement utilizes custom pathfinding for finding a path to the destination using the road network. Even when the closest road is outside of the navigation invoker radius, the AI will try to navigate to the closest road using EQS.
 
+
+The project also contains:
+
+- Custom made open world level
+- Procedural foliage
+- Usage of data tables
+- UI & Widgets
+- Dynamic night and day cycle with timekeeping
