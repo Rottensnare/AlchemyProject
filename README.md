@@ -2,7 +2,8 @@
 
 Developed with Unreal Engine 5 using both C++ and Blueprints
 Vast majority of the project is done in C++
-This project serves both as a demonstration of my abilities to solve game development problems on my own, and as a nice little project to work on things that I like.
+
+My primary goal in creating this project was to demonstrate my ability to solve game development problems independently, while also allowing myself the opportunity to work on something that I personally enjoy. 
 
 Videos for this project are found on YouTube: https://www.youtube.com/@strangejams7230
 
