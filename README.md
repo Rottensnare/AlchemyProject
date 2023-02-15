@@ -16,6 +16,7 @@ Currently the project contains the following systems:
 - AI
 
 
+
 1. Inventory system allows the player or the AI to have a personal inventory that can store any item that implements the correct interface.
 Currently the inventory consists of set number of slots where each different item is assigned to. Player can pick up one or multiple of the same items at a time. Items can be inspected, used or dropped. Items are organized into slots based on the hash code that gets generated for each item. This hash code ensures that even if a potion is named the same, but for example the quality is different, the new potion will be assigned to another slot. 
 Note: The current inventory system will be reworked so that there is no limit on the number of slots. This will be done using a listview.
@@ -30,10 +31,10 @@ Note: The current inventory system will be reworked so that there is no limit on
 
 
 
+
 The project also contains:
 
-- Custom made open world level
+- Open world level
 - Procedural foliage
-- Usage of data tables
 - UI & Widgets
 - Dynamic night and day cycle with timekeeping
