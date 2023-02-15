@@ -38,3 +38,4 @@ The project also contains:
 - Procedural foliage
 - UI & Widgets
 - Dynamic night and day cycle with timekeeping
+- Gameplay tags
