@@ -15,6 +15,7 @@ Currently the project contains the following systems:
 - Faction System
 - AI
 
+
 1. Inventory system allows the player or the AI to have a personal inventory that can store any item that implements the correct interface.
 Currently the inventory consists of set number of slots where each different item is assigned to. Player can pick up one or multiple of the same items at a time. Items can be inspected, used or dropped. Items are organized into slots based on the hash code that gets generated for each item. This hash code ensures that even if a potion is named the same, but for example the quality is different, the new potion will be assigned to another slot. 
 Note: The current inventory system will be reworked so that there is no limit on the number of slots. This will be done using a listview.
@@ -26,6 +27,7 @@ Note: The current inventory system will be reworked so that there is no limit on
 4. The faction system is still in its infancy, but currently the system allows each NPC to be part of a faction. Factions are defined by various attributes, including a membership list and a set of relationships with other factions. This includes designations of hostile, neutral, and friendly factions, and a map of opinions used to determine relations with other factions. AI perception takes factions into consideration, so that it treats members of hostile factions as enemies.
 
 5. The AI in its current form can have simple conversations with the player, can execute work related behavior, like "gathering" alchemy ingredients, chase hostiles, search for hostiles, patrol and move to locations using the road network. All of this is done using behavior trees, dynamic sub-trees, behavior tree tasks, decorators, services and EQS. AI road movement utilizes custom pathfinding for finding a path to the destination using the road network. Even when the closest road is outside of the navigation invoker radius, the AI will try to navigate to the closest road using EQS.
+
 
 
 The project also contains:
