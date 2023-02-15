@@ -6,6 +6,7 @@
 #include "AIController.h"
 #include "DetourCrowdAIController.h"
 #include "GameplayTagContainer.h"
+#include "EnvironmentQuery/EnvQueryTypes.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AIPerceptionTypes.h"
 #include "Utility/CustomAIContainer.h"
@@ -46,6 +47,10 @@ public:
 	UFUNCTION()
 	void OnPerceptionUpdated_Delegate(const TArray<AActor*>& UpdatedActors);
 	
+	UFUNCTION(BlueprintCallable)
+	TArray<FVector>& QueryForLocations(const class UEnvQuery* const InEnvQuery, APawn* InPawn, EEnvQueryRunMode::Type QueryRunMode);
+	void HandleQueryRequest_Locations(TSharedPtr<FEnvQueryResult> Result);
+	TArray<FVector> QueryLocations;
 	
 	void ChangeAttitudeTowards();
 
@@ -101,7 +106,7 @@ protected:
 
 
 	UFUNCTION(BlueprintCallable)
-	void QueryForActors_GameplayTags(const struct FGameplayTagContainer& InGameplayTagContainer, const EQueryType QueryType, const class UEnvQuery* const InEnvQuery, APawn* InPawn, const float SearchRadius, const float MinFindRadius, const float MaxFindRadius);
+	void QueryForActors_GameplayTags(const struct FGameplayTagContainer& InGameplayTagContainer, const EQueryType QueryType, const UEnvQuery* const InEnvQuery, APawn* InPawn, const float SearchRadius, const float MinFindRadius, const float MaxFindRadius);
 
 	void HandleQueryRequest(TSharedPtr<struct FEnvQueryResult> Result);
 

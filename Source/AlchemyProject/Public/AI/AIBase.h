@@ -130,6 +130,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AI|Utility", meta = (AllowPrivateAccess = "true"))
 	TArray<FRoadInfo> CurrentRoadInfos;
 
+	//Used for EQS context
+	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	FVector ClosestSplinePointLocation{FVector(0.f)};
+
 
 #if WITH_EDITOR
 	//Only works with Editor and changing values from the editor windows
