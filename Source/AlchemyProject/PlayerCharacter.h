@@ -153,6 +153,12 @@ public:
 	FORCEINLINE FGameplayTagContainer& GetGameplayTags() {return GameplayTags;}
 
 	virtual FNPCInfo& GetNPCInfo() override;
+
+	/* * * * * * * * * * * *
+	 *	INTERFACE OVERRIDES
+	 * * * * * * * * * * * */
+	UFUNCTION(BlueprintCallable)
+	virtual EPhysicalSurface GetFootStepSurfaceType() override;
 };
 
 

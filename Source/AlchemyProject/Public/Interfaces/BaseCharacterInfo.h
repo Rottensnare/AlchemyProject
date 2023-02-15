@@ -26,6 +26,8 @@ public:
 
 	
 	virtual FNPCInfo& GetNPCInfo();
+	virtual EPhysicalSurface GetFootStepSurfaceType();
+	
 
 private:
 
