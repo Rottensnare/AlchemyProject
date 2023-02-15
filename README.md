@@ -1,6 +1,10 @@
 # AlchemyProject
 
 Developed with Unreal Engine 5 using both C++ and Blueprints
+Vast majority of the project is done in C++
+This project serves both as a demonstration of my abilities to solve game development problems on my own, and as a nice little project to work on things that I like.
+
+Videos for this project are found on YouTube: https://www.youtube.com/@strangejams7230
 
 Currently the project contains the following systems:
 
@@ -20,4 +24,5 @@ Note: The current inventory system will be reworked so that there is no limit on
 
 4. The faction system is still in its infancy, but currently the system allows each NPC to be part of a faction. Factions are defined by various attributes, including a membership list and a set of relationships with other factions. This includes designations of hostile, neutral, and friendly factions, and a map of opinions used to determine relations with other factions. AI perception takes factions into consideration, so that it treats members of hostile factions as enemies.
 
-5. The AI in its current form can have simple conversations with the player, can execute work related behavior, like "gathering" alchemy ingredients, chase hostiles, search for hostiles, patrol and move to locations using the road network. All of this is done using behavior trees, dynamic sub-trees, behavior tree tasks, decorators, services and EQS. 
+5. The AI in its current form can have simple conversations with the player, can execute work related behavior, like "gathering" alchemy ingredients, chase hostiles, search for hostiles, patrol and move to locations using the road network. All of this is done using behavior trees, dynamic sub-trees, behavior tree tasks, decorators, services and EQS. AI road movement utilizes custom pathfinding for finding a path to the destination using the road network. Even when the closest road is outside of the navigation invoker radius, the AI will try to navigate to the closest road using EQS.
+
