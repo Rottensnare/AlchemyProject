@@ -3,6 +3,7 @@
 #include "AlchemyProjectGameMode.h"
 #include "AlchemyProjectCharacter.h"
 #include "Managers/FactionManager.h"
+#include "Managers/NavigationManager.h"
 #include "UObject/ConstructorHelpers.h"
 
 UFactionManager* AAlchemyProjectGameMode::FactionManager = nullptr;
@@ -22,6 +23,11 @@ UFactionManager* AAlchemyProjectGameMode::GetFactionManager()
 	return FactionManager;
 }
 
+UNavigationManager* AAlchemyProjectGameMode::GetNavigationManager()
+{
+	return NavigationManager;
+}
+
 void AAlchemyProjectGameMode::BeginPlay()
 {
 	if(!FactionManager)
@@ -30,6 +36,15 @@ void AAlchemyProjectGameMode::BeginPlay()
 		FactionManager->AddToRoot();
 		FactionManager->InitFactions();
 	}
-	
+
+	if(!NavigationManager)
+	{
+		NavigationManager = NewObject<UNavigationManager>();
+		NavigationManager->AddToRoot();
+		NavigationManager->InitRoads();
+	}
+
 	Super::BeginPlay();
 }
+
+

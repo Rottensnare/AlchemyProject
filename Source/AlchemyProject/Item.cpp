@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Components/WidgetComponent.h"
 #include "HUD/ItemPopUp.h"
+#include "UObject/ConstructorHelpers.h"
 
 
 AItem::AItem()

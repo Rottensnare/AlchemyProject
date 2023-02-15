@@ -4,6 +4,7 @@
 #include "AI/BaseAIController.h"
 
 #include "MyAIPerceptionComponent.h"
+#include "NavigationSystem.h"
 #include "AI/AIBase.h"
 #include "AlchemyProject/Enums/CustomDataTables.h"
 #include "BehaviorTree/BehaviorTree.h"
@@ -12,6 +13,7 @@
 #include "Engine/DataTable.h"
 #include "EnvironmentQuery/EnvQuery.h"
 #include "EnvironmentQuery/EnvQueryManager.h"
+#include "Kismet/GameplayStatics.h"
 #include "Navigation/CrowdFollowingComponent.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Hearing.h"
@@ -99,8 +101,27 @@ void ABaseAIController::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 }
 
+TArray<FVector>& ABaseAIController::QueryForLocations(const UEnvQuery* const InEnvQuery, APawn* InPawn, EEnvQueryRunMode::Type QueryRunMode)
+{
+	FEnvQueryRequest ActorsQueryRequest = FEnvQueryRequest(InEnvQuery, InPawn);
+	int32 ExecuteCode = ActorsQueryRequest.Execute(QueryRunMode, this, &ABaseAIController::HandleQueryRequest_Locations);
+	UE_LOG(LogTemp, Warning, TEXT("QueryForLocations: %d"), ExecuteCode)
+	return QueryLocations;
+}
+
+void ABaseAIController::HandleQueryRequest_Locations(TSharedPtr<FEnvQueryResult> Result)
+{
+	UE_LOG(LogTemp, Warning, TEXT("HandleQueryRequest_Locations"))
+	TArray<FVector> OutLocations;
+	if(Result->IsSuccessful())
+	{
+		Result->GetAllAsLocations(OutLocations);
+	}
+	QueryLocations = OutLocations;
+}
+
 void ABaseAIController::QueryForActors_GameplayTags(const FGameplayTagContainer& InGameplayTagContainer, const EQueryType QueryType,
-	const UEnvQuery* const InEnvQuery, APawn* InPawn, const float SearchRadius, const float MinFindRadius, const float MaxFindRadius)
+                                                    const UEnvQuery* const InEnvQuery, APawn* InPawn, const float SearchRadius, const float MinFindRadius, const float MaxFindRadius)
 {
 	TagsToBeTested = InGameplayTagContainer;
 	CurrentQueryType = QueryType;
@@ -333,6 +354,8 @@ void ABaseAIController::OnSightStimulusExpired_Delegate()
 {
 	if(BlackboardComponent == nullptr || AIBase == nullptr) return;
 	
+	if(AIBase->GetAIState() == EAIState::EAIS_Moving) return; //NOTE Temporary fix
+	
 	BlackboardComponent->SetValueAsBool(FName("PlayerSeen"), false);
 	AIBase->SetPlayerSeen(false);
 	AIBase->ToggleSpeechWidget("Target got away.");
@@ -341,6 +364,10 @@ void ABaseAIController::OnSightStimulusExpired_Delegate()
 
 void ABaseAIController::OnHearingStimulusExpired_Delegate()
 {
+	if(BlackboardComponent == nullptr || AIBase == nullptr) return;
+	
+	if(AIBase->GetAIState() == EAIState::EAIS_Moving) return; //NOTE Temporary fix
+	
 	if(!AIBase->GetPlayerSeen())
 	{
 		AIBase->ToggleSpeechWidget("Must have been wind.");
@@ -425,6 +452,8 @@ void ABaseAIController::ShowAIInfo()
 		AIPerceptionComponent->GetActorsPerception(Ector, PerceptionBlueprintInfo);
 		GEngine->AddOnScreenDebugMessage(0, 3.f, FColor::Cyan, FString::Printf(TEXT("Currently Perceived Actor: %s, Is Hostile: %d"), *Ector->GetName(), PerceptionBlueprintInfo.bIsHostile));
 	}
+
+	
 }
 
 

@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "Engine/DataTable.h"
+#include "Engine/UserDefinedStruct.h"
 
 #include "NPCStructs.generated.h"
 
@@ -62,6 +63,59 @@ inline bool FNPCInfo::FillData(FNPCInfo& InNPCInfo, const int32 ID)
 	}
 	return false;
 }
+
+
+USTRUCT(BlueprintType)
+struct FRoadConnectionContainer
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<TSoftObjectPtr<class ARoadSpline>> RoadSplines;
+	
+};
+
+//Stores all the roads in the game
+USTRUCT(BlueprintType)
+struct FRoadInfo : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TSoftObjectPtr<ARoadSpline> RoadSpline;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FRoadConnectionContainer RoadConnections;
+
+	bool operator==(const FRoadInfo& Other) const
+	{
+		return RoadSpline == Other.RoadSpline;
+	}
+
+	bool operator!=(const FRoadInfo& Other) const
+	{
+		return RoadSpline != Other.RoadSpline;
+	}
+};
+
+FORCEINLINE uint32 GetTypeHash(const FRoadInfo& MidiTime)
+{
+	const uint32 Hash = UUserDefinedStruct::GetUserDefinedStructTypeHash(&MidiTime, FRoadInfo::StaticStruct());
+	//NOTE Maybe try MidiTime.RoadSpline.Get() for the FCrc::MemCrc32
+	//uint32 Hash = FCrc::MemCrc32(&MidiTime, sizeof(FRoadInfo));
+	return Hash;
+}
+
+USTRUCT(BlueprintType)
+struct FRoadInfoContainer
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TArray<FRoadInfo> RoadInfos;
+
+	
+};
 
 /*
 USTRUCT(BlueprintType)

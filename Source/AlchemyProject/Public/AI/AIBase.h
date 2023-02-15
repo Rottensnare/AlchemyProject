@@ -44,6 +44,7 @@ public:
 	
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	UFUNCTION(BlueprintCallable)
 	virtual void SetAIState(EAIState NewState);
 	
 	void SetSpeechWidgetTimer();
@@ -51,6 +52,8 @@ public:
 	UFUNCTION()
 	void ToggleSpeechWidget(const FString InString = FString(""));
 	ETeamAttitude::Type GetFactionAttitude(const FNPCInfo& DetectedNPCInfo) const;
+	void DestinationReached();
+	
 protected:
 	virtual void BeginPlay() override;
 
@@ -77,6 +80,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory|Components", meta = (AllowPrivateAccess = "true"))
 	class UInventoryComponent* InventoryComponent;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI", meta = (AllowPrivateAccess = "true"))
+	class UNavigationInvokerComponent* NavigationInvokerComponent;
+
 	/** Used for detecting the player very close if AI bPlayerSeen = true */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Perception|Components", meta = (AllowPrivateAccess = "true"))
 	class USphereComponent* ESPSphere;
@@ -98,6 +104,35 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Data", meta = (AllowPrivateAccess = "true"))
 	FNPCInfo NPCInfo;
+
+	
+	/** NAVIGATION */
+	
+	//Current road names that the AI will follow
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Utility", meta = (AllowPrivateAccess = "true"))
+	TArray<FName> RoadNames;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AI|Utility", meta = (AllowPrivateAccess = "true"))
+	class ARoadSpline* CurrentRoad;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AI|Utility", meta = (AllowPrivateAccess = "true"))
+	FName CurrentRoadName;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AI|Utility", meta = (AllowPrivateAccess = "true"))
+	int32 CurrentRoadIndex{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Utility", meta = (AllowPrivateAccess = "true"))
+	AActor* NavDestination{nullptr};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AI|Utility", meta = (AllowPrivateAccess = "true"))
+	bool bRoadsFound = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AI|Utility", meta = (AllowPrivateAccess = "true"))
+	TArray<FRoadInfo> CurrentRoadInfos;
+
+	//Used for EQS context
+	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	FVector ClosestSplinePointLocation{FVector(0.f)};
 
 
 #if WITH_EDITOR
@@ -130,7 +165,7 @@ private:
 	bool bPlayerSeen{false};
 	bool bCanSeeTarget{false};
 	bool bSomethingHeard{false};
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "AI|Movement", meta = (AllowPrivateAccess = "true") )
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "AI|Movement", meta = (AllowPrivateAccess = "true"))
 	bool bFollowPlayer{false};
 	void SetFollowPlayer(bool Value);
 	
@@ -182,8 +217,9 @@ private:
 	//Map that stores information about the opinion of other NPCs.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Opinions", meta = (AllowPrivateAccess = "true"))
 	TMap<AActor*, int32> OpinionTable;
-
 	
+	UFUNCTION(BlueprintCallable)
+	void GetGameMode();
 
 public:
 	/*******************
@@ -197,7 +233,16 @@ public:
 	FORCEINLINE bool GetCanSeeTarget() const {return bCanSeeTarget;}
 	FORCEINLINE void SetCanSeeTarget(const bool Value) {bCanSeeTarget = Value;}
 	FORCEINLINE EAIState GetLastAIState() const {return LastAIState;}
-	
+	FORCEINLINE TArray<FName>& GetRoadNames() {return RoadNames;};
+	FORCEINLINE void SetRoadNames(const TArray<FName>& InRoadNames) {RoadNames = InRoadNames;};
+	FORCEINLINE FName& GetCurrentRoadName() {return CurrentRoadName;}
+	FORCEINLINE ARoadSpline* GetCurrentRoad() const {return CurrentRoad;}
+	FORCEINLINE int32 GetCurrentRoadIndex() const {return CurrentRoadIndex;}
+	FORCEINLINE void SetCurrentRoad(ARoadSpline* InRoadSpline);
+	FORCEINLINE AActor* GetNavDestination() const {return NavDestination;}
+	FORCEINLINE void SetNavDestination(AActor* InActor) {NavDestination = InActor;}
+	FORCEINLINE void SetRoadsFound(const bool bFound) {bRoadsFound = bFound;}
+	FORCEINLINE TArray<FRoadInfo>& GetCurrentRoadInfos() {return CurrentRoadInfos;}
 
 	/***********************
 	 *	Public Variables
@@ -212,6 +257,8 @@ public:
 	UPROPERTY(EditAnywhere, Category = "AI|Dialogue")
 	int32 NPC_ID{1};
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class AAlchemyProjectGameMode* AlchemyProjectGameMode;
 
 	/***********************
 	 *	INTERFACE OVERRIDES

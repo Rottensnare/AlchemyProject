@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AlchemyProjectGameMode.h"
 #include "Alchemy/AlchemyItem.h"
 #include "Alchemy/Components/Potion/PotionComponent.h"
 #include "Alchemy/CustomStructs/NPCStructs.h"

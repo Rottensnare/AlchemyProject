@@ -3,6 +3,7 @@
 
 #include "AlchemyProject/Public/AI/AIBase.h"
 
+#include "NavigationInvokerComponent.h"
 #include "AI/BaseAIController.h"
 #include "AI/UI/SpeechWidget.h"
 #include "AI/Utility/PatrolArea.h"
@@ -26,6 +27,8 @@ AAIBase::AAIBase()
 	
 	PerceptionStimuliSourceComponent = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("PerceptionStimuliSourceComp"));
 	PerceptionStimuliSourceComponent->bAutoRegister = true;
+
+	NavigationInvokerComponent = CreateDefaultSubobject<UNavigationInvokerComponent>(TEXT("NavigationInvokerComp"));
 
 	SpeechWidgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("SpeechWidgetComp"));
 	SpeechWidgetComp->SetupAttachment(GetRootComponent());
@@ -211,6 +214,16 @@ ETeamAttitude::Type AAIBase::GetFactionAttitude(const FNPCInfo& DetectedNPCInfo)
 	
 }
 
+void AAIBase::DestinationReached()
+{
+	NavDestination = nullptr;
+	bRoadsFound = false;
+	CurrentRoad = nullptr;
+	CurrentRoadIndex = -1;
+	CurrentRoadName = NAME_None;
+	RoadNames.Empty();
+}
+
 void AAIBase::SetSpeechWidgetTimer()
 {
 	/*
@@ -282,6 +295,11 @@ void AAIBase::RemoveFromActorsOfInterest(AActor* InActor)
 	ActorsOfInterest.Remove(InActor);
 }
 
+void AAIBase::GetGameMode()
+{
+	AlchemyProjectGameMode = Cast<AAlchemyProjectGameMode>(GetWorld()->GetAuthGameMode());
+}
+
 void AAIBase::SetPlayerSeen(const bool bValue)
 {
 	bPlayerSeen = bValue;
@@ -296,6 +314,13 @@ void AAIBase::SetPlayerSeen(const bool bValue)
 		SetAIState(GetLastAIState());
 		GetCharacterMovement()->MaxWalkSpeed = PatrolMoveSpeed;
 	}
+}
+
+void AAIBase::SetCurrentRoad(ARoadSpline* InRoadSpline)
+{
+	CurrentRoad = InRoadSpline;
+	CurrentRoadIndex++;
+	if(GetRoadNames().IsValidIndex(CurrentRoadIndex)) CurrentRoadName = GetRoadNames()[CurrentRoadIndex];
 }
 
 bool AAIBase::Interact(AActor* OtherActor)
