@@ -383,7 +383,6 @@ EPhysicalSurface APlayerCharacter::GetFootStepSurfaceType()
 	const FVector Start{GetActorLocation()};
 	const FVector End{Start + FVector(0.f, 0.f, -400.f)};
 	GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECollisionChannel::ECC_Visibility, QueryParams);
-	if(HitResult.GetActor()) UE_LOG(LogTemp, Warning, TEXT("HitActor: %s"), *HitResult.GetActor()->GetName())
 	return UPhysicalMaterial::DetermineSurfaceType(HitResult.PhysMaterial.Get());
 }
 
