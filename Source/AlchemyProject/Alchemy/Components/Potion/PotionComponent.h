@@ -25,13 +25,13 @@ protected:
 	UFUNCTION()
 	virtual void ExecuteFunctionality();
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	virtual void DestroyThisComponent();
 
 	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) override;
 
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	class APlayerCharacter* CurrentCharacter;
 
 	EProductQuality ProductQuality;

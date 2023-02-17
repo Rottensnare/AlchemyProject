@@ -12,5 +12,7 @@ FNPCInfo& IBaseCharacterInfo::GetNPCInfo()
 
 EPhysicalSurface IBaseCharacterInfo::GetFootStepSurfaceType()
 {
+	
 	return EPhysicalSurface::SurfaceType1;
+	
 }
