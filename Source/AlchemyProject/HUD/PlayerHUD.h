@@ -47,6 +47,7 @@ public:
 	
 	void AddCharacterOverlay();
 
+	UFUNCTION(BlueprintCallable)
 	void UpdateHealthBar(const float InHealth, const float InMaxHealth);
 
 	

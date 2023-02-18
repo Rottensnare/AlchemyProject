@@ -62,7 +62,7 @@ protected:
 	
 private:
 	
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Components, meta = (AllowPrivateAccess = "true"))
 	class UHealthComponent* HealthComponent;
 	UPROPERTY(VisibleAnywhere)
 	class UInventoryComponent* InventoryComponent;

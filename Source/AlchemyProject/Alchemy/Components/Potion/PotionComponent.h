@@ -34,6 +34,7 @@ protected:
 	UPROPERTY(BlueprintReadWrite)
 	class APlayerCharacter* CurrentCharacter;
 
+	UPROPERTY(BlueprintReadOnly)
 	EProductQuality ProductQuality;
 
 private:
