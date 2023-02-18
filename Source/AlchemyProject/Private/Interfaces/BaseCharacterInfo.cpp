@@ -9,3 +9,10 @@ FNPCInfo& IBaseCharacterInfo::GetNPCInfo()
 	DummyNPCInfo = FNPCInfo();
 	return DummyNPCInfo;
 }
+
+EPhysicalSurface IBaseCharacterInfo::GetFootStepSurfaceType()
+{
+	
+	return EPhysicalSurface::SurfaceType1;
+	
+}

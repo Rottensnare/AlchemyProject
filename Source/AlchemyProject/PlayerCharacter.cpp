@@ -374,6 +374,18 @@ FNPCInfo& APlayerCharacter::GetNPCInfo()
 	return NPCInfo;
 }
 
+EPhysicalSurface APlayerCharacter::GetFootStepSurfaceType()
+{
+	FHitResult HitResult;
+	FCollisionQueryParams QueryParams;
+	QueryParams.bReturnPhysicalMaterial = true;
+	QueryParams.AddIgnoredActor(this);
+	const FVector Start{GetActorLocation()};
+	const FVector End{Start + FVector(0.f, 0.f, -400.f)};
+	GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECollisionChannel::ECC_Visibility, QueryParams);
+	return UPhysicalMaterial::DetermineSurfaceType(HitResult.PhysMaterial.Get());
+}
+
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {

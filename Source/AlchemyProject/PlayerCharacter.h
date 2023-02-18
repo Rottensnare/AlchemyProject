@@ -62,7 +62,7 @@ protected:
 	
 private:
 	
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Components, meta = (AllowPrivateAccess = "true"))
 	class UHealthComponent* HealthComponent;
 	UPROPERTY(VisibleAnywhere)
 	class UInventoryComponent* InventoryComponent;
@@ -153,6 +153,12 @@ public:
 	FORCEINLINE FGameplayTagContainer& GetGameplayTags() {return GameplayTags;}
 
 	virtual FNPCInfo& GetNPCInfo() override;
+
+	/* * * * * * * * * * * *
+	 *	INTERFACE OVERRIDES
+	 * * * * * * * * * * * */
+	UFUNCTION(BlueprintCallable)
+	virtual EPhysicalSurface GetFootStepSurfaceType() override;
 };
 
 

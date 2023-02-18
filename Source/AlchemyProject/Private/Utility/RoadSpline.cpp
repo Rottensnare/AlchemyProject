@@ -86,8 +86,6 @@ FActorNavPackage ARoadSpline::GetActorNavPackage(AActor* InActor)
 	// If there is a next road
 	if(BaseAI->GetRoadNames().IsValidIndex(BaseAI->GetCurrentRoadIndex() + 1 ))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("IsValidIndex(BaseAI->GetCurrentRoadIndex() + 1 )"))
-		
 		const FName TempName = BaseAI->GetRoadNames()[BaseAI->GetCurrentRoadIndex() + 1 ];
 		const FString RoadInfoTablePath(TEXT("DataTable'/Game/Assets/Datatables/RoadInfoDataTable.RoadInfoDataTable'"));
 		// ReSharper disable once CppTooWideScope
@@ -106,7 +104,6 @@ FActorNavPackage ARoadSpline::GetActorNavPackage(AActor* InActor)
 	}
 	else if(BaseAI->GetNavDestination()) // If NavDestination is valid
 	{
-		UE_LOG(LogTemp, Warning, TEXT("BaseAI->GetNavDestination()"))
 		bHasNextRoad = false;
 		FName TempName = NAME_None;
 		if(BaseAI->GetRoadNames().IsValidIndex(BaseAI->GetCurrentRoadIndex())) TempName = BaseAI->GetRoadNames()[BaseAI->GetCurrentRoadIndex()];
@@ -285,7 +282,7 @@ FVector ARoadSpline::FindNextSplinePoint(AActor* InActor, bool& bSuccess)
 		if(bNextRoad)
 		{
 			OutVector = BaseAI->GetCurrentRoad()->GetSplineComponent()->GetLocationAtSplinePoint(ActorNavPackages[BaseAI].NextRoadSplineIndex, ESplineCoordinateSpace::World);
-			UE_LOG(LogTemp, Warning, TEXT("Switching Roads: %d"), bNextRoad)
+			//UE_LOG(LogTemp, Warning, TEXT("Switching Roads: %d"), bNextRoad)
 			//Remove the actor from the maps of this road.
 			ActorNavPackages.Remove(BaseAI);
 			ActorSplineIndexMap.Remove(BaseAI);

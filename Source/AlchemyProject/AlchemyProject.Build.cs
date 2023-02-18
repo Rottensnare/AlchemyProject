@@ -8,7 +8,7 @@ public class AlchemyProject : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "HeadMountedDisplay", "UMG", "SlateCore", "Slate", "AIModule", "GameplayTasks", "NavigationSystem", "GameplayTags", "Json", "JsonUtilities" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "HeadMountedDisplay", "UMG", "SlateCore", "Slate", "AIModule", "GameplayTasks", "NavigationSystem", "GameplayTags", "Json", "JsonUtilities", "PhysicsCore" });
 		PrivateDependencyModuleNames.AddRange(new string[]{"GameplayAbilities", "ComponentVisualizers", "UnrealEd" });
 	}
 }

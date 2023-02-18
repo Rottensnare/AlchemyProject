@@ -267,6 +267,8 @@ public:
 	virtual bool Interact(AActor* OtherActor) override;
 	virtual FNPCInfo& GetNPCInfo() override;
 	virtual FGameplayTagContainer& GetGameplayTagContainer() override;
+	UFUNCTION(BlueprintCallable)
+	virtual EPhysicalSurface GetFootStepSurfaceType() override;
 };
 
 template <typename T>
