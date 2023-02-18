@@ -96,6 +96,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI", meta = (AllowPrivateAccess = "true"))
 	EAIState AIState;
 
+	//LastAIState shouldn't be an AIState that is used for combat purposes, like InCombat, Chasing, Alerted
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI", meta = (AllowPrivateAccess = "true"))
 	EAIState LastAIState;
 

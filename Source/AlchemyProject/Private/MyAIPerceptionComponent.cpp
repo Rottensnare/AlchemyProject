@@ -3,6 +3,8 @@
 
 #include "MyAIPerceptionComponent.h"
 
+#include "AI/AIBase.h"
+#include "AI/BaseAIController.h"
 #include "Perception/AISense_Hearing.h"
 #include "Perception/AISense_Sight.h"
 
@@ -20,6 +22,15 @@ void UMyAIPerceptionComponent::HandleExpiredStimulus(FAIStimulus& StimulusStore)
 			if(!OutActors.Contains(PerceivedActor))
 			{
 				UE_LOG(LogTemp, Warning, TEXT("%s stimulus expired"), *PerceivedActor->GetName())
+				ABaseAIController* BaseAIController = Cast<ABaseAIController>(GetOwner());
+				if(BaseAIController)
+				{
+					BaseAIController->SetLastStimulusType(ELastStimulusType::ELST_MAX, PerceivedActor);
+					if(BaseAIController->GetAIBase())
+					{
+						if(!LastPerceivedActors_Sight.Contains(PerceivedActor) && !LastPerceivedActors_Hearing.Contains(PerceivedActor)) BaseAIController->GetAIBase()->SetAIState(BaseAIController->GetAIBase()->GetLastAIState());
+					}
+				}
 			}
 		}
 		LastPerceivedActors_Sight = OutActors;
@@ -35,6 +46,15 @@ void UMyAIPerceptionComponent::HandleExpiredStimulus(FAIStimulus& StimulusStore)
 			if(!OutActors.Contains(PerceivedActor))
 			{
 				UE_LOG(LogTemp, Warning, TEXT("%s stimulus expired"), *PerceivedActor->GetName())
+				ABaseAIController* BaseAIController = Cast<ABaseAIController>(GetOwner());
+				if(BaseAIController)
+				{
+					BaseAIController->SetLastStimulusType(ELastStimulusType::ELST_MAX, PerceivedActor);
+					if(BaseAIController->GetAIBase())
+					{
+						if(!LastPerceivedActors_Sight.Contains(PerceivedActor) && !LastPerceivedActors_Hearing.Contains(PerceivedActor)) BaseAIController->GetAIBase()->SetAIState(BaseAIController->GetAIBase()->GetLastAIState());
+					}
+				}
 			}
 		}
 		LastPerceivedActors_Hearing = OutActors;
