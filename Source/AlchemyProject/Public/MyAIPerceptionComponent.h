@@ -22,8 +22,14 @@ public:
 	FOnSightStimulusExpired OnSightStimulusExpired;
 	FOnHearingStimulusExpired OnHearingStimulusExpired;
 
+	UPROPERTY()
+	TArray<AActor*> LastPerceivedActors_Sight;
+	UPROPERTY()
+	TArray<AActor*> LastPerceivedActors_Hearing;
+
 protected:
 
 	virtual void HandleExpiredStimulus(FAIStimulus& StimulusStore) override;
-	
+
+
 };

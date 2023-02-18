@@ -105,13 +105,13 @@ TArray<FVector>& ABaseAIController::QueryForLocations(const UEnvQuery* const InE
 {
 	FEnvQueryRequest ActorsQueryRequest = FEnvQueryRequest(InEnvQuery, InPawn);
 	int32 ExecuteCode = ActorsQueryRequest.Execute(QueryRunMode, this, &ABaseAIController::HandleQueryRequest_Locations);
-	UE_LOG(LogTemp, Warning, TEXT("QueryForLocations: %d"), ExecuteCode)
+	//UE_LOG(LogTemp, Warning, TEXT("QueryForLocations: %d"), ExecuteCode)
 	return QueryLocations;
 }
 
 void ABaseAIController::HandleQueryRequest_Locations(TSharedPtr<FEnvQueryResult> Result)
 {
-	UE_LOG(LogTemp, Warning, TEXT("HandleQueryRequest_Locations"))
+	//UE_LOG(LogTemp, Warning, TEXT("HandleQueryRequest_Locations"))
 	TArray<FVector> OutLocations;
 	if(Result->IsSuccessful())
 	{
@@ -187,7 +187,7 @@ void ABaseAIController::HandleQueryRequest(TSharedPtr<FEnvQueryResult> Result)
 		}else UE_LOG(LogTemp, Display, TEXT("OutActors was Empty"))
 	} else UE_LOG(LogTemp, Display, TEXT("Result was unsuccessful"))
 	
-	UE_LOG(LogTemp, Display, TEXT("Number of Matches: %d"), CustomAIContainer->ActorContainer.Num())
+	//UE_LOG(LogTemp, Display, TEXT("Number of Matches: %d"), CustomAIContainer->ActorContainer.Num())
 	if(BlackboardComponent) BlackboardComponent->SetValueAsObject(FName("QueryActors"), CustomAIContainer);
 	
 	TagsToBeTested = FGameplayTagContainer::EmptyContainer;
@@ -256,7 +256,7 @@ void ABaseAIController::OnTargetPerceptionUpdated_Delegate(AActor* InActor, FAIS
 {
 	//UE_LOG(LogTemp, Warning, TEXT("OnTargetPerceptionUpdated_Delegate"))
 	if(InActor == nullptr || BlackboardComponent == nullptr || AIBase == nullptr) return;
-
+	
 	ETeamAttitude::Type AttitudeType = ETeamAttitude::Neutral;
 	if(IBaseCharacterInfo* TempInterface = Cast<IBaseCharacterInfo>(InActor))
 	{
@@ -280,6 +280,7 @@ void ABaseAIController::OnTargetPerceptionUpdated_Delegate(AActor* InActor, FAIS
 				AIBase->SetCanSeeTarget(true);
 				BlackboardComponent->ClearValue(FName("PointOfInterest"));
 				BlackboardComponent->ClearValue(FName("PredictedTargetLocation"));
+				AIPerceptionComponent->LastPerceivedActors_Sight.AddUnique(InActor);
 			}
 			else
 			{
@@ -325,9 +326,10 @@ void ABaseAIController::OnTargetPerceptionUpdated_Delegate(AActor* InActor, FAIS
 			if(AIBase->GetPlayerSeen()) break;
 			if(Stimulus.WasSuccessfullySensed())
 			{
-				AIBase->SetAIState(EAIState::EAIS_Alerted);
+				if(AIBase->GetAIState() != EAIState::EAIS_Chasing) AIBase->SetAIState(EAIState::EAIS_Alerted);
 				AIBase->ToggleSpeechWidget("Herd sum ting");
 				BlackboardComponent->SetValueAsVector(FName("PointOfInterest"), Stimulus.StimulusLocation);
+				AIPerceptionComponent->LastPerceivedActors_Hearing.AddUnique(InActor);
 			}
 			//UE_LOG(LogTemp, Warning, TEXT("Heard sum ting"))
 		}
@@ -347,7 +349,8 @@ void ABaseAIController::OnTargetPerceptionUpdated_Delegate(AActor* InActor, FAIS
 
 void ABaseAIController::OnTargetPerceptionInfoUpdated_Delegate(const FActorPerceptionUpdateInfo& UpdateInfo)
 {
-	//UE_LOG(LogTemp, Warning, TEXT("OnTargetPerceptionInfoUpdated_Delegate"))
+	
+	
 }
 
 void ABaseAIController::OnSightStimulusExpired_Delegate()
