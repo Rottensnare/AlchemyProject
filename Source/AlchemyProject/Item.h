@@ -85,6 +85,11 @@ protected:
 
 	bool bShouldInitGameplayTags{true};
 
+	UFUNCTION()
+	void OnComponentWake_Delegate(UPrimitiveComponent* WakingComponent, FName BoneName);
+	UFUNCTION()
+	void OnComponentSleep_Delegate(UPrimitiveComponent* SleepingComponent, FName BoneName);
+
 private:
 
 

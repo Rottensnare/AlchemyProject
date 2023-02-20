@@ -264,6 +264,16 @@ void AAIBase::OnESPEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* 
 	bESPOverlapping = false;
 }
 
+void AAIBase::CalculateAbility()
+{
+	
+}
+
+void AAIBase::Attack()
+{
+	
+}
+
 void AAIBase::SetFollowPlayer(bool Value)
 {
 	bFollowPlayer = Value;

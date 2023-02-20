@@ -32,10 +32,19 @@ void UTestHealthPotion::ExecuteFunctionality()
 	CurrentCharacter = CurrentCharacter == nullptr ? Cast<APlayerCharacter>(GetOwner()) : CurrentCharacter;
 	if(CurrentCharacter)
 	{
+		float HealthToAdd = 0.f;
+		if(QualityCurve)
+		{
+			HealthToAdd = QualityCurve->GetFloatValue(static_cast<uint8>(ProductQuality));
+		}
+		else
+		{
+			HealthToAdd = FMath::Clamp(InstantHealAmount * ((1 + (0.5f * static_cast<uint8>(ProductQuality)))), 0, 10000);
+		}
 		//Heal Player
 		CurrentCharacter->GetHealthComponent()->SetHealth(
 		FMath::Clamp(
-			CurrentCharacter->GetHealthComponent()->GetHealth() + FMath::Clamp(InstantHealAmount * ((1 + (0.5f * (uint8)ProductQuality))), 0, 10000)
+			CurrentCharacter->GetHealthComponent()->GetHealth() + HealthToAdd
 			, 0.f
 			, CurrentCharacter->GetHealthComponent()->GetMaxHealth()));
 

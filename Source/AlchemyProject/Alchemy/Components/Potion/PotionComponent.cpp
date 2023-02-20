@@ -17,9 +17,9 @@ UPotionComponent::UPotionComponent()
 
 void UPotionComponent::BeginPlay()
 {
-	Super::BeginPlay();
-
+	if(QualityCurve == nullptr) QualityCurve = GetCurveFromDataTable();
 	
+	Super::BeginPlay();
 }
 
 void UPotionComponent::ExecuteFunctionality()
@@ -41,6 +41,18 @@ void UPotionComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 	}
 	
 	Super::OnComponentDestroyed(bDestroyingHierarchy);
+}
+
+UCurveFloat* UPotionComponent::GetCurveFromDataTable()
+{
+	static const FString PathName = TEXT("DataTable'/Game/Assets/Datatables/PotionQualityTable.PotionQualityTable'");
+	const UDataTable* PotionDataTable = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, *PathName));
+	if(PotionDataTable)
+	{
+		const FQualityCurve* TempQualityCurve = PotionDataTable->FindRow<FQualityCurve>(PotionName, "");
+		if(TempQualityCurve) return TempQualityCurve->FloatCurve;
+	}
+	return nullptr;
 }
 
 

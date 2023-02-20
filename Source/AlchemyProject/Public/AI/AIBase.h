@@ -107,7 +107,7 @@ protected:
 	FNPCInfo NPCInfo;
 
 	
-	/** NAVIGATION */
+	/** CATEGORY NAVIGATION */
 	
 	//Current road names that the AI will follow
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Utility", meta = (AllowPrivateAccess = "true"))
@@ -160,6 +160,13 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	bool bESPOverlapping{false};
+
+	/* CATEGORY COMBAT */
+
+	UFUNCTION(BlueprintCallable)
+	virtual void CalculateAbility();
+	UFUNCTION(BlueprintCallable)
+	virtual void Attack();
 	
 private:	
 

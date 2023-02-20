@@ -24,6 +24,7 @@ AItem::AItem()
 	ItemPopUp->SetWidgetClass(PopupClass.Class);
 	ItemPopUp->SetDrawSize(FVector2D(400.f, 200.f));
 	ItemPopUp->SetWidgetSpace(EWidgetSpace::Screen);
+	ItemMesh->bTraceComplexOnMove = true;
 	
 }
 
@@ -32,6 +33,8 @@ void AItem::BeginPlay()
 	Super::BeginPlay();
 
 	ItemPopUp->SetVisibility(false);
+	ItemMesh->OnComponentWake.AddDynamic(this, &ThisClass::OnComponentWake_Delegate);
+	ItemMesh->OnComponentSleep.AddDynamic(this, &ThisClass::OnComponentSleep_Delegate);
 
 	FTimerDelegate TimerDelegate2;
 	TimerDelegate2.BindUFunction(this, FName("UpdatePopUp"));
@@ -61,6 +64,17 @@ void AItem::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 
 	
 	Super::PostEditChangeProperty(PropertyChangedEvent);
+}
+
+void AItem::OnComponentWake_Delegate(UPrimitiveComponent* WakingComponent,
+	FName BoneName)
+{
+	if(ItemMesh) ItemMesh->SetUseCCD(true);
+}
+
+void AItem::OnComponentSleep_Delegate(UPrimitiveComponent* SleepingComponent, FName BoneName)
+{
+	if(ItemMesh) ItemMesh->SetUseCCD(false);
 }
 
 FGameplayTagContainer& AItem::GetGameplayTagContainer()
