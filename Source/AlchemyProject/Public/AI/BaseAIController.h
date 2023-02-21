@@ -123,6 +123,7 @@ protected:
 	FGameplayTagContainer TagsToBeTested;
 	EQueryType CurrentQueryType;
 
+	// Used for containing actors that are queried. Used as a blackboard value.
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	class UCustomAIContainer* CustomAIContainer;
 
@@ -139,12 +140,13 @@ private:
 	float PeripheralVisionAngle{73.f};
 	
 	float CheckStimulusTimer{0.f};
-	
+
+	//TODO: Move these to the AI class. Probably shouldn't be in the controller. Different AIs should have different values.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Perception|Values", meta = (AllowPrivateAccess = "true"))
-	float MaxAgeSight{30.f};
+	float MaxAgeSight{90.f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Perception|Values", meta = (AllowPrivateAccess = "true"))
-	float MaxAgeHearing{30.f};
+	float MaxAgeHearing{60.f};
 
 	bool bHearingStimulusHasUpdated{true};
 	

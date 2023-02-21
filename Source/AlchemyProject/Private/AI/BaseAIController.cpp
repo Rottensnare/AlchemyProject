@@ -53,7 +53,7 @@ ABaseAIController::ABaseAIController(const FObjectInitializer& ObjectInitializer
 	TeamAttitudeMap_Hearing.Emplace(ETeamAttitude::Neutral, true);
 
 	SenseConfig_Prediction = CreateDefaultSubobject<UAISenseConfig_Prediction>(TEXT("SenseConfig_Prediction"));
-	SenseConfig_Prediction->SetMaxAge(10.f);
+	SenseConfig_Prediction->SetMaxAge(30.f);
 
 	AIPerceptionComponent->ConfigureSense(*SenseConfig_Sight);
 	AIPerceptionComponent->ConfigureSense(*SenseConfig_Hearing);
@@ -71,8 +71,8 @@ void ABaseAIController::BeginPlay()
 	AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &ABaseAIController::OnTargetPerceptionUpdated_Delegate);
 	AIPerceptionComponent->OnPerceptionUpdated.AddDynamic(this, &ABaseAIController::OnPerceptionUpdated_Delegate);
 	AIPerceptionComponent->OnTargetPerceptionInfoUpdated.AddDynamic(this, &ThisClass::OnTargetPerceptionInfoUpdated_Delegate);
-	AIPerceptionComponent->OnSightStimulusExpired.AddDynamic(this, &ABaseAIController::OnSightStimulusExpired_Delegate);
-	AIPerceptionComponent->OnHearingStimulusExpired.AddDynamic(this, &ABaseAIController::OnHearingStimulusExpired_Delegate);
+	//AIPerceptionComponent->OnSightStimulusExpired.AddDynamic(this, &ABaseAIController::OnSightStimulusExpired_Delegate);
+	//AIPerceptionComponent->OnHearingStimulusExpired.AddDynamic(this, &ABaseAIController::OnHearingStimulusExpired_Delegate);
 	
 	AIBase = Cast<AAIBase>(GetPawn());
 
@@ -371,7 +371,10 @@ void ABaseAIController::OnTargetPerceptionUpdated_Delegate(AActor* InActor, FAIS
 			{
 				if(AIBase->GetPlayerSeen() == false)
 				{
-					if(AIBase->GetAIState() != EAIState::EAIS_Chasing) AIBase->SetAIState(EAIState::EAIS_Alerted);
+					if(AIBase->GetAIState() != EAIState::EAIS_Chasing ||
+						AIBase->GetAIState() != EAIState::EAIS_InCombat ||
+						AIBase->GetAIState() != EAIState::EAIS_Dead) AIBase->SetAIState(EAIState::EAIS_Alerted);
+					
 					AIBase->ToggleSpeechWidget("Herd sum ting");
 					BlackboardComponent->SetValueAsVector(FName("PointOfInterest"), Stimulus.StimulusLocation);
 					AIPerceptionComponent->LastPerceivedActors_Hearing.AddUnique(InActor);
@@ -413,7 +416,7 @@ void ABaseAIController::OnSightStimulusExpired_Delegate()
 	BlackboardComponent->SetValueAsBool(FName("PlayerSeen"), false);
 	AIBase->SetPlayerSeen(false);
 	AIBase->ToggleSpeechWidget("Target got away.");
-	AIBase->SetAIState(AIBase->GetLastAIState()); //TODO: Need to make this the state the AI was before the chain of events.
+	AIBase->SetAIState(AIBase->GetLastAIState());
 }
 
 void ABaseAIController::OnHearingStimulusExpired_Delegate()

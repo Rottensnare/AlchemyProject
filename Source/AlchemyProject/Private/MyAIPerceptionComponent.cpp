@@ -14,10 +14,10 @@ void UMyAIPerceptionComponent::HandleExpiredStimulus(FAIStimulus& StimulusStore)
 	
 	if(StimulusStore.Type.Name.ToString().Contains("Sight"))
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Sight Exprired"))
+		UE_LOG(LogTemp, Warning, TEXT("Sight Exprired"))
 		//GetCurrentlyPerceivedActors(UAISense_Sight::StaticClass(), OutActors);
 		GetKnownPerceivedActors(UAISense_Sight::StaticClass(), OutActors);
-		for(const AActor* const PerceivedActor : LastPerceivedActors_Sight)
+		for(AActor* const PerceivedActor : LastPerceivedActors_Sight)
 		{
 			if(!OutActors.Contains(PerceivedActor))
 			{
@@ -28,7 +28,19 @@ void UMyAIPerceptionComponent::HandleExpiredStimulus(FAIStimulus& StimulusStore)
 					BaseAIController->SetLastStimulusType(ELastStimulusType::ELST_MAX, PerceivedActor);
 					if(BaseAIController->GetAIBase())
 					{
-						if(!LastPerceivedActors_Sight.Contains(PerceivedActor) && !LastPerceivedActors_Hearing.Contains(PerceivedActor)) BaseAIController->GetAIBase()->SetAIState(BaseAIController->GetAIBase()->GetLastAIState());
+						if(!LastPerceivedActors_Hearing.Contains(PerceivedActor))
+						{
+							//BaseAIController->GetAIBase()->SetAIState(BaseAIController->GetAIBase()->GetLastAIState());
+							ETeamAttitude::Type AttitudeType = ETeamAttitude::Neutral;
+							if(IBaseCharacterInfo* CharacterInterface = Cast<IBaseCharacterInfo>(PerceivedActor))
+							{
+								AttitudeType = BaseAIController->GetAIBase()->GetFactionAttitude(CharacterInterface->GetNPCInfo());
+							}
+							if(AttitudeType == ETeamAttitude::Hostile)
+							{
+								BaseAIController->OnSightStimulusExpired_Delegate();
+							}
+						}
 					}
 				}
 			}
@@ -38,10 +50,10 @@ void UMyAIPerceptionComponent::HandleExpiredStimulus(FAIStimulus& StimulusStore)
 	}
 	else if(StimulusStore.Type.Name.ToString().Contains("Hearing"))
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Hearing Exprired"))
+		UE_LOG(LogTemp, Warning, TEXT("Hearing Exprired"))
 		//GetCurrentlyPerceivedActors(UAISense_Hearing::StaticClass(), OutActors);
 		GetKnownPerceivedActors(UAISense_Hearing::StaticClass(), OutActors);
-		for(const AActor* const PerceivedActor : LastPerceivedActors_Hearing)
+		for(AActor* const PerceivedActor : LastPerceivedActors_Hearing)
 		{
 			if(!OutActors.Contains(PerceivedActor))
 			{
@@ -52,7 +64,19 @@ void UMyAIPerceptionComponent::HandleExpiredStimulus(FAIStimulus& StimulusStore)
 					BaseAIController->SetLastStimulusType(ELastStimulusType::ELST_MAX, PerceivedActor);
 					if(BaseAIController->GetAIBase())
 					{
-						if(!LastPerceivedActors_Sight.Contains(PerceivedActor) && !LastPerceivedActors_Hearing.Contains(PerceivedActor)) BaseAIController->GetAIBase()->SetAIState(BaseAIController->GetAIBase()->GetLastAIState());
+						if(!LastPerceivedActors_Sight.Contains(PerceivedActor))
+						{
+							//BaseAIController->GetAIBase()->SetAIState(BaseAIController->GetAIBase()->GetLastAIState());
+							ETeamAttitude::Type AttitudeType = ETeamAttitude::Neutral;
+							if(IBaseCharacterInfo* CharacterInterface = Cast<IBaseCharacterInfo>(PerceivedActor))
+							{
+								AttitudeType = BaseAIController->GetAIBase()->GetFactionAttitude(CharacterInterface->GetNPCInfo());
+							}
+							if(AttitudeType == ETeamAttitude::Hostile)
+							{
+								BaseAIController->OnHearingStimulusExpired_Delegate();
+							}
+						}
 					}
 				}
 			}
