@@ -13,6 +13,7 @@
 #include "Engine/DataTable.h"
 #include "EnvironmentQuery/EnvQuery.h"
 #include "EnvironmentQuery/EnvQueryManager.h"
+#include "EnvironmentQuery/EnvQueryOption.h"
 #include "Kismet/GameplayStatics.h"
 #include "Navigation/CrowdFollowingComponent.h"
 #include "Perception/AIPerceptionComponent.h"
@@ -103,10 +104,19 @@ void ABaseAIController::Tick(float DeltaSeconds)
 
 TArray<FVector>& ABaseAIController::QueryForLocations(const UEnvQuery* const InEnvQuery, APawn* InPawn, EEnvQueryRunMode::Type QueryRunMode)
 {
+	QueryLocations.Empty();
+	
+	if(InEnvQuery == nullptr || InPawn == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("QueryForLocations: InEnvQuery or InPawn was nullptr"))
+		return QueryLocations;
+	}
 	FEnvQueryRequest ActorsQueryRequest = FEnvQueryRequest(InEnvQuery, InPawn);
-	int32 ExecuteCode = ActorsQueryRequest.Execute(QueryRunMode, this, &ABaseAIController::HandleQueryRequest_Locations);
+	const int32 ExecuteCode = ActorsQueryRequest.Execute(QueryRunMode, this, &ABaseAIController::HandleQueryRequest_Locations);
 	//UE_LOG(LogTemp, Warning, TEXT("QueryForLocations: %d"), ExecuteCode)
 	return QueryLocations;
+
+	
 }
 
 void ABaseAIController::HandleQueryRequest_Locations(TSharedPtr<FEnvQueryResult> Result)
