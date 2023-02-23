@@ -130,7 +130,7 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Custom Movement")
 	bool bSprinting{true};
 
-	/** Perception */
+	/** CATEGORY Perception */
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Perception|Components", meta = (AllowPrivateAccess = "true"))
 	class UAIPerceptionStimuliSourceComponent* PerceptionStimuliSourceComponent;
@@ -138,6 +138,34 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	FGameplayTagContainer GameplayTags;
 
+	/** CATEGORY Navigation */
+
+	//NOTE: When jumping, a smart link is placed from jump start to jump end
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Custom", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class ADynamicNavLinkProxy> NavLinkProxyClass;
+
+	//TODO: Switch to TQueue for pooling purposes
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Custom", meta = (AllowPrivateAccess = "true"))
+	TArray<TObjectPtr<ADynamicNavLinkProxy>> CurrentNavLinkProxies;
+
+	//Saved so that it can be used when Landed function is executed.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<ADynamicNavLinkProxy> CurrentNavProxy;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom", meta = (AllowPrivateAccess = "true"))
+	int32 MaxNavLinkCount{10};
+
+	//Point link vertical offset from the actor location. Felt like the actor location on its own was too high.
+	UPROPERTY(EditAnywhere)
+	FVector PointLinkOffset{FVector(0.f, 0.f, 40.f)};
+
+	virtual void OnJumped_Implementation() override;
+
+	virtual void Landed(const FHitResult& Hit) override;
+
+	UPROPERTY(EditDefaultsOnly)
+	bool bDebugging{false};
 
 public:
 	

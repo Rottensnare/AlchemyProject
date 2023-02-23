@@ -6,6 +6,8 @@
 #include "HealthComponent.h"
 #include "InventoryComponent.h"
 #include "Item.h"
+#include "NavigationSystem.h"
+#include "NavLinkCustomComponent.h"
 #include "AI/AIBase.h"
 #include "Alchemy/Potion.h"
 #include "Camera/CameraComponent.h"
@@ -21,6 +23,7 @@
 #include "Perception/AISense_Sight.h"
 #include "PlayerController/MyPlayerController.h"
 #include "Utility/CharacterData.h"
+#include "Utility/DynamicNavLinkProxy.h"
 
 
 // Sets default values
@@ -367,6 +370,77 @@ void APlayerCharacter::HUDInitTimerFinished()
 			MyPlayerController->SetInventoryGrid(InventoryComponent->NumberOfInventorySlots);
 		}
 	}
+}
+
+void APlayerCharacter::OnJumped_Implementation()
+{
+	if(CurrentNavLinkProxies.Num() < MaxNavLinkCount && NavLinkProxyClass != nullptr)
+	{
+		ADynamicNavLinkProxy* NavProxy = NewObject<ADynamicNavLinkProxy>(this, NavLinkProxyClass, NAME_None, RF_Transient);
+		if(NavProxy)
+		{
+			CurrentNavProxy = NavProxy;
+
+			for(FNavigationLink& NavLink : CurrentNavProxy->PointLinks)
+			{
+				NavLink.Left = GetActorLocation() - PointLinkOffset;
+				NavLink.Right = GetActorLocation() - PointLinkOffset;
+				NavLink.Direction = ENavLinkDirection::LeftToRight;
+				if(bDebugging)
+				{
+					DrawDebugBox(GetWorld(), NavLink.Left, FVector(5.f), FColor::Red, false, 10.f, 0, 1);
+				}
+			}
+			CurrentNavProxy.Get()->GetSmartLinkComp()->SetLinkData(
+				GetActorLocation(),
+				GetActorLocation(),
+				ENavLinkDirection::LeftToRight);
+
+			
+			CurrentNavProxy->bSmartLinkIsRelevant = true;
+			CurrentNavProxy->SetSmartLinkEnabled(true);
+			
+			CurrentNavLinkProxies.Add(CurrentNavProxy);
+
+			
+			
+		}
+		
+	}
+	
+	Super::OnJumped_Implementation();
+}
+
+void APlayerCharacter::Landed(const FHitResult& Hit)
+{
+	if(CurrentNavProxy)
+	{
+		for(FNavigationLink& NavLink : CurrentNavProxy->PointLinks)
+		{
+			NavLink.Right = GetActorLocation() - PointLinkOffset;
+			if(bDebugging)
+			{
+				DrawDebugBox(GetWorld(), NavLink.Right, FVector(5.f), FColor::Red, false, 10.f, 0, 1);
+			}
+		}
+		
+		CurrentNavProxy->CopyEndPointsFromSimpleLinkToSmartLink();
+		CurrentNavProxy->bSmartLinkIsRelevant = true;
+		CurrentNavProxy->SetSmartLinkEnabled(true);
+
+		UNavigationSystemV1* NavSys = UNavigationSystemV1::GetCurrent(GetWorld());
+		if(NavSys)
+		{
+			if(INavRelevantInterface* NavRelevantInterface = Cast<INavRelevantInterface>(CurrentNavProxy))
+			{
+				NavSys->UpdateNavOctreeElement(CurrentNavProxy, NavRelevantInterface, FNavigationOctreeController::OctreeUpdate_Default);
+			}
+		}
+	}
+	
+	CurrentNavProxy = nullptr;
+	
+	Super::Landed(Hit);
 }
 
 FNPCInfo& APlayerCharacter::GetNPCInfo()
