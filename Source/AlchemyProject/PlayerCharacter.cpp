@@ -374,9 +374,20 @@ void APlayerCharacter::HUDInitTimerFinished()
 
 void APlayerCharacter::OnJumped_Implementation()
 {
-	if(CurrentNavLinkProxies.Num() < MaxNavLinkCount && NavLinkProxyClass != nullptr)
+	if(NavLinkProxyClass != nullptr)
 	{
-		ADynamicNavLinkProxy* NavProxy = NewObject<ADynamicNavLinkProxy>(this, NavLinkProxyClass, NAME_None, RF_Transient);
+		ADynamicNavLinkProxy* NavProxy;
+		if(CurrentNavLinkProxies.Num() < MaxNavLinkCount)
+		{
+			NavProxy = NewObject<ADynamicNavLinkProxy>(this, NavLinkProxyClass, NAME_None, RF_Transient);
+		}
+		else
+		{
+			NavProxy = CurrentNavLinkProxies[CurrentNavLinkID];
+		}
+
+		CurrentNavLinkID = (CurrentNavLinkID + 1 ) % MaxNavLinkCount;
+		
 		if(NavProxy)
 		{
 			CurrentNavProxy = NavProxy;

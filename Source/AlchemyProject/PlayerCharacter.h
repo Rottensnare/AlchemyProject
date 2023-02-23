@@ -149,6 +149,8 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Custom", meta = (AllowPrivateAccess = "true"))
 	TArray<TObjectPtr<ADynamicNavLinkProxy>> CurrentNavLinkProxies;
 
+	int32 CurrentNavLinkID = 0;
+
 	//Saved so that it can be used when Landed function is executed.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<ADynamicNavLinkProxy> CurrentNavProxy;
@@ -164,6 +166,8 @@ private:
 
 	virtual void Landed(const FHitResult& Hit) override;
 
+
+	
 	UPROPERTY(EditDefaultsOnly)
 	bool bDebugging{false};
 
