@@ -389,6 +389,7 @@ void APlayerCharacter::OnJumped_Implementation()
 		}
 		else
 		{
+			checkf(CurrentNavLinkProxies.IsValidIndex(CurrentNavLinkID), TEXT("Should always be valid"))
 			NavProxy = CurrentNavLinkProxies[CurrentNavLinkID];
 		}
 
@@ -397,7 +398,8 @@ void APlayerCharacter::OnJumped_Implementation()
 		if(NavProxy)
 		{
 			CurrentNavProxy = NavProxy;
-
+			CurrentNavProxy->SetActorLocation(GetActorLocation());
+			
 			for(FNavigationLink& NavLink : CurrentNavProxy->PointLinks)
 			{
 				FTransform ActorTransform = CurrentNavProxy->GetTransform();
@@ -417,7 +419,7 @@ void APlayerCharacter::OnJumped_Implementation()
 			CurrentNavProxy->bSmartLinkIsRelevant = true;
 			CurrentNavProxy->SetSmartLinkEnabled(true);
 			
-			CurrentNavLinkProxies.Add(CurrentNavProxy);
+			if(CurrentNavLinkProxies.Num() < MaxNavLinkCount) CurrentNavLinkProxies.Add(CurrentNavProxy);
 		}
 		
 	}
@@ -452,6 +454,12 @@ void APlayerCharacter::Landed(const FHitResult& Hit)
 			}
 		}
 		
+		//Making sure that the AI only uses smart link if the player jumped. This is to prevent the AI from falling off places on accident.
+		for(FNavigationLink& NavLink : CurrentNavProxy->PointLinks)
+		{
+			NavLink.Left = FVector(0.f);
+			NavLink.Right = FVector(0.f);
+		}
 	}
 	
 	CurrentNavProxy = nullptr;
