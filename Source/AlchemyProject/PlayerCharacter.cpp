@@ -389,7 +389,7 @@ void APlayerCharacter::OnJumped_Implementation()
 		}
 		else
 		{
-			checkf(CurrentNavLinkProxies.IsValidIndex(CurrentNavLinkID), TEXT("Should always be valid"))
+			checkf(CurrentNavLinkProxies.IsValidIndex(CurrentNavLinkID), TEXT("CurrentNavLinkID should always be valid"))
 			NavProxy = CurrentNavLinkProxies[CurrentNavLinkID];
 		}
 
@@ -404,22 +404,21 @@ void APlayerCharacter::OnJumped_Implementation()
 			{
 				FTransform ActorTransform = CurrentNavProxy->GetTransform();
 				NavLink.Left = ActorTransform.InverseTransformPosition(GetActorLocation()) - PointLinkOffset;
-				NavLink.Right = ActorTransform.InverseTransformPosition(GetActorLocation()) - PointLinkOffset;
+				NavLink.Right = ActorTransform.InverseTransformPosition(GetActorLocation()) - PointLinkOffset + FVector(100.f, 50.f, 0.f);
 				NavLink.Direction = ENavLinkDirection::BothWays;
 				if(bDebugging)
 				{
 					DrawDebugBox(GetWorld(), GetActorLocation() - PointLinkOffset, FVector(5.f), FColor::Red, false, 10.f, 0, 1);
 				}
 			}
-			CurrentNavProxy.Get()->GetSmartLinkComp()->SetLinkData(
-				GetActorLocation(),
-				GetActorLocation(),
-				ENavLinkDirection::BothWays);
+
+			CurrentNavProxy->CopyEndPointsFromSimpleLinkToSmartLink();
 			
 			CurrentNavProxy->bSmartLinkIsRelevant = true;
 			CurrentNavProxy->SetSmartLinkEnabled(true);
 			
 			if(CurrentNavLinkProxies.Num() < MaxNavLinkCount) CurrentNavLinkProxies.Add(CurrentNavProxy);
+			
 		}
 		
 	}
@@ -457,8 +456,9 @@ void APlayerCharacter::Landed(const FHitResult& Hit)
 		//Making sure that the AI only uses smart link if the player jumped. This is to prevent the AI from falling off places on accident.
 		for(FNavigationLink& NavLink : CurrentNavProxy->PointLinks)
 		{
-			NavLink.Left = FVector(0.f);
-			NavLink.Right = FVector(0.f);
+			FTransform ActorTransform = CurrentNavProxy->GetTransform();
+			NavLink.Left = ActorTransform.InverseTransformVector(FVector(10.f));
+			NavLink.Right = ActorTransform.InverseTransformVector(FVector(200.f));
 		}
 	}
 	
