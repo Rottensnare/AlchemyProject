@@ -10,10 +10,16 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(BlueprintType, Blueprintable)
 class ALCHEMYPROJECT_API ADynamicNavLinkProxy : public ANavLinkProxy, public INavLinkCustomInterface
 {
 	GENERATED_BODY()
 
-	
+public:
+
+	//virtual void BeginPlay() override;
+
+protected:
+
+	//void OnNavLinkReach_Delegate( AActor* MovingActor, const FVector& DestinationPoint);
 };

@@ -379,7 +379,13 @@ void APlayerCharacter::OnJumped_Implementation()
 		ADynamicNavLinkProxy* NavProxy;
 		if(CurrentNavLinkProxies.Num() < MaxNavLinkCount)
 		{
-			NavProxy = NewObject<ADynamicNavLinkProxy>(this, NavLinkProxyClass, NAME_None, RF_Transient);
+			FActorSpawnParameters ActorSpawnParameters;
+			ActorSpawnParameters.bNoFail = true;
+			ActorSpawnParameters.ObjectFlags = RF_Transient;
+			const FVector SpawnLocation = GetActorLocation();
+			const FRotator SpawnRotation = FRotator::ZeroRotator;
+	
+			NavProxy = Cast<ADynamicNavLinkProxy>(GetWorld()->SpawnActor(NavLinkProxyClass, &SpawnLocation, &SpawnRotation, ActorSpawnParameters));
 		}
 		else
 		{
@@ -394,27 +400,24 @@ void APlayerCharacter::OnJumped_Implementation()
 
 			for(FNavigationLink& NavLink : CurrentNavProxy->PointLinks)
 			{
-				NavLink.Left = GetActorLocation() - PointLinkOffset;
-				NavLink.Right = GetActorLocation() - PointLinkOffset;
-				NavLink.Direction = ENavLinkDirection::LeftToRight;
+				FTransform ActorTransform = CurrentNavProxy->GetTransform();
+				NavLink.Left = ActorTransform.InverseTransformPosition(GetActorLocation()) - PointLinkOffset;
+				NavLink.Right = ActorTransform.InverseTransformPosition(GetActorLocation()) - PointLinkOffset;
+				NavLink.Direction = ENavLinkDirection::BothWays;
 				if(bDebugging)
 				{
-					DrawDebugBox(GetWorld(), NavLink.Left, FVector(5.f), FColor::Red, false, 10.f, 0, 1);
+					DrawDebugBox(GetWorld(), GetActorLocation() - PointLinkOffset, FVector(5.f), FColor::Red, false, 10.f, 0, 1);
 				}
 			}
 			CurrentNavProxy.Get()->GetSmartLinkComp()->SetLinkData(
 				GetActorLocation(),
 				GetActorLocation(),
-				ENavLinkDirection::LeftToRight);
-
+				ENavLinkDirection::BothWays);
 			
 			CurrentNavProxy->bSmartLinkIsRelevant = true;
 			CurrentNavProxy->SetSmartLinkEnabled(true);
 			
 			CurrentNavLinkProxies.Add(CurrentNavProxy);
-
-			
-			
 		}
 		
 	}
@@ -428,10 +431,11 @@ void APlayerCharacter::Landed(const FHitResult& Hit)
 	{
 		for(FNavigationLink& NavLink : CurrentNavProxy->PointLinks)
 		{
-			NavLink.Right = GetActorLocation() - PointLinkOffset;
+			FTransform ActorTransform = CurrentNavProxy->GetTransform();
+			NavLink.Right = ActorTransform.InverseTransformPosition(GetActorLocation()) - PointLinkOffset;
 			if(bDebugging)
 			{
-				DrawDebugBox(GetWorld(), NavLink.Right, FVector(5.f), FColor::Red, false, 10.f, 0, 1);
+				DrawDebugBox(GetWorld(), GetActorLocation() - PointLinkOffset, FVector(5.f), FColor::Red, false, 10.f, 0, 1);
 			}
 		}
 		
@@ -447,6 +451,7 @@ void APlayerCharacter::Landed(const FHitResult& Hit)
 				NavSys->UpdateNavOctreeElement(CurrentNavProxy, NavRelevantInterface, FNavigationOctreeController::OctreeUpdate_Default);
 			}
 		}
+		
 	}
 	
 	CurrentNavProxy = nullptr;

@@ -144,8 +144,7 @@ private:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Custom", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<class ADynamicNavLinkProxy> NavLinkProxyClass;
-
-	//TODO: Switch to TQueue for pooling purposes
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Custom", meta = (AllowPrivateAccess = "true"))
 	TArray<TObjectPtr<ADynamicNavLinkProxy>> CurrentNavLinkProxies;
 
