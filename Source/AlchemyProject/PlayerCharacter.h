@@ -161,6 +161,18 @@ private:
 	UPROPERTY(EditAnywhere)
 	FVector PointLinkOffset{FVector(0.f, 0.f, 40.f)};
 
+	// This is used to find a random point on the navmesh. Used for making sure that there is a valid point for the nav link points,
+	// and for adjusting the location.
+	UPROPERTY(EditAnywhere)
+	float NavLinkRndRadius{40.f};
+
+	//If NavLocation is generated to a place too much below the actor location find another random location.
+	UPROPERTY(EditAnywhere)
+	float NavDistanceTolerance{200.f};
+
+	//Checks if the NavLocation is close enough to the characters feet. Tries to adjusts the location if not. 
+	void ValidateNavLocation(const class UNavigationSystemV1* const NavSys, FNavLocation& NavLocation) const;
+
 	virtual void OnJumped_Implementation() override;
 
 	virtual void Landed(const FHitResult& Hit) override;
