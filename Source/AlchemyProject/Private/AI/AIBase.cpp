@@ -138,6 +138,7 @@ bool AAIBase::FindNextPatrolPoint()
 {
 	if(PatrolArea && AIController && AIController->GetBlackboardComponent())
 	{
+		// Original position is not currently used and should be reworked. This is not the intended use.
 		AIController->GetBlackboardComponent()->SetValueAsVector(FName("OriginalPosition"), GetActorLocation());
 		PointOfInterest = PatrolArea->GetRandomPatrolCoordinates();
 		if(PointOfInterest != FVector())

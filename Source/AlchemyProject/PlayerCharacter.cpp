@@ -444,9 +444,9 @@ void APlayerCharacter::OnJumped_Implementation()
 					
 					if(bDebugging)
 					{
-						DrawDebugBox(GetWorld(), GetActorLocation() - FVector(0.f,0.f,GetCapsuleComponent()->GetScaledCapsuleHalfHeight()), FVector(5.f), FColor::Yellow, false, 10.f, 0, 1);
-						DrawDebugBox(GetWorld(), GetActorLocation() - PointLinkOffset, FVector(5.f), FColor::Red, false, 10.f, 0, 1);
-						DrawDebugBox(GetWorld(), NavLocation.Location, FVector(5.f), FColor::Green, false, 10.f, 0, 1);
+						//DrawDebugBox(GetWorld(), GetActorLocation() - FVector(0.f,0.f,GetCapsuleComponent()->GetScaledCapsuleHalfHeight()), FVector(5.f), FColor::Yellow, false, 10.f, 0, 1);
+						//DrawDebugBox(GetWorld(), GetActorLocation() - PointLinkOffset, FVector(5.f), FColor::Red, false, 10.f, 0, 1);
+						//DrawDebugBox(GetWorld(), NavLocation.Location, FVector(5.f), FColor::Green, false, 10.f, 0, 1);
 						DrawDebugBox(GetWorld(), NavLocation.Location - PointLinkOffset, FVector(5.f), FColor::Cyan, false, 10.f, 0, 1);
 					}
 				}
@@ -500,9 +500,9 @@ void APlayerCharacter::Landed(const FHitResult& Hit)
 				
 				if(bDebugging)
 				{
-					DrawDebugBox(GetWorld(), GetActorLocation() - FVector(0.f,0.f,GetCapsuleComponent()->GetScaledCapsuleHalfHeight()), FVector(5.f), FColor::Yellow, false, 10.f, 0, 1);
-					DrawDebugBox(GetWorld(), GetActorLocation() - PointLinkOffset, FVector(5.f), FColor::Red, false, 10.f, 0, 1);
-					DrawDebugBox(GetWorld(), NavLocation.Location, FVector(5.f), FColor::Green, false, 10.f, 0, 1);
+					//DrawDebugBox(GetWorld(), GetActorLocation() - FVector(0.f,0.f,GetCapsuleComponent()->GetScaledCapsuleHalfHeight()), FVector(5.f), FColor::Yellow, false, 10.f, 0, 1);
+					//DrawDebugBox(GetWorld(), GetActorLocation() - PointLinkOffset, FVector(5.f), FColor::Red, false, 10.f, 0, 1);
+					//DrawDebugBox(GetWorld(), NavLocation.Location, FVector(5.f), FColor::Green, false, 10.f, 0, 1);
 					DrawDebugBox(GetWorld(), NavLocation.Location - PointLinkOffset, FVector(5.f), FColor::Cyan, false, 10.f, 0, 1);
 				}
 			}

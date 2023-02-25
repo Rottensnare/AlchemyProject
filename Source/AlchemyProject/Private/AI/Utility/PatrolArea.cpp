@@ -28,7 +28,6 @@ FVector APatrolArea::GetRandomPatrolCoordinates()
 		bool bOnNavMesh = UNavigationSystemV1::GetNavigationSystem(GetWorld())->ProjectPointToNavigation( Point, NavLoc); // Checks if hit location has valid NavMesh Path
 		if(bOnNavMesh)
 		{
-			i = 4;
 			//UE_LOG(LogTemp, Warning, TEXT("NavLoc: "), *NavLoc.Location.ToString())
 			return NavLoc.Location;
 		}
