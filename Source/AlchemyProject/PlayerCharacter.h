@@ -9,10 +9,11 @@
 #include "Alchemy/CustomStructs/NPCStructs.h"
 #include "GameFramework/Character.h"
 #include "Interfaces/BaseCharacterInfo.h"
+#include "Interfaces/Lootable.h"
 #include "PlayerCharacter.generated.h"
 
 UCLASS()
-class ALCHEMYPROJECT_API APlayerCharacter : public ACharacter, public IQueryable, public IBaseCharacterInfo
+class ALCHEMYPROJECT_API APlayerCharacter : public ACharacter, public IQueryable, public IBaseCharacterInfo, public ILootable
 {
 	GENERATED_BODY()
 
@@ -65,7 +66,7 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Components, meta = (AllowPrivateAccess = "true"))
 	class UHealthComponent* HealthComponent;
 	UPROPERTY(VisibleAnywhere)
-	class UInventoryComponent* InventoryComponent;
+	TObjectPtr<class UInventoryComponent> InventoryComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Components, meta = (AllowPrivateAccess = "true"))
 	class UAlchemyComponent* AlchemyComponent;
 
@@ -180,9 +181,11 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	bool bDebugging{false};
 
+	void DebugFunction();
+
 public:
 	
-	FORCEINLINE UInventoryComponent* GetInventoryComponent() const {return InventoryComponent;}
+	FORCEINLINE TObjectPtr<UInventoryComponent> GetInventoryComponent() const {return InventoryComponent;}
 	FORCEINLINE UAlchemyComponent* GetAlchemyComponent() const {return AlchemyComponent;}
 	FORCEINLINE UHealthComponent* GetHealthComponent() const {return HealthComponent;}
 	FORCEINLINE void SetAlchemyTable(AAlchemyTable* InTable) {CurrentAlchemyTable = InTable;}
@@ -200,6 +203,8 @@ public:
 	 * * * * * * * * * * * */
 	UFUNCTION(BlueprintCallable)
 	virtual EPhysicalSurface GetFootStepSurfaceType() override;
+
+	virtual TObjectPtr<UInventoryComponent> GetInventoryComp() override;
 };
 
 

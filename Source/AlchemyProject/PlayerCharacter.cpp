@@ -326,6 +326,8 @@ void APlayerCharacter::ShowInfoButtonPressed() //TODO: Can be split into smaller
 			}
 		}
 	}
+
+	DebugFunction();
 }
 
 void APlayerCharacter::ToggleSprint()
@@ -536,6 +538,24 @@ void APlayerCharacter::Landed(const FHitResult& Hit)
 	Super::Landed(Hit);
 }
 
+void APlayerCharacter::DebugFunction()
+{
+	TArray<FString> Strings {"Oof", "Yes", "No", "Maybe", "Perhaps", "I Guess", "Idk", "Aaa", "Cha-Ching"};
+	Algo::SortBy(Strings, [](const FString& StringisKhan)
+	{
+		return StringisKhan;
+	}, TGreater<>());
+
+	UE_LOG(LogTemp, Warning, TEXT("First string: %s"), *Strings[0])
+
+	TArray<FString> Numbahs {"5", "2", "12", "33", "0", "0", "2"};
+	Algo::SortBy(Numbahs, [](const FString& NumbahOne)
+	{
+		return FCString::Atoi(*NumbahOne);
+	}, TGreater<>());
+	UE_LOG(LogTemp, Warning, TEXT("First numbah: %s"), *Numbahs[0])
+}
+
 FNPCInfo& APlayerCharacter::GetNPCInfo()
 {
 	return NPCInfo;
@@ -551,6 +571,11 @@ EPhysicalSurface APlayerCharacter::GetFootStepSurfaceType()
 	const FVector End{Start + FVector(0.f, 0.f, -400.f)};
 	GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECollisionChannel::ECC_Visibility, QueryParams);
 	return UPhysicalMaterial::DetermineSurfaceType(HitResult.PhysMaterial.Get());
+}
+
+TObjectPtr<UInventoryComponent> APlayerCharacter::GetInventoryComp()
+{
+	return InventoryComponent;
 }
 
 

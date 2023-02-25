@@ -80,7 +80,8 @@ protected:
 	void UpdateItemAmount(const int32 Index, const int32 Change);
 
 	
-	
+	UPROPERTY(BlueprintReadWrite)
+	TArray<class UListInventoryElement*> InventoryElements;
 
 	
 private:

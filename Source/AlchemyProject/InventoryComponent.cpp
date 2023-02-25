@@ -162,6 +162,10 @@ void UInventoryComponent::ShowInventory(bool bVisible)
 			}
 		}
 	}
+	if(bVisible)
+	{
+		
+	}
 }
 
 //Function that's over 150 lines of code. This is a mess and this system doesn't work well with the alchemy system, needs a thorough rework!

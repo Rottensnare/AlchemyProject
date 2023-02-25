@@ -108,7 +108,7 @@ void UAlchemyComponent::CreateAlchemyProduct(const FAlchemyPackage& AlchemyPacka
 			TMap<EPrimarySubstance, bool> TempMap;
 			TMap<int32, int32> DecreasePerIndexMap;
 			TArray<EIngredientQuality> IngredientQualities;
-			for(auto& Slut : Character->GetInventoryComponent()->GetInventory())
+			for(auto& Slut : Character->GetInventoryComp()->GetInventory())
 			{
 				for(auto& InInfo : AlchemyPackage.IngredientInfos)
 				{
