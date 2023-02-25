@@ -23,6 +23,16 @@ enum class EQueryType : uint8
 	EQT_MAX UMETA(DisplayName = "DefaultMax")
 };
 
+UENUM(BlueprintType)
+enum class ELastStimulusType : uint8
+{
+	ELST_Sight UMETA(DisplayName = "Sight"),
+	ELST_Hearing UMETA(DisplayName = "Hearing"),
+	ELST_Damage UMETA(DisplayName = "Damage"),
+
+	ELST_MAX UMETA(DisplayName = "DefaultMax")
+};
+
 /**
  * 
  */
@@ -113,10 +123,13 @@ protected:
 	FGameplayTagContainer TagsToBeTested;
 	EQueryType CurrentQueryType;
 
+	// Used for containing actors that are queried. Used as a blackboard value.
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	class UCustomAIContainer* CustomAIContainer;
 
 	class UBehaviorTree* GetBehaviorTree(const FName BehaviorTreeName) const;
+
+	ELastStimulusType LastStimulusType{ELastStimulusType::ELST_MAX};
 
 private:
 
@@ -127,12 +140,15 @@ private:
 	float PeripheralVisionAngle{73.f};
 	
 	float CheckStimulusTimer{0.f};
-	
+
+	//TODO: Move these to the AI class. Probably shouldn't be in the controller. Different AIs should have different values.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Perception|Values", meta = (AllowPrivateAccess = "true"))
-	float MaxAgeSight{30.f};
+	float MaxAgeSight{90.f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Perception|Values", meta = (AllowPrivateAccess = "true"))
-	float MaxAgeHearing{30.f};
+	float MaxAgeHearing{60.f};
+
+	bool bHearingStimulusHasUpdated{true};
 	
 public:
 
@@ -140,7 +156,12 @@ public:
 	FORCEINLINE UBehaviorTreeComponent* GetAIBehaviorTreeComponent() const {return BehaviorTreeComponent;}
 	FORCEINLINE virtual FGenericTeamId GetGenericTeamId() const override {return TeamId;}
 	FORCEINLINE UCustomAIContainer* GetCustomAIContainer() const {return CustomAIContainer;}
+	FORCEINLINE AAIBase* GetAIBase() const {return AIBase;}
 
 	FORCEINLINE void AddToCustomAIContainer(AActor* ActorToAdd) const {if(CustomAIContainer) CustomAIContainer->ActorContainer.Add(ActorToAdd);}
 	FORCEINLINE void ClearCustomAIContainer() const {if(CustomAIContainer) CustomAIContainer->ActorContainer.Empty();}
+
+	void SetLastStimulusType(const ELastStimulusType InStimulusType,  const AActor* const InActor);
+	UFUNCTION(BlueprintCallable)
+	void SetHearingStimulusHasUpdated(const bool bUpdated);
 };

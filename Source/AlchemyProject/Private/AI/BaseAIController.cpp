@@ -13,6 +13,7 @@
 #include "Engine/DataTable.h"
 #include "EnvironmentQuery/EnvQuery.h"
 #include "EnvironmentQuery/EnvQueryManager.h"
+#include "EnvironmentQuery/EnvQueryOption.h"
 #include "Kismet/GameplayStatics.h"
 #include "Navigation/CrowdFollowingComponent.h"
 #include "Perception/AIPerceptionComponent.h"
@@ -53,7 +54,7 @@ ABaseAIController::ABaseAIController(const FObjectInitializer& ObjectInitializer
 	TeamAttitudeMap_Hearing.Emplace(ETeamAttitude::Neutral, true);
 
 	SenseConfig_Prediction = CreateDefaultSubobject<UAISenseConfig_Prediction>(TEXT("SenseConfig_Prediction"));
-	SenseConfig_Prediction->SetMaxAge(10.f);
+	SenseConfig_Prediction->SetMaxAge(30.f);
 
 	AIPerceptionComponent->ConfigureSense(*SenseConfig_Sight);
 	AIPerceptionComponent->ConfigureSense(*SenseConfig_Hearing);
@@ -71,8 +72,8 @@ void ABaseAIController::BeginPlay()
 	AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &ABaseAIController::OnTargetPerceptionUpdated_Delegate);
 	AIPerceptionComponent->OnPerceptionUpdated.AddDynamic(this, &ABaseAIController::OnPerceptionUpdated_Delegate);
 	AIPerceptionComponent->OnTargetPerceptionInfoUpdated.AddDynamic(this, &ThisClass::OnTargetPerceptionInfoUpdated_Delegate);
-	AIPerceptionComponent->OnSightStimulusExpired.AddDynamic(this, &ABaseAIController::OnSightStimulusExpired_Delegate);
-	AIPerceptionComponent->OnHearingStimulusExpired.AddDynamic(this, &ABaseAIController::OnHearingStimulusExpired_Delegate);
+	//AIPerceptionComponent->OnSightStimulusExpired.AddDynamic(this, &ABaseAIController::OnSightStimulusExpired_Delegate);
+	//AIPerceptionComponent->OnHearingStimulusExpired.AddDynamic(this, &ABaseAIController::OnHearingStimulusExpired_Delegate);
 	
 	AIBase = Cast<AAIBase>(GetPawn());
 
@@ -103,15 +104,24 @@ void ABaseAIController::Tick(float DeltaSeconds)
 
 TArray<FVector>& ABaseAIController::QueryForLocations(const UEnvQuery* const InEnvQuery, APawn* InPawn, EEnvQueryRunMode::Type QueryRunMode)
 {
+	QueryLocations.Empty();
+	
+	if(InEnvQuery == nullptr || InPawn == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("QueryForLocations: InEnvQuery or InPawn was nullptr"))
+		return QueryLocations;
+	}
 	FEnvQueryRequest ActorsQueryRequest = FEnvQueryRequest(InEnvQuery, InPawn);
-	int32 ExecuteCode = ActorsQueryRequest.Execute(QueryRunMode, this, &ABaseAIController::HandleQueryRequest_Locations);
-	UE_LOG(LogTemp, Warning, TEXT("QueryForLocations: %d"), ExecuteCode)
+	const int32 ExecuteCode = ActorsQueryRequest.Execute(QueryRunMode, this, &ABaseAIController::HandleQueryRequest_Locations);
+	//UE_LOG(LogTemp, Warning, TEXT("QueryForLocations: %d"), ExecuteCode)
 	return QueryLocations;
+
+	
 }
 
 void ABaseAIController::HandleQueryRequest_Locations(TSharedPtr<FEnvQueryResult> Result)
 {
-	UE_LOG(LogTemp, Warning, TEXT("HandleQueryRequest_Locations"))
+	//UE_LOG(LogTemp, Warning, TEXT("HandleQueryRequest_Locations"))
 	TArray<FVector> OutLocations;
 	if(Result->IsSuccessful())
 	{
@@ -187,7 +197,7 @@ void ABaseAIController::HandleQueryRequest(TSharedPtr<FEnvQueryResult> Result)
 		}else UE_LOG(LogTemp, Display, TEXT("OutActors was Empty"))
 	} else UE_LOG(LogTemp, Display, TEXT("Result was unsuccessful"))
 	
-	UE_LOG(LogTemp, Display, TEXT("Number of Matches: %d"), CustomAIContainer->ActorContainer.Num())
+	//UE_LOG(LogTemp, Display, TEXT("Number of Matches: %d"), CustomAIContainer->ActorContainer.Num())
 	if(BlackboardComponent) BlackboardComponent->SetValueAsObject(FName("QueryActors"), CustomAIContainer);
 	
 	TagsToBeTested = FGameplayTagContainer::EmptyContainer;
@@ -211,6 +221,44 @@ UBehaviorTree* ABaseAIController::GetBehaviorTree(const FName BehaviorTreeName) 
 	return nullptr;
 }
 
+void ABaseAIController::SetLastStimulusType(const ELastStimulusType InStimulusType, const AActor* const InActor)
+{
+	
+	if(InStimulusType == ELastStimulusType::ELST_MAX)
+	{
+		const FActorPerceptionInfo* ActorPerceptionInfo = PerceptionComponent->GetActorInfo(*InActor);
+		for(const FAIStimulus AIStimulus : ActorPerceptionInfo->LastSensedStimuli)
+		{
+			switch (AIStimulus.Type)
+			{
+			case 0:
+				LastStimulusType = ELastStimulusType::ELST_Sight;
+				break;
+			case 1:
+				LastStimulusType = ELastStimulusType::ELST_Hearing;
+			default:
+				LastStimulusType = ELastStimulusType::ELST_MAX;
+				break;
+			}
+		}
+	}
+	else
+	{
+		LastStimulusType = InStimulusType;
+	}
+
+	BlackboardComponent->SetValueAsEnum(TEXT("LastStimulusType"), (uint8)LastStimulusType);
+	
+}
+
+void ABaseAIController::SetHearingStimulusHasUpdated(const bool bUpdated)
+{
+	if(BlackboardComponent == nullptr) return;
+	
+	bHearingStimulusHasUpdated = bUpdated;
+	BlackboardComponent->SetValueAsBool(TEXT("HearingStimulusHasUpdated"), bHearingStimulusHasUpdated);
+}
+
 void ABaseAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
@@ -221,12 +269,14 @@ void ABaseAIController::OnPossess(APawn* InPawn)
 	{
 		if(Enemy->GetBehaviorTree())
 		{
-			if(BlackboardComponent) BlackboardComponent->InitializeBlackboard(*(Enemy->GetBehaviorTree()->GetBlackboardAsset()));
-			if(BehaviorTreeComponent)
+			if(BehaviorTreeComponent && BlackboardComponent)
 			{
+				BlackboardComponent->InitializeBlackboard(*(Enemy->GetBehaviorTree()->GetBlackboardAsset()));
 				BehaviorTreeComponent->StartTree(*GetBehaviorTree("Default"), EBTExecutionMode::Looped); //TODO: Instead of "Default" make it dynamic based on Gameplay Tags
 				//RunBehaviorTree(GetBehaviorTree("Default")); //BUG: RunBehaviorTree doesn't check if the tree is running already
 				BehaviorTreeComponent->SetDynamicSubtree(FGameplayTag::RequestGameplayTag(FName("Subtree.Work")), GetBehaviorTree("Work"));
+				BlackboardComponent->SetValueAsEnum(TEXT("LastStimulusType"), (uint8)ELastStimulusType::ELST_MAX);
+				BlackboardComponent->SetValueAsBool(TEXT("HearingStimulusHasUpdated"), true);
 			}
 		}
 	}
@@ -256,11 +306,11 @@ void ABaseAIController::OnTargetPerceptionUpdated_Delegate(AActor* InActor, FAIS
 {
 	//UE_LOG(LogTemp, Warning, TEXT("OnTargetPerceptionUpdated_Delegate"))
 	if(InActor == nullptr || BlackboardComponent == nullptr || AIBase == nullptr) return;
-
+	
 	ETeamAttitude::Type AttitudeType = ETeamAttitude::Neutral;
-	if(IBaseCharacterInfo* TempInterface = Cast<IBaseCharacterInfo>(InActor))
+	if(IBaseCharacterInfo* CharacterInterface = Cast<IBaseCharacterInfo>(InActor))
 	{
-		AttitudeType = AIBase->GetFactionAttitude(TempInterface->GetNPCInfo());
+		AttitudeType = AIBase->GetFactionAttitude(CharacterInterface->GetNPCInfo());
 	}
 	
 	switch (Stimulus.Type)
@@ -280,6 +330,10 @@ void ABaseAIController::OnTargetPerceptionUpdated_Delegate(AActor* InActor, FAIS
 				AIBase->SetCanSeeTarget(true);
 				BlackboardComponent->ClearValue(FName("PointOfInterest"));
 				BlackboardComponent->ClearValue(FName("PredictedTargetLocation"));
+				AIPerceptionComponent->LastPerceivedActors_Sight.AddUnique(InActor);
+				SetLastStimulusType(ELastStimulusType::ELST_Sight, InActor);
+				//SetStimulusHasUpdated(true); //NOTE currently used only for hearing
+				
 			}
 			else
 			{
@@ -322,12 +376,24 @@ void ABaseAIController::OnTargetPerceptionUpdated_Delegate(AActor* InActor, FAIS
 		//Hearing
 		if(ETeamAttitude::Hostile == AttitudeType)
 		{
-			if(AIBase->GetPlayerSeen()) break;
+			
 			if(Stimulus.WasSuccessfullySensed())
 			{
-				AIBase->SetAIState(EAIState::EAIS_Alerted);
-				AIBase->ToggleSpeechWidget("Herd sum ting");
-				BlackboardComponent->SetValueAsVector(FName("PointOfInterest"), Stimulus.StimulusLocation);
+				if(AIBase->GetPlayerSeen() == false)
+				{
+					if(AIBase->GetAIState() != EAIState::EAIS_Chasing ||
+						AIBase->GetAIState() != EAIState::EAIS_InCombat ||
+						AIBase->GetAIState() != EAIState::EAIS_Dead) AIBase->SetAIState(EAIState::EAIS_Alerted);
+					
+					AIBase->ToggleSpeechWidget("Herd sum ting");
+					BlackboardComponent->SetValueAsVector(FName("PointOfInterest"), Stimulus.StimulusLocation);
+					AIPerceptionComponent->LastPerceivedActors_Hearing.AddUnique(InActor);
+				}
+				
+				SetLastStimulusType(ELastStimulusType::ELST_Hearing, InActor);
+				BlackboardComponent->SetValueAsVector(FName("LastTargetLocHearing"), Stimulus.StimulusLocation);
+				SetHearingStimulusHasUpdated(true);
+				
 			}
 			//UE_LOG(LogTemp, Warning, TEXT("Heard sum ting"))
 		}
@@ -347,7 +413,8 @@ void ABaseAIController::OnTargetPerceptionUpdated_Delegate(AActor* InActor, FAIS
 
 void ABaseAIController::OnTargetPerceptionInfoUpdated_Delegate(const FActorPerceptionUpdateInfo& UpdateInfo)
 {
-	//UE_LOG(LogTemp, Warning, TEXT("OnTargetPerceptionInfoUpdated_Delegate"))
+	
+	
 }
 
 void ABaseAIController::OnSightStimulusExpired_Delegate()
@@ -359,7 +426,7 @@ void ABaseAIController::OnSightStimulusExpired_Delegate()
 	BlackboardComponent->SetValueAsBool(FName("PlayerSeen"), false);
 	AIBase->SetPlayerSeen(false);
 	AIBase->ToggleSpeechWidget("Target got away.");
-	AIBase->SetAIState(AIBase->GetLastAIState()); //TODO: Need to make this the state the AI was before the chain of events.
+	AIBase->SetAIState(AIBase->GetLastAIState());
 }
 
 void ABaseAIController::OnHearingStimulusExpired_Delegate()

@@ -6,21 +6,26 @@
 #include "HealthComponent.h"
 #include "InventoryComponent.h"
 #include "Item.h"
+#include "NavigationSystem.h"
+#include "NavLinkCustomComponent.h"
 #include "AI/AIBase.h"
 #include "Alchemy/Potion.h"
 #include "Camera/CameraComponent.h"
 #include "Components/AlchemyComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Engine/UserDefinedStruct.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Interfaces/Pickable.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "Perception/AISense_Hearing.h"
 #include "Perception/AISense_Sight.h"
 #include "PlayerController/MyPlayerController.h"
 #include "Utility/CharacterData.h"
+#include "Utility/DynamicNavLinkProxy.h"
 
 
 // Sets default values
@@ -367,6 +372,168 @@ void APlayerCharacter::HUDInitTimerFinished()
 			MyPlayerController->SetInventoryGrid(InventoryComponent->NumberOfInventorySlots);
 		}
 	}
+}
+
+void APlayerCharacter::ValidateNavLocation(const UNavigationSystemV1* const NavSys, FNavLocation& NavLocation) const
+{
+	check(NavSys != nullptr)
+	
+	//Max number of tries before we give up trying ;(
+	constexpr int32 MaxLoops = 20;
+	int32 LoopCount = 0;
+					
+	//Loop while the distance between the actor's feet location and the NavLocation is less than the tolerance. Note that it should be less than the tolerance most of the time. Exception is when there is NavMesh below other NavMesh
+	while(UKismetMathLibrary::Vector_Distance(FVector(GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z - GetCapsuleComponent()->GetScaledCapsuleHalfHeight()), NavLocation.Location) > NavDistanceTolerance && LoopCount < MaxLoops)
+	{
+		NavSys->GetRandomPointInNavigableRadius(GetActorLocation() - FVector(0.f,0.f,GetCapsuleComponent()->GetScaledCapsuleHalfHeight()), NavLinkRndRadius, NavLocation);
+		LoopCount++;
+		//UE_LOG(LogTemp, Warning, TEXT("NavLink loop: Loops Done: %d"), LoopCount)
+	}
+}
+
+void APlayerCharacter::OnJumped_Implementation()
+{
+	if(NavLinkProxyClass != nullptr)
+	{
+		bool bShouldDestroy = false;
+		ADynamicNavLinkProxy* NavProxy;
+		UNavigationSystemV1* NavSys = UNavigationSystemV1::GetCurrent(GetWorld());
+		if(NavSys)
+		{
+			if(CurrentNavLinkProxies.Num() < MaxNavLinkCount)
+			{
+				FActorSpawnParameters ActorSpawnParameters;
+				ActorSpawnParameters.bNoFail = true;
+				ActorSpawnParameters.ObjectFlags = RF_Transient;
+				const FVector SpawnLocation = GetActorLocation();
+				const FRotator SpawnRotation = FRotator::ZeroRotator;
+	
+				NavProxy = Cast<ADynamicNavLinkProxy>(GetWorld()->SpawnActor(NavLinkProxyClass, &SpawnLocation, &SpawnRotation, ActorSpawnParameters));
+			}
+			else
+			{
+				checkf(CurrentNavLinkProxies.IsValidIndex(CurrentNavLinkID), TEXT("CurrentNavLinkID should always be valid"))
+				NavProxy = CurrentNavLinkProxies[CurrentNavLinkID];
+			}
+
+			CurrentNavLinkID = (CurrentNavLinkID + 1 ) % MaxNavLinkCount;
+		
+			if(NavProxy)
+			{
+				CurrentNavProxy = NavProxy;
+				CurrentNavProxy->SetActorLocation(GetActorLocation());
+			
+				for(FNavigationLink& NavLink : CurrentNavProxy->PointLinks)
+				{
+					FNavLocation NavLocation;
+					FTransform ActorTransform = CurrentNavProxy->GetTransform();
+					const bool bNavigable = NavSys->GetRandomPointInNavigableRadius(GetActorLocation() - FVector(0.f,0.f,GetCapsuleComponent()->GetScaledCapsuleHalfHeight()), NavLinkRndRadius, NavLocation);
+					
+					ValidateNavLocation(NavSys, NavLocation);
+					
+					if(bNavigable)
+					{
+						NavLink.Left = ActorTransform.InverseTransformPosition(FVector(NavLocation.Location.X, NavLocation.Location.Y, GetActorLocation().Z - GetCapsuleComponent()->GetScaledCapsuleHalfHeight() - PointLinkOffset.Z));
+						NavLink.Right = ActorTransform.InverseTransformPosition(FVector(NavLocation.Location.X, NavLocation.Location.Y, GetActorLocation().Z - GetCapsuleComponent()->GetScaledCapsuleHalfHeight() - PointLinkOffset.Z)) + FVector(100.f, 50.f, 0.f);
+						NavLink.Direction = ENavLinkDirection::BothWays;
+					}
+					else
+					{
+						bShouldDestroy = true;
+					}
+					
+					if(bDebugging)
+					{
+						//DrawDebugBox(GetWorld(), GetActorLocation() - FVector(0.f,0.f,GetCapsuleComponent()->GetScaledCapsuleHalfHeight()), FVector(5.f), FColor::Yellow, false, 10.f, 0, 1);
+						//DrawDebugBox(GetWorld(), GetActorLocation() - PointLinkOffset, FVector(5.f), FColor::Red, false, 10.f, 0, 1);
+						//DrawDebugBox(GetWorld(), NavLocation.Location, FVector(5.f), FColor::Green, false, 10.f, 0, 1);
+						DrawDebugBox(GetWorld(), NavLocation.Location - PointLinkOffset, FVector(5.f), FColor::Cyan, false, 10.f, 0, 1);
+					}
+				}
+
+				CurrentNavProxy->CopyEndPointsFromSimpleLinkToSmartLink();
+			
+				CurrentNavProxy->bSmartLinkIsRelevant = true;
+				CurrentNavProxy->SetSmartLinkEnabled(true);
+			
+				if(CurrentNavLinkProxies.Num() < MaxNavLinkCount) CurrentNavLinkProxies.Add(CurrentNavProxy);
+
+				if(bShouldDestroy)
+				{
+					CurrentNavLinkProxies.Remove(CurrentNavProxy);
+					CurrentNavLinkID--;
+					CurrentNavProxy->Destroy();
+					CurrentNavProxy = nullptr;
+				}
+			}
+		}
+	}
+	
+	Super::OnJumped_Implementation();
+}
+
+void APlayerCharacter::Landed(const FHitResult& Hit)
+{
+	if(CurrentNavProxy)
+	{
+		bool bShouldDestroy = false;
+		UNavigationSystemV1* NavSys = UNavigationSystemV1::GetCurrent(GetWorld());
+		if(NavSys)
+		{
+			for(FNavigationLink& NavLink : CurrentNavProxy->PointLinks)
+			{
+				FNavLocation NavLocation;
+				FTransform ActorTransform = CurrentNavProxy->GetTransform();
+				const bool bNavigable = NavSys->GetRandomPointInNavigableRadius(GetActorLocation() - FVector(0.f,0.f,GetCapsuleComponent()->GetScaledCapsuleHalfHeight()), NavLinkRndRadius, NavLocation); //BUG: will ignore Z axis distance
+				
+				ValidateNavLocation(NavSys, NavLocation);
+				
+				if(bNavigable)
+				{
+					NavLink.Right = ActorTransform.InverseTransformPosition(FVector(NavLocation.Location.X, NavLocation.Location.Y, (GetActorLocation().Z - GetCapsuleComponent()->GetScaledCapsuleHalfHeight()) - PointLinkOffset.Z));
+					CurrentNavProxy->CopyEndPointsFromSimpleLinkToSmartLink();
+				}
+				else
+				{
+					bShouldDestroy = true;
+				}
+				
+				if(bDebugging)
+				{
+					//DrawDebugBox(GetWorld(), GetActorLocation() - FVector(0.f,0.f,GetCapsuleComponent()->GetScaledCapsuleHalfHeight()), FVector(5.f), FColor::Yellow, false, 10.f, 0, 1);
+					//DrawDebugBox(GetWorld(), GetActorLocation() - PointLinkOffset, FVector(5.f), FColor::Red, false, 10.f, 0, 1);
+					//DrawDebugBox(GetWorld(), NavLocation.Location, FVector(5.f), FColor::Green, false, 10.f, 0, 1);
+					DrawDebugBox(GetWorld(), NavLocation.Location - PointLinkOffset, FVector(5.f), FColor::Cyan, false, 10.f, 0, 1);
+				}
+			}
+			
+			if(INavRelevantInterface* NavRelevantInterface = Cast<INavRelevantInterface>(CurrentNavProxy))
+			{
+				NavSys->UpdateNavOctreeElement(CurrentNavProxy, NavRelevantInterface, FNavigationOctreeController::OctreeUpdate_Default);
+			}
+			
+			//Making sure that the AI only uses smart link if the player jumped. This is to prevent the AI from falling off places on accident.
+			for(FNavigationLink& NavLink : CurrentNavProxy->PointLinks)
+			{
+				FTransform ActorTransform = CurrentNavProxy->GetTransform();
+				NavLink.Left = ActorTransform.InverseTransformVector(FVector(10.f, 10.f, 10000.f)); //These positions need to be nowhere near anything the AI can get to.
+				NavLink.Right = ActorTransform.InverseTransformVector(FVector(200.f, 100.f, 10000.f)); 
+			}
+		}
+		
+		if(bShouldDestroy)
+		{
+			// Destroying the nav link since it's not linking 2 valid locations.
+			CurrentNavLinkProxies.Remove(CurrentNavProxy);
+			CurrentNavLinkID--;
+			CurrentNavProxy->Destroy();
+		}
+	}
+	
+	CurrentNavProxy = nullptr;
+	
+	
+	Super::Landed(Hit);
 }
 
 FNPCInfo& APlayerCharacter::GetNPCInfo()

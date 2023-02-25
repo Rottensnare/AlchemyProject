@@ -7,6 +7,16 @@
 #include "Components/ActorComponent.h"
 #include "PotionComponent.generated.h"
 
+USTRUCT(BlueprintType)
+struct FQualityCurve : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	class UCurveFloat* FloatCurve;
+	
+};
+
 
 UCLASS( Blueprintable, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class ALCHEMYPROJECT_API UPotionComponent : public UActorComponent
@@ -36,6 +46,15 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly)
 	EProductQuality ProductQuality;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	class UCurveFloat* QualityCurve;
+
+	UPROPERTY(EditDefaultsOnly)
+	FName PotionName{NAME_None};
+
+	//This is here if someone (Me) forgets to select the curve but it's present in the data table.
+	UCurveFloat* GetCurveFromDataTable();
 
 private:
 

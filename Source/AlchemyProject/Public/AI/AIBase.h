@@ -96,6 +96,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI", meta = (AllowPrivateAccess = "true"))
 	EAIState AIState;
 
+	//LastAIState shouldn't be an AIState that is used for combat purposes, like InCombat, Chasing, Alerted
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI", meta = (AllowPrivateAccess = "true"))
 	EAIState LastAIState;
 
@@ -106,7 +107,7 @@ protected:
 	FNPCInfo NPCInfo;
 
 	
-	/** NAVIGATION */
+	/** CATEGORY NAVIGATION */
 	
 	//Current road names that the AI will follow
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Utility", meta = (AllowPrivateAccess = "true"))
@@ -159,6 +160,13 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	bool bESPOverlapping{false};
+
+	/* CATEGORY COMBAT */
+
+	UFUNCTION(BlueprintCallable)
+	virtual void CalculateAbility();
+	UFUNCTION(BlueprintCallable)
+	virtual void Attack();
 	
 private:	
 

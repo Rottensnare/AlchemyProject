@@ -130,7 +130,7 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Custom Movement")
 	bool bSprinting{true};
 
-	/** Perception */
+	/** CATEGORY Perception */
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Perception|Components", meta = (AllowPrivateAccess = "true"))
 	class UAIPerceptionStimuliSourceComponent* PerceptionStimuliSourceComponent;
@@ -138,6 +138,47 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	FGameplayTagContainer GameplayTags;
 
+	/** CATEGORY Navigation */
+
+	//NOTE: When jumping, a smart link is placed from jump start to jump end
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Custom", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class ADynamicNavLinkProxy> NavLinkProxyClass;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Custom", meta = (AllowPrivateAccess = "true"))
+	TArray<TObjectPtr<ADynamicNavLinkProxy>> CurrentNavLinkProxies;
+
+	int32 CurrentNavLinkID = 0;
+
+	//Saved so that it can be used when Landed function is executed.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<ADynamicNavLinkProxy> CurrentNavProxy;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom", meta = (AllowPrivateAccess = "true"))
+	int32 MaxNavLinkCount{10};
+
+	//Point link vertical offset from the actor location. Felt like the actor location on its own was too high.
+	UPROPERTY(EditAnywhere)
+	FVector PointLinkOffset{FVector(0.f, 0.f, 40.f)};
+
+	// This is used to find a random point on the navmesh. Used for making sure that there is a valid point for the nav link points,
+	// and for adjusting the location.
+	UPROPERTY(EditAnywhere)
+	float NavLinkRndRadius{40.f};
+
+	//If NavLocation is generated to a place too much below the actor location find another random location.
+	UPROPERTY(EditAnywhere)
+	float NavDistanceTolerance{200.f};
+
+	//Checks if the NavLocation is close enough to the characters feet. Tries to adjusts the location if not. 
+	void ValidateNavLocation(const class UNavigationSystemV1* const NavSys, FNavLocation& NavLocation) const;
+
+	virtual void OnJumped_Implementation() override;
+
+	virtual void Landed(const FHitResult& Hit) override;
+	
+	UPROPERTY(EditDefaultsOnly)
+	bool bDebugging{false};
 
 public:
 	

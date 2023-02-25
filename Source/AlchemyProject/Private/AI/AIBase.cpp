@@ -80,7 +80,12 @@ void AAIBase::BeginPlay()
 		AIController->GetAIBlackboardComponent()->SetValueAsBool(FName("FollowPlayer"), bFollowPlayer);
 		AIController->GetAIBlackboardComponent()->SetValueAsVector(FName("OriginalPosition"), OriginalPosition);
 
-		LastAIState = AIState;
+		if(AIState != EAIState::EAIS_Alerted && AIState != EAIState::EAIS_Chasing && AIState != EAIState::EAIS_InCombat)
+		{
+			LastAIState = AIState;
+		}
+		else LastAIState = EAIState::EAIS_Idle;
+		
 	}
 
 	IQueryable::InitializeGameplayTagContainer(GameplayTagContainer);
@@ -133,6 +138,7 @@ bool AAIBase::FindNextPatrolPoint()
 {
 	if(PatrolArea && AIController && AIController->GetBlackboardComponent())
 	{
+		// Original position is not currently used and should be reworked. This is not the intended use.
 		AIController->GetBlackboardComponent()->SetValueAsVector(FName("OriginalPosition"), GetActorLocation());
 		PointOfInterest = PatrolArea->GetRandomPatrolCoordinates();
 		if(PointOfInterest != FVector())
@@ -259,6 +265,16 @@ void AAIBase::OnESPEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* 
 	bESPOverlapping = false;
 }
 
+void AAIBase::CalculateAbility()
+{
+	
+}
+
+void AAIBase::Attack()
+{
+	
+}
+
 void AAIBase::SetFollowPlayer(bool Value)
 {
 	bFollowPlayer = Value;
@@ -365,8 +381,21 @@ void AAIBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 void AAIBase::SetAIState(EAIState NewState)
 {
 	//UE_LOG(LogTemp, Warning, TEXT("SetAIState"))
-	LastAIState = AIState;
+	if(NewState != EAIState::EAIS_Alerted && NewState != EAIState::EAIS_Chasing && NewState != EAIState::EAIS_InCombat)
+	{
+		LastAIState = NewState;
+	}
+	
 	AIState = NewState;
+
+	if(AIState == EAIState::EAIS_Moving || AIState == EAIState::EAIS_Chasing)
+	{
+		GetCharacterMovement()->MaxWalkSpeed = DefaultMoveSpeed;
+	}
+	else
+	{
+		GetCharacterMovement()->MaxWalkSpeed = PatrolMoveSpeed;
+	}
 
 	if(AIController == nullptr || AIController->GetAIBlackboardComponent() == nullptr) return;
 	AIController->GetAIBlackboardComponent()->SetValueAsEnum(FName("AIState"), (uint8)AIState);

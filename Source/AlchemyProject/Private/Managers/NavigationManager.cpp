@@ -11,7 +11,7 @@
 
 bool UNavigationManager::CalculateRequiredRoads(AAIBase* InActor, ARoadSpline* StartRoad, ARoadSpline* EndRoad, TArray<FRoadInfo>& OutRoadInfos)
 {
-	UE_LOG(LogTemp, Warning, TEXT("CalculateRequiredRoads"))
+	//UE_LOG(LogTemp, Warning, TEXT("CalculateRequiredRoads"))
 	AAIBase* BaseAI = Cast<AAIBase>(InActor);
 	if(BaseAI == nullptr) return false;
 	//UE_LOG(LogTemp, Warning, TEXT("BaseAI ok"))
