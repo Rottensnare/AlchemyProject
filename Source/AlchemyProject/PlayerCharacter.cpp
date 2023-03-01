@@ -363,6 +363,15 @@ void APlayerCharacter::EndInteraction()
 	}
 }
 
+float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator,
+	AActor* DamageCauser)
+{
+	HealthComponent->SetHealth(FMath::Clamp(HealthComponent->GetHealth() - DamageAmount, 0, HealthComponent->GetMaxHealth()));
+	MyPlayerController->SetHUDHealth(HealthComponent->GetHealth(), HealthComponent->GetMaxHealth());
+	
+	return Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+}
+
 void APlayerCharacter::HUDInitTimerFinished()
 {
 	MyPlayerController = MyPlayerController == nullptr ? Cast<AMyPlayerController>(Controller) : MyPlayerController;

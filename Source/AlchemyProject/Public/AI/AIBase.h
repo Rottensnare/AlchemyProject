@@ -69,6 +69,8 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	bool FindNextPatrolPoint();
+
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	
 	//Deprecated
 	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Perception", meta = (AllowPrivateAccess = "true"))
@@ -79,6 +81,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory|Components", meta = (AllowPrivateAccess = "true"))
 	class UInventoryComponent* InventoryComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Health|Components", meta = (AllowPrivateAccess = "true"))
+	class UHealthComponent* HealthComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI", meta = (AllowPrivateAccess = "true"))
 	class UNavigationInvokerComponent* NavigationInvokerComponent;
@@ -277,6 +282,7 @@ public:
 	virtual FGameplayTagContainer& GetGameplayTagContainer() override;
 	UFUNCTION(BlueprintCallable)
 	virtual EPhysicalSurface GetFootStepSurfaceType() override;
+	virtual UHealthComponent* GetHealthComp() override;
 };
 
 template <typename T>

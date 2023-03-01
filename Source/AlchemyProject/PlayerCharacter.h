@@ -60,6 +60,8 @@ protected:
 	void ShowInfoButtonPressed();
 	void ToggleSprint();
 	void EndInteraction();
+
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	
 private:
 	
@@ -143,19 +145,19 @@ private:
 
 	//NOTE: When jumping, a smart link is placed from jump start to jump end
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Custom", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Custom Navigation", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<class ADynamicNavLinkProxy> NavLinkProxyClass;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Custom", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Custom Navigation", meta = (AllowPrivateAccess = "true"))
 	TArray<TObjectPtr<ADynamicNavLinkProxy>> CurrentNavLinkProxies;
 
 	int32 CurrentNavLinkID = 0;
 
 	//Saved so that it can be used when Landed function is executed.
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Custom Navigation", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<ADynamicNavLinkProxy> CurrentNavProxy;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom Navigation", meta = (AllowPrivateAccess = "true"))
 	int32 MaxNavLinkCount{10};
 
 	//Point link vertical offset from the actor location. Felt like the actor location on its own was too high.
@@ -177,6 +179,7 @@ private:
 	virtual void OnJumped_Implementation() override;
 
 	virtual void Landed(const FHitResult& Hit) override;
+	
 	
 	UPROPERTY(EditDefaultsOnly)
 	bool bDebugging{false};

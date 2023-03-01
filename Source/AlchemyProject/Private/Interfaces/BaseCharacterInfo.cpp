@@ -16,3 +16,8 @@ EPhysicalSurface IBaseCharacterInfo::GetFootStepSurfaceType()
 	return EPhysicalSurface::SurfaceType1;
 	
 }
+
+UHealthComponent* IBaseCharacterInfo::GetHealthComp()
+{
+	return nullptr;
+}

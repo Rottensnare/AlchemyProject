@@ -8,6 +8,7 @@
 #include "AI/UI/SpeechWidget.h"
 #include "AI/Utility/PatrolArea.h"
 #include "AlchemyProject/AlchemyProjectGameMode.h"
+#include "AlchemyProject/HealthComponent.h"
 #include "AlchemyProject/InventoryComponent.h"
 #include "AlchemyProject/PlayerCharacter.h"
 #include "BehaviorTree/BlackboardComponent.h"
@@ -41,6 +42,7 @@ AAIBase::AAIBase()
 	ESPSphere->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
 
 	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
+	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 
 	//CharacterData = CreateDefaultSubobject<UCharacterData>(TEXT("CharacterData"));
 	
@@ -148,6 +150,14 @@ bool AAIBase::FindNextPatrolPoint()
 		}
 	}
 	return false;
+}
+
+float AAIBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator,
+	AActor* DamageCauser)
+{
+	HealthComponent->SetHealth(FMath::Clamp(HealthComponent->GetHealth() - DamageAmount, 0, HealthComponent->GetMaxHealth()));
+	
+	return Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
 
 void AAIBase::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
@@ -370,6 +380,11 @@ EPhysicalSurface AAIBase::GetFootStepSurfaceType()
 	const FVector End{Start + FVector(0.f, 0.f, -400.f)};
 	GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECollisionChannel::ECC_Visibility, QueryParams);
 	return UPhysicalMaterial::DetermineSurfaceType(HitResult.PhysMaterial.Get());
+}
+
+UHealthComponent* AAIBase::GetHealthComp()
+{
+	return HealthComponent;
 }
 
 void AAIBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

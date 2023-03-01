@@ -10,7 +10,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Abstract)
 class ALCHEMYPROJECT_API UListInventoryElement : public UUserWidget, public IUserObjectListEntry
 {
 	GENERATED_BODY()

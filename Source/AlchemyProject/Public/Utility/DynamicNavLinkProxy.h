@@ -17,9 +17,9 @@ class ALCHEMYPROJECT_API ADynamicNavLinkProxy : public ANavLinkProxy, public INa
 
 public:
 
-	//virtual void BeginPlay() override;
+	
 
-protected:
 
-	//void OnNavLinkReach_Delegate( AActor* MovingActor, const FVector& DestinationPoint);
+
+	
 };

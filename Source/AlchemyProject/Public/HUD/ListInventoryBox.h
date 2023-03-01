@@ -45,7 +45,7 @@ class ALCHEMYPROJECT_API UListInventoryBox : public UUserWidget
 
 public:
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	class UListView* InventoryList;
 
 	UPROPERTY(BlueprintReadWrite)

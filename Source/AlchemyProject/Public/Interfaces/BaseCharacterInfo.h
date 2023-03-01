@@ -27,6 +27,7 @@ public:
 	
 	virtual FNPCInfo& GetNPCInfo();
 	virtual EPhysicalSurface GetFootStepSurfaceType();
+	virtual class UHealthComponent* GetHealthComp();
 	
 
 private:

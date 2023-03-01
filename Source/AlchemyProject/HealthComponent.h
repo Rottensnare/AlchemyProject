@@ -22,6 +22,8 @@ protected:
 
 	virtual void BeginPlay() override;
 
+	TMap<UDamageType*, float> DamageResistanceMap;
+
 private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health", meta = (AllowPrivateAccess = "true"))
@@ -31,7 +33,7 @@ private:
 	float MaxHealth{200.f};
 
 	UPROPERTY()
-	class AMyPlayerController* OwnerController;
+	class AController* OwnerController;
 
 public:
 
