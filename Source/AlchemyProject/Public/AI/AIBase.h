@@ -141,6 +141,12 @@ protected:
 	FVector ClosestSplinePointLocation{FVector(0.f)};
 
 
+	/**	CATEGORY Squad */
+
+	// Which squad the AI is part of.
+	UPROPERTY(VisibleAnywhere)
+	int32 SquadID{-1};
+
 #if WITH_EDITOR
 	//Only works with Editor and changing values from the editor windows
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
@@ -172,6 +178,13 @@ protected:
 	virtual void CalculateAbility();
 	UFUNCTION(BlueprintCallable)
 	virtual void Attack();
+	UFUNCTION(BlueprintCallable)
+	virtual bool UseAbility();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	float IdealCombatRange{20.f};
+
+	
 	
 private:	
 
@@ -256,6 +269,7 @@ public:
 	FORCEINLINE void SetNavDestination(AActor* InActor) {NavDestination = InActor;}
 	FORCEINLINE void SetRoadsFound(const bool bFound) {bRoadsFound = bFound;}
 	FORCEINLINE TArray<FRoadInfo>& GetCurrentRoadInfos() {return CurrentRoadInfos;}
+	FORCEINLINE void SetSquadID(const int32 InID) {SquadID = InID;}
 
 	/***********************
 	 *	Public Variables

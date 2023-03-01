@@ -8,6 +8,7 @@
 #include "AlchemyProjectGameMode.generated.h"
 
 class UFactionManager;
+class UCombatManager;
 UCLASS(minimalapi)
 class AAlchemyProjectGameMode : public AGameModeBase
 {
@@ -26,10 +27,22 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	UNavigationManager* GetNavigationManager();
+	
+	UFUNCTION(BlueprintCallable)
+	UCombatManager* GetCombatManager() const;
 
 protected:
 
 	virtual void BeginPlay() override;
+
+private:
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	UCombatManager* CombatManager;
+
+public:
+
+
 };
 
 

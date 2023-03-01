@@ -2,6 +2,7 @@
 
 #include "AlchemyProjectGameMode.h"
 #include "AlchemyProjectCharacter.h"
+#include "Managers/CombatManager.h"
 #include "Managers/FactionManager.h"
 #include "Managers/NavigationManager.h"
 #include "UObject/ConstructorHelpers.h"
@@ -28,6 +29,11 @@ UNavigationManager* AAlchemyProjectGameMode::GetNavigationManager()
 	return NavigationManager;
 }
 
+UCombatManager* AAlchemyProjectGameMode::GetCombatManager() const
+{
+	return CombatManager;
+}
+
 void AAlchemyProjectGameMode::BeginPlay()
 {
 	if(!FactionManager)
@@ -42,6 +48,12 @@ void AAlchemyProjectGameMode::BeginPlay()
 		NavigationManager = NewObject<UNavigationManager>();
 		NavigationManager->AddToRoot();
 		NavigationManager->InitRoads();
+	}
+
+	if(!CombatManager)
+	{
+		CombatManager = NewObject<UCombatManager>();
+		CombatManager->AddToRoot();
 	}
 
 	Super::BeginPlay();

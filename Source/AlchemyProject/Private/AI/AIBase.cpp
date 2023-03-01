@@ -285,6 +285,14 @@ void AAIBase::Attack()
 	
 }
 
+bool AAIBase::UseAbility()
+{
+	
+	
+	
+	return true;
+}
+
 void AAIBase::SetFollowPlayer(bool Value)
 {
 	bFollowPlayer = Value;
@@ -332,7 +340,7 @@ void AAIBase::SetPlayerSeen(const bool bValue)
 	
 	if(bPlayerSeen)
 	{
-		SetAIState(EAIState::EAIS_Chasing);
+		SetAIState(EAIState::EAIS_InCombat);
 		GetCharacterMovement()->MaxWalkSpeed = DefaultMoveSpeed;
 	}
 	else
