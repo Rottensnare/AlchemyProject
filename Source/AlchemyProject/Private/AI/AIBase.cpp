@@ -15,6 +15,9 @@
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GAS/Attributes/AlcAttributeSet.h"
+#include "GAS/Components/AlcAbilitySystemComponent.h"
+#include "GAS/GameplayAbility/AlcGameplayAbility.h"
 #include "Kismet/GameplayStatics.h"
 #include "Managers/FactionManager.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
@@ -44,7 +47,11 @@ AAIBase::AAIBase()
 	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 
-	//CharacterData = CreateDefaultSubobject<UCharacterData>(TEXT("CharacterData"));
+	AbilitySystemComponent = CreateDefaultSubobject<UAlcAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
+	AbilitySystemComponent->SetIsReplicated(true);
+	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
+
+	Attributes = CreateDefaultSubobject<UAlcAttributeSet>(TEXT("Attributes"));
 	
 }
 
@@ -393,6 +400,52 @@ EPhysicalSurface AAIBase::GetFootStepSurfaceType()
 UHealthComponent* AAIBase::GetHealthComp()
 {
 	return HealthComponent;
+}
+
+UAbilitySystemComponent* AAIBase::GetAbilitySystemComponent() const
+{
+	return AbilitySystemComponent;
+}
+
+void AAIBase::InitializeAttributes()
+{
+	if(AbilitySystemComponent && DefaultAttributeEffects)
+	{
+		FGameplayEffectContextHandle EffectContextHandle = AbilitySystemComponent->MakeEffectContext();
+		EffectContextHandle.AddSourceObject(this);
+
+		const FGameplayEffectSpecHandle SpecHandle = AbilitySystemComponent->MakeOutgoingSpec(DefaultAttributeEffects, 1, EffectContextHandle);
+
+		if(SpecHandle.IsValid())
+		{
+			FActiveGameplayEffectHandle GEHandle = AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+		}
+	}
+}
+
+void AAIBase::GiveAbilities()
+{
+	if(HasAuthority() && AbilitySystemComponent)
+	{
+		for(TSubclassOf<UAlcGameplayAbility>& Ability : DefaultAbilities)
+		{
+			AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(*Ability, 1, static_cast<int32>(Ability.GetDefaultObject()->AbilityInputID), this));
+		}
+	}
+}
+
+void AAIBase::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	check(AbilitySystemComponent != nullptr)
+
+	/**	NOTE: This is the server implementation, but the current project is not ment to be multiplayer.
+	 *	Just following a tutorial */
+	AbilitySystemComponent->InitAbilityActorInfo(this, this);
+
+	InitializeAttributes();
+	GiveAbilities();
 }
 
 void AAIBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

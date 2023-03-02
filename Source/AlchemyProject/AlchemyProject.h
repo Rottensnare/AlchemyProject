@@ -8,3 +8,12 @@
 #define EPS_Ground EPhysicalSurface::SurfaceType2
 #define EPS_Grass EPhysicalSurface::SurfaceType3
 #define EPS_Water EPhysicalSurface::SurfaceType4
+
+UENUM(BlueprintType)
+enum class EGASAbilityInputID : uint8
+{
+	None,
+	Confirm,
+	Cancel,
+	Punch
+};

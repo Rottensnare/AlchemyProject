@@ -3,6 +3,7 @@
 
 #include "PlayerCharacter.h"
 
+#include "AbilitySystemComponent.h"
 #include "HealthComponent.h"
 #include "InventoryComponent.h"
 #include "Item.h"
@@ -17,6 +18,9 @@
 #include "Engine/UserDefinedStruct.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GAS/Attributes/AlcAttributeSet.h"
+#include "GAS/Components/AlcAbilitySystemComponent.h"
+#include "GAS/GameplayAbility/AlcGameplayAbility.h"
 #include "Interfaces/Pickable.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -50,6 +54,13 @@ APlayerCharacter::APlayerCharacter()
 	PerceptionStimuliSourceComponent = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("PerceptionStimuliSourceComp"));
 	PerceptionStimuliSourceComponent->RegisterForSense(UAISense_Sight::StaticClass());
 	PerceptionStimuliSourceComponent->RegisterForSense(UAISense_Hearing::StaticClass());
+
+	AbilitySystemComponent = CreateDefaultSubobject<UAlcAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
+	AbilitySystemComponent->SetIsReplicated(true);
+	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
+
+	Attributes = CreateDefaultSubobject<UAlcAttributeSet>(TEXT("Attributes"));
+	
 
 	//CharacterData = CreateDefaultSubobject<UCharacterData>(TEXT("CharacterData"));
 }
@@ -587,6 +598,70 @@ TObjectPtr<UInventoryComponent> APlayerCharacter::GetInventoryComp()
 	return InventoryComponent;
 }
 
+UAbilitySystemComponent* APlayerCharacter::GetAbilitySystemComponent() const
+{
+	return AbilitySystemComponent;
+}
+
+void APlayerCharacter::InitializeAttributes()
+{
+	if(AbilitySystemComponent && DefaultAttributeEffects)
+	{
+		FGameplayEffectContextHandle EffectContextHandle = AbilitySystemComponent->MakeEffectContext();
+		EffectContextHandle.AddSourceObject(this);
+
+		FGameplayEffectSpecHandle SpecHandle = AbilitySystemComponent->MakeOutgoingSpec(DefaultAttributeEffects, 1, EffectContextHandle);
+
+		if(SpecHandle.IsValid())
+		{
+			FActiveGameplayEffectHandle GEHandle = AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+		}
+	}
+}
+
+void APlayerCharacter::GiveAbilities()
+{
+	if(HasAuthority() && AbilitySystemComponent)
+	{
+		for(TSubclassOf<UAlcGameplayAbility>& Ability : DefaultAbilities)
+		{
+			AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(*Ability, 1, static_cast<int32>(Ability.GetDefaultObject()->AbilityInputID), this));
+			
+		}
+	}
+}
+
+void APlayerCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	check(AbilitySystemComponent != nullptr)
+
+	/**	NOTE: This is the server implementation, but the current project is not ment to be multiplayer.
+	 *	Just following a tutorial */
+	AbilitySystemComponent->InitAbilityActorInfo(this, this);
+
+	InitializeAttributes();
+	GiveAbilities();
+}
+
+void APlayerCharacter::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+
+	check(AbilitySystemComponent != nullptr)
+	
+	AbilitySystemComponent->InitAbilityActorInfo(this, this);
+
+	InitializeAttributes();
+
+	if(AbilitySystemComponent && InputComponent)
+	{
+		const FGameplayAbilityInputBinds Binds("Confirm", "Cancel", "EGASAbilityInputID", static_cast<int32>(EGASAbilityInputID::Confirm), static_cast<int32>(EGASAbilityInputID::Cancel));
+		AbilitySystemComponent->BindAbilityActivationToInputComponent(InputComponent, Binds);
+	}
+}
+
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -604,6 +679,12 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAxis("MoveRight", this, &ThisClass::MoveRight);
 	PlayerInputComponent->BindAxis("Turn", this, &ThisClass::Turn);
 	PlayerInputComponent->BindAxis("LookUp", this, &ThisClass::LookUp);
+
+	if(AbilitySystemComponent && InputComponent)
+	{
+		const FGameplayAbilityInputBinds Binds("Confirm", "Cancel", "EGASAbilityInputID", static_cast<int32>(EGASAbilityInputID::Confirm), static_cast<int32>(EGASAbilityInputID::Cancel));
+		AbilitySystemComponent->BindAbilityActivationToInputComponent(InputComponent, Binds);
+	}
 	
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 

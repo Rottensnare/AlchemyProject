@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AbilitySystemInterface.h"
 #include "BaseAIController.h"
 #include "GameplayTagAssetInterface.h"
 #include "GameplayTagContainer.h"
@@ -33,7 +34,7 @@ enum class EAIState : uint8
 };
 
 UCLASS(AutoCollapseCategories = ("Perception"))
-class ALCHEMYPROJECT_API AAIBase : public ACharacter, public IQueryable, public IInteractable, public IBaseCharacterInfo
+class ALCHEMYPROJECT_API AAIBase : public ACharacter, public IQueryable, public IInteractable, public IBaseCharacterInfo, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
@@ -87,6 +88,21 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI", meta = (AllowPrivateAccess = "true"))
 	class UNavigationInvokerComponent* NavigationInvokerComponent;
+
+	/**	Category GAS */
+	
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Abilities", meta = (AllowPrivateAccess = "true"))
+	class UAbilitySystemComponent* AbilitySystemComponent;
+
+	UPROPERTY()
+	class UAlcAttributeSet* Attributes;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "GAS", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class UGameplayEffect> DefaultAttributeEffects;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "GAS", meta = (AllowPrivateAccess = "true"))
+	TArray<TSubclassOf<class UAlcGameplayAbility>> DefaultAbilities;
+	
 
 	/** Used for detecting the player very close if AI bPlayerSeen = true */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Perception|Components", meta = (AllowPrivateAccess = "true"))
@@ -184,8 +200,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
 	float IdealCombatRange{20.f};
 
-	
-	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UAnimMontage* HitReactMontage;
+
 private:	
 
 	bool bPlayerSeen{false};
@@ -297,6 +314,13 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual EPhysicalSurface GetFootStepSurfaceType() override;
 	virtual UHealthComponent* GetHealthComp() override;
+
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+
+	virtual void InitializeAttributes();
+	virtual void GiveAbilities();
+
+	virtual void PossessedBy(AController* NewController) override;
 };
 
 template <typename T>

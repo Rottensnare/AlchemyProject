@@ -10,10 +10,13 @@
 #include "GameFramework/Character.h"
 #include "Interfaces/BaseCharacterInfo.h"
 #include "Interfaces/Lootable.h"
+#include "AbilitySystemInterface.h"
 #include "PlayerCharacter.generated.h"
 
+class UAbilitySystemComponent;
+
 UCLASS()
-class ALCHEMYPROJECT_API APlayerCharacter : public ACharacter, public IQueryable, public IBaseCharacterInfo, public ILootable
+class ALCHEMYPROJECT_API APlayerCharacter : public ACharacter, public IQueryable, public IBaseCharacterInfo, public ILootable, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
@@ -71,6 +74,22 @@ private:
 	TObjectPtr<class UInventoryComponent> InventoryComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Components, meta = (AllowPrivateAccess = "true"))
 	class UAlchemyComponent* AlchemyComponent;
+
+	/** Category GAS */
+	
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Abilities", meta = (AllowPrivateAccess = "true"))
+	UAbilitySystemComponent* AbilitySystemComponent;
+
+	UPROPERTY()
+	class UAlcAttributeSet* Attributes;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "GAS", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class UGameplayEffect> DefaultAttributeEffects;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "GAS", meta = (AllowPrivateAccess = "true"))
+	TArray<TSubclassOf<class UAlcGameplayAbility>> DefaultAbilities;
+	
+	/**	Category Default */
 
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	class USpringArmComponent* CameraBoom;
@@ -208,6 +227,14 @@ public:
 	virtual EPhysicalSurface GetFootStepSurfaceType() override;
 
 	virtual TObjectPtr<UInventoryComponent> GetInventoryComp() override;
+
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+
+	virtual void InitializeAttributes();
+	virtual void GiveAbilities();
+
+	virtual void PossessedBy(AController* NewController) override;
+	virtual void OnRep_PlayerState() override;
 };
 
 
