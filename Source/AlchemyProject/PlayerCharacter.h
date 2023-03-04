@@ -88,6 +88,11 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "GAS", meta = (AllowPrivateAccess = "true"))
 	TArray<TSubclassOf<class UAlcGameplayAbility>> DefaultAbilities;
+
+	/**	Category Combat */
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* MeleeAttackMontage;
 	
 	/**	Category Default */
 
@@ -235,6 +240,7 @@ public:
 
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void OnRep_PlayerState() override;
+	
 };
 
 

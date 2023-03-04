@@ -8,7 +8,7 @@
 #include "BaseCharacterInfo.generated.h"
 
 // This class does not need to be modified.
-UINTERFACE(MinimalAPI)
+UINTERFACE(BlueprintType)
 class UBaseCharacterInfo : public UInterface
 {
 	GENERATED_BODY()
@@ -28,9 +28,12 @@ public:
 	virtual FNPCInfo& GetNPCInfo();
 	virtual EPhysicalSurface GetFootStepSurfaceType();
 	virtual class UHealthComponent* GetHealthComp();
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	UAnimMontage* GetMeleeMontage();
 	
 
 private:
 
-	FNPCInfo DummyNPCInfo;
+	FNPCInfo DummyInfo;
 };

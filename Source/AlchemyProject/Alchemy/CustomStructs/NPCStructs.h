@@ -21,6 +21,8 @@ struct FNPCInfo : public FTableRowBase
 {
 	GENERATED_BODY()
 
+	FNPCInfo();
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	int32 NPC_ID;
 
@@ -40,6 +42,15 @@ struct FNPCInfo : public FTableRowBase
 
 	
 };
+
+inline FNPCInfo::FNPCInfo()
+{
+	NPC_ID = 0;
+	Name = NAME_None;
+	FirstName = NAME_None;
+	LastName = NAME_None;
+	FullName = NAME_None;
+}
 
 inline bool FNPCInfo::FillData(FNPCInfo& InNPCInfo, const int32 ID)
 {

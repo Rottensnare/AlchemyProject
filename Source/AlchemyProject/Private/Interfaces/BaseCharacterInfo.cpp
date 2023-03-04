@@ -6,8 +6,7 @@
 // Add default functionality here for any IBaseCharacterInfo functions that are not pure virtual.
 FNPCInfo& IBaseCharacterInfo::GetNPCInfo()
 {
-	DummyNPCInfo = FNPCInfo();
-	return DummyNPCInfo;
+	return DummyInfo;
 }
 
 EPhysicalSurface IBaseCharacterInfo::GetFootStepSurfaceType()

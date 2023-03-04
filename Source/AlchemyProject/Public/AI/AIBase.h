@@ -203,6 +203,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UAnimMontage* HitReactMontage;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UAnimMontage* MeleeAttackMontage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UAnimMontage* AttackMontage;
+
 private:	
 
 	bool bPlayerSeen{false};
@@ -321,6 +327,7 @@ public:
 	virtual void GiveAbilities();
 
 	virtual void PossessedBy(AController* NewController) override;
+	
 };
 
 template <typename T>

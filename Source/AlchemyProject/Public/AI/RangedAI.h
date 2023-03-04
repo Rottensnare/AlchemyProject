@@ -13,5 +13,9 @@ UCLASS()
 class ALCHEMYPROJECT_API ARangedAI : public AAIBase
 {
 	GENERATED_BODY()
+
+public:
+	
+
 	
 };

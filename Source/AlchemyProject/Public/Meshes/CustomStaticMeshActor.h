@@ -30,5 +30,5 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GameplayTags")
 	FGameplayTagContainer GameplayTags;
 
-	virtual void GetOwnedGameplayTags(FGameplayTagContainer& TagContainer) const override { TagContainer = GameplayTags; return; }
+	virtual void GetOwnedGameplayTags(FGameplayTagContainer& TagContainer) const override { TagContainer = GameplayTags;}
 };
