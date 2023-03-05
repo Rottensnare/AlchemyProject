@@ -31,6 +31,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	UAnimMontage* GetMeleeMontage();
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	TArray<FName> GetMeleeSections();
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	TArray<FName> GetHitReactSections();
 	
 
 private:

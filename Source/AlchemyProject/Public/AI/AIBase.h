@@ -204,7 +204,13 @@ protected:
 	UAnimMontage* HitReactMontage;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TArray<FName> HitReactSections;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UAnimMontage* MeleeAttackMontage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TArray<FName> MeleeSections;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UAnimMontage* AttackMontage;
