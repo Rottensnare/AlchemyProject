@@ -37,6 +37,14 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	TArray<FName> GetHitReactSections();
+
+	//Provide name to specify which ranged montage, since there can be multiple
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	UAnimMontage* GetRangedMontage(const FName& MontageName);
+
+	//TODO: Need to make a TMap where key is UAnimMontage and value is TArray<FName> (Need to make a struct to for container)
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	TArray<FName> GetRangedSections();
 	
 
 private:

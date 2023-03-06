@@ -200,20 +200,23 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
 	float IdealCombatRange{20.f};
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* HitReactMontage;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TArray<FName> HitReactSections;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* MeleeAttackMontage;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TArray<FName> MeleeSections;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* RangeAttackMontage;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	UAnimMontage* AttackMontage;
+	TArray<FName> RangedSections;
 
 private:	
 
