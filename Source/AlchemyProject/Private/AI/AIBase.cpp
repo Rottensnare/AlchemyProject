@@ -364,6 +364,11 @@ void AAIBase::SetCurrentRoad(ARoadSpline* InRoadSpline)
 	if(GetRoadNames().IsValidIndex(CurrentRoadIndex)) CurrentRoadName = GetRoadNames()[CurrentRoadIndex];
 }
 
+ABaseAIController* AAIBase::GetBaseAIController() const
+{
+	return AIController;
+}
+
 bool AAIBase::Interact(AActor* OtherActor)
 {
 	if(!bCanBeInteractedWith) return false;

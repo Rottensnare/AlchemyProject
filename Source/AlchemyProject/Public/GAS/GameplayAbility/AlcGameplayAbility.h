@@ -22,5 +22,22 @@ public:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Ability")
 	EGASAbilityInputID AbilityInputID{EGASAbilityInputID::None};
 
-	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ability|Range")
+	bool bHasRangeRequirements;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ability|Range", meta = (EditCondition="bHasRangeRequirements"))
+	float MinRange;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ability|Range", meta = (EditCondition="bHasRangeRequirements"))
+	float PreferredRange;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ability|Range", meta = (EditCondition="bHasRangeRequirements"))
+	float MaxRange;
+
+protected:
+
+	virtual bool CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags, FGameplayTagContainer* OptionalRelevantTags) const override;
+
+	UFUNCTION(BlueprintCallable)
+	virtual void SetTarget(AActor* AvatarActor) const;
 };

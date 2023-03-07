@@ -303,6 +303,8 @@ public:
 	FORCEINLINE TArray<FRoadInfo>& GetCurrentRoadInfos() {return CurrentRoadInfos;}
 	FORCEINLINE void SetSquadID(const int32 InID) {SquadID = InID;}
 
+	ABaseAIController* GetBaseAIController() const;
+
 	/***********************
 	 *	Public Variables
 	 **********************/

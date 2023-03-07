@@ -13,5 +13,21 @@ UCLASS()
 class ALCHEMYPROJECT_API UAlcAbilitySystemComponent : public UAbilitySystemComponent
 {
 	GENERATED_BODY()
+
+public:
+
+	UFUNCTION(BlueprintCallable)
+	void CheckAbilityRangeRequirements();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Ability|Target")
+	float DistanceToTarget;
+
+protected:
 	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Ability|Target", meta = (AllowPrivateAccess = "true"))
+	AActor* TargetActor;
+
+public:
+
+	FORCEINLINE void SetTargetActor(AActor* InActor) {TargetActor = InActor;}
 };
