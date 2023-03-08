@@ -28,7 +28,7 @@ protected:
 	AActor* TargetActor;
 
 	UFUNCTION(BlueprintCallable)
-	virtual void SetTargetAndCheckRange(AActor* InAvatarActor) const;
+	virtual void SetTargetAndCheckRange();
 
 	UFUNCTION(BlueprintCallable)
 	TArray<FGameplayAbilitySpecHandle> GetAbilitiesInRange();

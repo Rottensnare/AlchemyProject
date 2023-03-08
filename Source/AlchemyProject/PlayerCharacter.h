@@ -96,6 +96,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* RangeAttackMontage;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	AActor* TargetActor;
 	
 	/**	Category Default */
 
@@ -225,6 +228,8 @@ public:
 	FORCEINLINE void SetCurrentNPC(APawn* InPawn) {CurrentNPC = InPawn;}
 	FORCEINLINE int32 GetCurrentNPC_ID() const {return CurrentNPC_ID;}
 	FORCEINLINE FGameplayTagContainer& GetGameplayTags() {return GameplayTags;}
+	FORCEINLINE void SetTargetActor(AActor* InActor) {TargetActor = InActor;}
+	FORCEINLINE AActor* GetTargetActor() const {return TargetActor;}
 
 	virtual FNPCInfo& GetNPCInfo() override;
 

@@ -4,6 +4,7 @@
 #include "GAS/Components/AlcAbilitySystemComponent.h"
 
 #include "AI/AIBase.h"
+#include "AlchemyProject/PlayerCharacter.h"
 #include "GAS/GameplayAbility/AlcGameplayAbility.h"
 
 void UAlcAbilitySystemComponent::CheckAbilityRangeRequirements()
@@ -39,23 +40,34 @@ void UAlcAbilitySystemComponent::CheckAbilityRangeRequirements()
 	}
 }
 //NOTE: Should be called before trying to activate an ability
-void UAlcAbilitySystemComponent::SetTargetAndCheckRange(AActor* InAvatarActor) const
+void UAlcAbilitySystemComponent::SetTargetAndCheckRange()
 {
-	AAIBase* AIActor = Cast<AAIBase>(InAvatarActor);
-	if(AIActor)
+	const AAIBase* AIActor = Cast<AAIBase>(GetAvatarActor());
+	
+	if(AIActor == nullptr)
 	{
-		AActor* CurrentTarget = Cast<AActor>(AIActor->GetBaseAIController()->GetAIBlackboardComponent()->GetValueAsObject(FName("Target")));
-		if(CurrentTarget)
+		const APlayerCharacter* Player = Cast<APlayerCharacter>(GetAvatarActor());
+		if(Player)
 		{
-			UAlcAbilitySystemComponent* AlcAbilitySystemComponent = Cast<UAlcAbilitySystemComponent>(AIActor->GetAbilitySystemComponent());
-			if(AlcAbilitySystemComponent)
+			if(Player->GetTargetActor())
 			{
-				AlcAbilitySystemComponent->SetTargetActor(CurrentTarget);
-				AlcAbilitySystemComponent->DistanceToTarget = FVector::Distance(AIActor->GetActorLocation(), CurrentTarget->GetActorLocation());
-				AlcAbilitySystemComponent->CheckAbilityRangeRequirements();
+				SetTargetActor(Player->GetTargetActor());
+				DistanceToTarget = FVector::Distance(GetAvatarActor()->GetActorLocation(), Player->GetTargetActor()->GetActorLocation());
+				CheckAbilityRangeRequirements();
 			}
 		}
+		
+		return;
 	}
+
+	AActor* CurrentTarget = Cast<AActor>(AIActor->GetBaseAIController()->GetAIBlackboardComponent()->GetValueAsObject(FName("Target")));
+	if(CurrentTarget)
+	{
+		SetTargetActor(CurrentTarget);
+		DistanceToTarget = FVector::Distance(GetAvatarActor()->GetActorLocation(), CurrentTarget->GetActorLocation());
+		CheckAbilityRangeRequirements();
+	}
+	
 }
 
 //NOTE: Should be called after "SetTargetAndCheckRange"
