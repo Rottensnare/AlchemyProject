@@ -3,20 +3,22 @@
 
 #include "GAS/Components/AlcAbilitySystemComponent.h"
 
+#include "AI/AIBase.h"
 #include "GAS/GameplayAbility/AlcGameplayAbility.h"
 
 void UAlcAbilitySystemComponent::CheckAbilityRangeRequirements()
 {
 	ABILITYLIST_SCOPE_LOCK()
-	for(FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
+	for(const FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
 	{
 		UAlcGameplayAbility* AlcAbility = Cast<UAlcGameplayAbility>(AbilitySpec.Ability);
 		if(AlcAbility)
 		{
 			if(AlcAbility->bHasRangeRequirements == false) continue;
 			
-			if(DistanceToTarget < AlcAbility->MinRange)
+			if(DistanceToTarget < AlcAbility->MinRange) 
 			{
+				
 				AlcAbility->AbilityTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Ability.Requirement.TooClose")));
 				AlcAbility->AbilityTags.RemoveTag(FGameplayTag::RequestGameplayTag(FName("Ability.Requirement.TooFar")));
 				AlcAbility->AbilityTags.RemoveTag(FGameplayTag::RequestGameplayTag(FName("Ability.Requirement.InRange")));
@@ -35,4 +37,40 @@ void UAlcAbilitySystemComponent::CheckAbilityRangeRequirements()
 			}
 		}
 	}
+}
+//NOTE: Should be called before trying to activate an ability
+void UAlcAbilitySystemComponent::SetTargetAndCheckRange(AActor* InAvatarActor) const
+{
+	AAIBase* AIActor = Cast<AAIBase>(InAvatarActor);
+	if(AIActor)
+	{
+		AActor* CurrentTarget = Cast<AActor>(AIActor->GetBaseAIController()->GetAIBlackboardComponent()->GetValueAsObject(FName("Target")));
+		if(CurrentTarget)
+		{
+			UAlcAbilitySystemComponent* AlcAbilitySystemComponent = Cast<UAlcAbilitySystemComponent>(AIActor->GetAbilitySystemComponent());
+			if(AlcAbilitySystemComponent)
+			{
+				AlcAbilitySystemComponent->SetTargetActor(CurrentTarget);
+				AlcAbilitySystemComponent->DistanceToTarget = FVector::Distance(AIActor->GetActorLocation(), CurrentTarget->GetActorLocation());
+				AlcAbilitySystemComponent->CheckAbilityRangeRequirements();
+			}
+		}
+	}
+}
+
+//NOTE: Should be called after "SetTargetAndCheckRange"
+TArray<FGameplayAbilitySpecHandle> UAlcAbilitySystemComponent::GetAbilitiesInRange()
+{
+	TArray<FGameplayAbilitySpecHandle> InRangeAbilities;
+	
+	ABILITYLIST_SCOPE_LOCK()
+	for(FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
+	{
+		if(AbilitySpec.Ability->AbilityTags.HasTag(FGameplayTag::RequestGameplayTag(FName("Ability.Requirement.InRange"))))
+		{
+			InRangeAbilities.AddUnique(AbilitySpec.Handle);
+		}
+	}
+	
+	return InRangeAbilities;
 }

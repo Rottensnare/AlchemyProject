@@ -27,6 +27,12 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Ability|Target", meta = (AllowPrivateAccess = "true"))
 	AActor* TargetActor;
 
+	UFUNCTION(BlueprintCallable)
+	virtual void SetTargetAndCheckRange(AActor* InAvatarActor) const;
+
+	UFUNCTION(BlueprintCallable)
+	TArray<FGameplayAbilitySpecHandle> GetAbilitiesInRange();
+
 public:
 
 	FORCEINLINE void SetTargetActor(AActor* InActor) {TargetActor = InActor;}

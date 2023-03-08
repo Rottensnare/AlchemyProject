@@ -22,6 +22,11 @@ public:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Ability")
 	EGASAbilityInputID AbilityInputID{EGASAbilityInputID::None};
 
+	/** Category RANGE
+	*	Range is mainly used by AI to determine if they should use an ability.
+	*	Can also be used with TAB targeted abilities for player
+	*/
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ability|Range")
 	bool bHasRangeRequirements;
 
@@ -37,7 +42,5 @@ public:
 protected:
 
 	virtual bool CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags, FGameplayTagContainer* OptionalRelevantTags) const override;
-
-	UFUNCTION(BlueprintCallable)
-	virtual void SetTarget(AActor* AvatarActor) const;
+	
 };
