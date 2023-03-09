@@ -19,7 +19,6 @@ void UAlcAbilitySystemComponent::CheckAbilityRangeRequirements()
 			
 			if(DistanceToTarget < AlcAbility->MinRange) 
 			{
-				
 				AlcAbility->AbilityTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Ability.Requirement.TooClose")));
 				AlcAbility->AbilityTags.RemoveTag(FGameplayTag::RequestGameplayTag(FName("Ability.Requirement.TooFar")));
 				AlcAbility->AbilityTags.RemoveTag(FGameplayTag::RequestGameplayTag(FName("Ability.Requirement.InRange")));
