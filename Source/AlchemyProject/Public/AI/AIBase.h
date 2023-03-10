@@ -39,6 +39,9 @@ class ALCHEMYPROJECT_API AAIBase : public ACharacter, public IQueryable, public 
 	GENERATED_BODY()
 
 public:
+
+	friend class ABaseAIController;
+	
 	AAIBase();
 
 	virtual void GetActorEyesViewPoint(FVector& OutLocation, FRotator& OutRotation) const override;
@@ -72,6 +75,10 @@ protected:
 	bool FindNextPatrolPoint();
 
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
+	// Places the TraceProxy in the passed in location and traces for a hit.
+	UFUNCTION(BlueprintCallable)
+	virtual bool TraceForTargetProxy(const FVector& InLocation, FHitResult& OutHitResult);
 	
 	//Deprecated
 	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Perception", meta = (AllowPrivateAccess = "true"))
@@ -107,6 +114,11 @@ protected:
 	/** Used for detecting the player very close if AI bPlayerSeen = true */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Perception|Components", meta = (AllowPrivateAccess = "true"))
 	class USphereComponent* ESPSphere;
+	
+	/**	Used for tracing and placed on the predicated target location or last stimulus location */
+	/**	Shouldn't have collision, used when tracing against the TargetProxy object types */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	class UBoxComponent* TargetProxy;
 	
 	UPROPERTY(EditAnywhere, Category = "Behavior Tree", meta = (AllowPrivateAccess = "true"))
 	class UBehaviorTree* BehaviorTree;

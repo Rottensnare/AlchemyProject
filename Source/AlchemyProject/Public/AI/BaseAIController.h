@@ -42,7 +42,7 @@ class ALCHEMYPROJECT_API ABaseAIController : public AAIController
 	GENERATED_BODY()
 
 public:
-
+	
 	ABaseAIController(const FObjectInitializer& ObjectInitializer);
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual ETeamAttitude::Type GetTeamAttitudeTowards(const AActor& Other) const override;

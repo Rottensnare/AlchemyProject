@@ -10,6 +10,7 @@
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Components/BoxComponent.h"
 #include "Engine/DataTable.h"
 #include "EnvironmentQuery/EnvQuery.h"
 #include "EnvironmentQuery/EnvQueryManager.h"
@@ -345,6 +346,7 @@ void ABaseAIController::OnTargetPerceptionUpdated_Delegate(AActor* InActor, FAIS
 			
 			BlackboardComponent->SetValueAsObject(FName("Target"), InActor);
 			BlackboardComponent->SetValueAsVector(FName("LastTargetLocation"), InActor->GetActorLocation());
+			AIBase->TargetProxy->SetWorldLocation(InActor->GetActorLocation());
 
 			//UE_LOG(LogTemp, Warning, TEXT("Stimulus Debug: %s"), *Stimulus.GetDebugDescription())
 			

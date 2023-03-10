@@ -15,6 +15,7 @@ APatrolArea::APatrolArea()
 	PatrolArea = CreateDefaultSubobject<UBoxComponent>(TEXT("PatrolArea"));
 	PatrolArea->SetupAttachment(GetRootComponent());
 	PatrolArea->InitBoxExtent(FVector(100.f));
+	PatrolArea->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 FVector APatrolArea::GetRandomPatrolCoordinates()

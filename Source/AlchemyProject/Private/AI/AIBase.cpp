@@ -12,6 +12,7 @@
 #include "AlchemyProject/InventoryComponent.h"
 #include "AlchemyProject/PlayerCharacter.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -52,6 +53,14 @@ AAIBase::AAIBase()
 	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
 
 	Attributes = CreateDefaultSubobject<UAlcAttributeSet>(TEXT("Attributes"));
+
+	TargetProxy = CreateDefaultSubobject<UBoxComponent>(TEXT("TargetProxy"));
+	TargetProxy->SetBoxExtent(FVector(30.f, 30.f, 88.f));
+	TargetProxy->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	TargetProxy->SetCollisionObjectType(ECC_EngineTraceChannel1);
+	TargetProxy->SetCollisionResponseToAllChannels(ECR_Ignore);
+	TargetProxy->SetCollisionResponseToChannel(ECC_EngineTraceChannel1, ECR_Block);
+	TargetProxy->SetGenerateOverlapEvents(false);
 	
 }
 
@@ -165,6 +174,33 @@ float AAIBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, A
 	HealthComponent->SetHealth(FMath::Clamp(HealthComponent->GetHealth() - DamageAmount, 0, HealthComponent->GetMaxHealth()));
 	
 	return Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+}
+
+bool AAIBase::TraceForTargetProxy(const FVector& InLocation, FHitResult& OutHitResult)
+{
+	bool bSuccess = false;
+
+	TargetProxy->SetWorldLocation(InLocation);
+	
+	FHitResult HitResult;
+	FCollisionObjectQueryParams CollisionObjectQueryParams;
+	CollisionObjectQueryParams.AddObjectTypesToQuery(ECC_GameTraceChannel1);
+	CollisionObjectQueryParams.AddObjectTypesToQuery(ECC_Pawn);
+	CollisionObjectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
+	CollisionObjectQueryParams.AddObjectTypesToQuery(ECC_WorldStatic);
+	CollisionObjectQueryParams.AddObjectTypesToQuery(ECC_Visibility);
+	FCollisionQueryParams CollisionQueryParams;
+	CollisionQueryParams.AddIgnoredActor(this);
+	
+	GetWorld()->LineTraceSingleByObjectType(HitResult, GetActorLocation(), InLocation, CollisionObjectQueryParams, CollisionQueryParams);
+	
+	if(HitResult.bBlockingHit)
+	{
+		OutHitResult = HitResult;
+		bSuccess = true;
+	}
+	
+	return bSuccess;
 }
 
 void AAIBase::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
