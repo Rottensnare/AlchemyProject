@@ -516,5 +516,4 @@ void AAIBase::SetAIState(EAIState NewState)
 
 	if(AIController == nullptr || AIController->GetAIBlackboardComponent() == nullptr) return;
 	AIController->GetAIBlackboardComponent()->SetValueAsEnum(FName("AIState"), (uint8)AIState);
-	
 }
