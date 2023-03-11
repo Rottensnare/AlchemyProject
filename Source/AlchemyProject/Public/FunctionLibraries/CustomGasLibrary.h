@@ -18,4 +18,7 @@ class ALCHEMYPROJECT_API UCustomGasLibrary : public UBlueprintFunctionLibrary
 
 	UFUNCTION(BlueprintCallable, Category = "Gameplay Tags")
 	static FGameplayTagContainer AddTagsToGameplayTagContainer(const FGameplayTagContainer& OutGameplayTagContainer, const FGameplayTagContainer& TagsToAdd);
+	
+	UFUNCTION(BlueprintCallable, Category = "Gameplay Tags")
+	static FGameplayTagContainer RemoveTagsFromGameplayTagContainer(const FGameplayTagContainer& OutGameplayTagContainer, const FGameplayTagContainer& TagsToRemove);
 };

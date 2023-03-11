@@ -14,3 +14,11 @@ FGameplayTagContainer UCustomGasLibrary::AddTagsToGameplayTagContainer(const FGa
 
 	return ReturnContainer;
 }
+
+FGameplayTagContainer UCustomGasLibrary::RemoveTagsFromGameplayTagContainer(
+	const FGameplayTagContainer& OutGameplayTagContainer, const FGameplayTagContainer& TagsToRemove)
+{
+	FGameplayTagContainer ReturnContainer = OutGameplayTagContainer;
+	ReturnContainer.RemoveTags(TagsToRemove);
+	return ReturnContainer;
+}

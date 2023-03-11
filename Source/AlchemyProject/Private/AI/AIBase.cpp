@@ -203,6 +203,11 @@ bool AAIBase::TraceForTargetProxy(const FVector& InLocation, FHitResult& OutHitR
 	return bSuccess;
 }
 
+void AAIBase::MovementTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
+{
+	UE_LOG(LogTemp, Warning, TEXT("TagChanged: %s"), *CallbackTag.GetTagName().ToString())
+}
+
 void AAIBase::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	static const FName NAME_FollowPlayer = FName("bFollowPlayer");
@@ -403,6 +408,15 @@ void AAIBase::SetCurrentRoad(ARoadSpline* InRoadSpline)
 ABaseAIController* AAIBase::GetBaseAIController() const
 {
 	return AIController;
+}
+
+void AAIBase::SetBeingCareful(const bool InBool)
+{
+	if(AIController == nullptr || AIController->GetAIBlackboardComponent() == nullptr) return;
+	
+	AIController->GetAIBlackboardComponent()->SetValueAsBool(FName("BeingCareful"), InBool);
+	bBeingCareful = InBool;
+	
 }
 
 bool AAIBase::Interact(AActor* OtherActor)

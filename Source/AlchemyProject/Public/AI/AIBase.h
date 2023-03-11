@@ -109,6 +109,8 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "GAS", meta = (AllowPrivateAccess = "true"))
 	TArray<TSubclassOf<class UAlcGameplayAbility>> DefaultAbilities;
+
+	virtual void MovementTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
 	
 
 	/** Used for detecting the player very close if AI bPlayerSeen = true */
@@ -212,6 +214,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
 	float IdealCombatRange{20.f};
 
+	/**	Should be used when losing sight of the enemy, covering a squadmember or whenever AI should move more carefully */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	bool bBeingCareful{false};
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* HitReactMontage;
 
@@ -229,6 +235,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TArray<FName> RangedSections;
+
 
 private:	
 
@@ -314,8 +321,10 @@ public:
 	FORCEINLINE void SetRoadsFound(const bool bFound) {bRoadsFound = bFound;}
 	FORCEINLINE TArray<FRoadInfo>& GetCurrentRoadInfos() {return CurrentRoadInfos;}
 	FORCEINLINE void SetSquadID(const int32 InID) {SquadID = InID;}
+	FORCEINLINE bool GetBeingCareful() const {return bBeingCareful;}
 
 	ABaseAIController* GetBaseAIController() const;
+	void SetBeingCareful(const bool InBool);
 
 	/***********************
 	 *	Public Variables
