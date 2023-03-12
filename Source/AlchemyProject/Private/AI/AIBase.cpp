@@ -335,10 +335,17 @@ void AAIBase::Attack()
 
 bool AAIBase::UseAbility()
 {
-	
-	
-	
 	return true;
+}
+
+void AAIBase::HandleLostEnemy(AActor* Enemy)
+{
+	
+}
+
+void AAIBase::HandleEnemySeen(AActor* Enemy)
+{
+	
 }
 
 void AAIBase::SetFollowPlayer(bool Value)
@@ -416,7 +423,8 @@ void AAIBase::SetBeingCareful(const bool InBool)
 	
 	AIController->GetAIBlackboardComponent()->SetValueAsBool(FName("BeingCareful"), InBool);
 	bBeingCareful = InBool;
-	
+	if(bBeingCareful) GetCharacterMovement()->MaxWalkSpeed = PatrolMoveSpeed;
+	else GetCharacterMovement()->MaxWalkSpeed = DefaultMoveSpeed;
 }
 
 bool AAIBase::Interact(AActor* OtherActor)

@@ -333,6 +333,7 @@ void ABaseAIController::OnTargetPerceptionUpdated_Delegate(AActor* InActor, FAIS
 				BlackboardComponent->ClearValue(FName("PredictedTargetLocation"));
 				AIPerceptionComponent->LastPerceivedActors_Sight.AddUnique(InActor);
 				SetLastStimulusType(ELastStimulusType::ELST_Sight, InActor);
+				AIBase->HandleEnemySeen(InActor);
 				//SetStimulusHasUpdated(true); //NOTE currently used only for hearing
 				
 			}
@@ -342,6 +343,7 @@ void ABaseAIController::OnTargetPerceptionUpdated_Delegate(AActor* InActor, FAIS
 				AIBase->SetCanSeeTarget(false);
 				BlackboardComponent->SetValueAsBool(FName("CanSeeTarget"), false);
 				UAISense_Prediction::RequestPawnPredictionEvent(GetPawn(), InActor, 2.f);
+				AIBase->HandleLostEnemy(InActor);
 			}
 			
 			BlackboardComponent->SetValueAsObject(FName("Target"), InActor);

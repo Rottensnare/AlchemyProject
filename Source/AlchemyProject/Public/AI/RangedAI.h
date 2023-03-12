@@ -17,5 +17,10 @@ class ALCHEMYPROJECT_API ARangedAI : public AAIBase
 public:
 	
 
+protected:
+
+	virtual void HandleEnemySeen(AActor* Enemy) override;
+
+	virtual void HandleLostEnemy(AActor* Enemy) override;
 	
 };

@@ -235,6 +235,10 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TArray<FName> RangedSections;
+	
+	virtual void HandleLostEnemy(AActor* Enemy);
+
+	virtual void HandleEnemySeen(AActor* Enemy);
 
 
 private:	
