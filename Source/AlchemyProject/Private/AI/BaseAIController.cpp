@@ -134,6 +134,8 @@ void ABaseAIController::HandleQueryRequest_Locations(TSharedPtr<FEnvQueryResult>
 void ABaseAIController::QueryForActors_GameplayTags(const FGameplayTagContainer& InGameplayTagContainer, const EQueryType QueryType,
                                                     const UEnvQuery* const InEnvQuery, APawn* InPawn, const float SearchRadius, const float MinFindRadius, const float MaxFindRadius)
 {
+	// Custom EQS implementation that uses a GameplayTagContainer. Calls HandleQueryRequest when done.
+	
 	TagsToBeTested = InGameplayTagContainer;
 	CurrentQueryType = QueryType;
 	FEnvQueryRequest ActorsQueryRequest = FEnvQueryRequest(InEnvQuery, InPawn);
@@ -153,6 +155,7 @@ void ABaseAIController::QueryForActors_GameplayTags(const FGameplayTagContainer&
 
 void ABaseAIController::HandleQueryRequest(TSharedPtr<FEnvQueryResult> Result)
 {
+	//Adds actors to the CustomAIContainer that match the chosen GameplayTags and implement the IQueryable interface.
 	ClearCustomAIContainer();
 	
 	if(Result->IsSuccessful())
@@ -184,7 +187,7 @@ void ABaseAIController::HandleQueryRequest(TSharedPtr<FEnvQueryResult> Result)
 						NewQuery = FGameplayTagQuery::MakeQuery_MatchTag(TagsToBeTested.First());
 						break;
 					default:
-						UE_LOG(LogTemp, Warning, TEXT("Query type not valid!"))
+						UE_LOG(LogTemp, Warning, TEXT("%hs Query type not valid!"), __FUNCTION__)
 						break;
 					}
 					
@@ -192,11 +195,11 @@ void ABaseAIController::HandleQueryRequest(TSharedPtr<FEnvQueryResult> Result)
 					if(bMatchesQuery)
 					{
 						AddToCustomAIContainer(OutActor);
-					} else UE_LOG(LogTemp, Display, TEXT("bMatchesQuery was false"))
+					} else UE_LOG(LogTemp, Display, TEXT("%hs bMatchesQuery was false"), __FUNCTION__)
 				}
 			}
-		}else UE_LOG(LogTemp, Display, TEXT("OutActors was Empty"))
-	} else UE_LOG(LogTemp, Display, TEXT("Result was unsuccessful"))
+		}else UE_LOG(LogTemp, Display, TEXT("%hs OutActors was Empty"), __FUNCTION__)
+	} else UE_LOG(LogTemp, Display, TEXT("%hs Result was unsuccessful"), __FUNCTION__)
 	
 	//UE_LOG(LogTemp, Display, TEXT("Number of Matches: %d"), CustomAIContainer->ActorContainer.Num())
 	if(BlackboardComponent) BlackboardComponent->SetValueAsObject(FName("QueryActors"), CustomAIContainer);

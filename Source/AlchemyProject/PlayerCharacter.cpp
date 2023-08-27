@@ -704,7 +704,7 @@ void APlayerCharacter::UsePotion(const TSubclassOf<UPotionComponent> InComponent
 	auto* PotionComponent = NewObject<UPotionComponent>(this, InComponentClass, NAME_None, RF_Transient);
 	if(PotionComponent == nullptr)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Failed to create PotionComponent"))
+		UE_LOG(LogTemp, Error, TEXT("%hs Failed to create PotionComponent"), __FUNCTION__)
 		return;
 	}
 	PotionComponent->RegisterComponent();

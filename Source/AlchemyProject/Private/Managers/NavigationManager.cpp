@@ -11,10 +11,9 @@
 
 bool UNavigationManager::CalculateRequiredRoads(AAIBase* InActor, ARoadSpline* StartRoad, ARoadSpline* EndRoad, TArray<FRoadInfo>& OutRoadInfos)
 {
-	//UE_LOG(LogTemp, Warning, TEXT("CalculateRequiredRoads"))
 	AAIBase* BaseAI = Cast<AAIBase>(InActor);
 	if(BaseAI == nullptr) return false;
-	//UE_LOG(LogTemp, Warning, TEXT("BaseAI ok"))
+
 	FRoadConnectionContainer RoadConnectionContainer;
 	
 	if(StartRoad == EndRoad)
@@ -63,8 +62,7 @@ bool UNavigationManager::CalculateRequiredRoads(AAIBase* InActor, ARoadSpline* S
 	}
 	
 	if (StartRoadInfo.RoadSpline == nullptr || EndRoadInfo.RoadSpline == nullptr) return false;
-
-	//UE_LOG(LogTemp, Warning, TEXT("StartRoadInfo != nullptr && EndRoadInfo != nullptr"))
+	
 	// First FRoadInfo* is the road that was visited and the second one in the array is the FRoadInfo* that the road was visited from
 	TMap<FRoadInfo, FRoadInfo> VisitedRoads;
 	TQueue<FRoadInfo> RoadsToVisit;
@@ -287,6 +285,7 @@ ARoadSpline* UNavigationManager::GetNearestRoadSplinePoint(const AActor* const I
 	
 	return ClosestRoad;
 }
+
 // First int32 is for the current road, the other is for the next
 TMap<int32,int32> UNavigationManager::GetRoadSwitchIndex(ARoadSpline* CurrentRoad, ARoadSpline* NextRoad)
 {

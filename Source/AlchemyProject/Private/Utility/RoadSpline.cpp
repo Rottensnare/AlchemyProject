@@ -344,7 +344,7 @@ bool ARoadSpline::GetNextRoad(AActor* InActor)
 	// NOTE Takes an AActor* but only actually accepts BaseAI
 	// NOTE This will be changed in the future to accept other actors too
 
-	// NOTE: This function finds the next for the passed in actor
+	// NOTE: This function finds the next road for the passed in actor
 	// NOTE: Sets the current road to the next road
 	// NOTE: Adds the actor to the ActorNavPackages map of the next road
 	// NOTE: Lastly it calls GetActorNavPackage
