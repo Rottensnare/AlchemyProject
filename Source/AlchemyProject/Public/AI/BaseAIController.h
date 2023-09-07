@@ -133,6 +133,8 @@ protected:
 
 private:
 
+	//TODO: Move these to the AI class. Probably shouldn't be in the controller. Different AIs should have different values.
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Perception|Values", meta = (AllowPrivateAccess = "true"))
 	float MaxSightRadius{2000.f};
 
@@ -140,8 +142,7 @@ private:
 	float PeripheralVisionAngle{73.f};
 	
 	float CheckStimulusTimer{0.f};
-
-	//TODO: Move these to the AI class. Probably shouldn't be in the controller. Different AIs should have different values.
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Perception|Values", meta = (AllowPrivateAccess = "true"))
 	float MaxAgeSight{90.f};
 
