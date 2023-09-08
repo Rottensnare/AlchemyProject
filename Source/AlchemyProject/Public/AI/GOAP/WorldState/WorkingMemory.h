@@ -34,7 +34,7 @@ protected:
 
 
 private:
-	inline static unsigned long long UWMFact::UniqueFactID = 0;
+	inline static unsigned long long UniqueFactID = 0;
 	
 	double Time = 0;
 };

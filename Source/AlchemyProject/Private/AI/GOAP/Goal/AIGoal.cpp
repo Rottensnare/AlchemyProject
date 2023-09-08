@@ -13,6 +13,12 @@ ActivationTime(0)
 	
 }
 
+void UAIGoal::InitGoal(AAgentBase* InAgent, EGoalType InGoalType)
+{
+	Agent = InAgent;
+	GoalType = InGoalType;
+}
+
 void UAIGoal::ActivateGoal()
 {
 	ActivationTime = GetWorld()->GetTimeSeconds();
