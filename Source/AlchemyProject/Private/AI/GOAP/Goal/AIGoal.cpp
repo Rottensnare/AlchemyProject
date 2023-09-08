@@ -3,3 +3,17 @@
 
 #include "AI/GOAP/Goal/AIGoal.h"
 
+UAIGoal::UAIGoal()
+	:
+Agent(nullptr),
+RecalculationFrequency(0.f),
+GoalRelevancy(0.f),
+ActivationTime(0)
+{
+	
+}
+
+void UAIGoal::ActivateGoal()
+{
+	ActivationTime = GetWorld()->GetTimeSeconds();
+}

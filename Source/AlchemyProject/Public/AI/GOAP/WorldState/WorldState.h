@@ -8,6 +8,14 @@
 
 class UBlackboardComponent;
 
+USTRUCT()
+struct FFact
+{
+	GENERATED_BODY()
+
+	
+};
+
 /**
  * 
  */

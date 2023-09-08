@@ -8,4 +8,5 @@
 UWorldState::UWorldState()
 {
 	WorldBlackboard = CreateDefaultSubobject<UBlackboardComponent>("WorldBlackboard");
+	
 }
