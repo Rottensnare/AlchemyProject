@@ -17,4 +17,9 @@ class ALCHEMYPROJECT_API UAIGoal_GoTo : public UAIGoal
 public:
 
 	virtual bool IsWorldStateSatisfied(const UWorldState* WS) override;
+
+protected:
+
+	float Threshold = 100.f;
+	FVector TargetLocation = FVector::ZeroVector;
 };
