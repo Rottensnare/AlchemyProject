@@ -109,12 +109,12 @@ TArray<FVector>& ABaseAIController::QueryForLocations(const UEnvQuery* const InE
 	
 	if(InEnvQuery == nullptr || InPawn == nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("QueryForLocations: InEnvQuery or InPawn was nullptr"))
+		UE_LOG(LogTemp, Warning, TEXT("%hs: InEnvQuery or InPawn was nullptr"), __FUNCTION__)
 		return QueryLocations;
 	}
 	FEnvQueryRequest ActorsQueryRequest = FEnvQueryRequest(InEnvQuery, InPawn);
 	const int32 ExecuteCode = ActorsQueryRequest.Execute(QueryRunMode, this, &ABaseAIController::HandleQueryRequest_Locations);
-	//UE_LOG(LogTemp, Warning, TEXT("QueryForLocations: %d"), ExecuteCode)
+	UE_LOG(LogTemp, Warning, TEXT("%hs: %d"), __FUNCTION__, ExecuteCode)
 	return QueryLocations;
 
 	
@@ -122,7 +122,6 @@ TArray<FVector>& ABaseAIController::QueryForLocations(const UEnvQuery* const InE
 
 void ABaseAIController::HandleQueryRequest_Locations(TSharedPtr<FEnvQueryResult> Result)
 {
-	//UE_LOG(LogTemp, Warning, TEXT("HandleQueryRequest_Locations"))
 	TArray<FVector> OutLocations;
 	if(Result->IsSuccessful())
 	{
@@ -277,7 +276,7 @@ void ABaseAIController::OnPossess(APawn* InPawn)
 			{
 				BlackboardComponent->InitializeBlackboard(*(Enemy->GetBehaviorTree()->GetBlackboardAsset()));
 				BehaviorTreeComponent->StartTree(*GetBehaviorTree("Default"), EBTExecutionMode::Looped); //TODO: Instead of "Default" make it dynamic based on Gameplay Tags
-				//RunBehaviorTree(GetBehaviorTree("Default")); //BUG: RunBehaviorTree doesn't check if the tree is running already
+				//RunBehaviorTree(GetBehaviorTree("Default")); //NOTE: RunBehaviorTree doesn't check if the tree is running already
 				BehaviorTreeComponent->SetDynamicSubtree(FGameplayTag::RequestGameplayTag(FName("Subtree.Work")), GetBehaviorTree("Work"));
 				BlackboardComponent->SetValueAsEnum(TEXT("LastStimulusType"), (uint8)ELastStimulusType::ELST_MAX);
 				BlackboardComponent->SetValueAsBool(TEXT("HearingStimulusHasUpdated"), true);

@@ -9,36 +9,20 @@
 #include "Utility/RoadSpline.h"
 #include "Utility/RoadSplineComponent.h"
 
+//TODO: Divide into smaller functions.
+//TODO: Use A Star instead of BFS
+//TODO: Remove unnecessary for loops
+//TODO: Instead of spline points figure out a better way.
 bool UNavigationManager::CalculateRequiredRoads(AAIBase* InActor, ARoadSpline* StartRoad, ARoadSpline* EndRoad, TArray<FRoadInfo>& OutRoadInfos)
 {
-	AAIBase* BaseAI = Cast<AAIBase>(InActor);
-	if(BaseAI == nullptr) return false;
+	if(InActor == nullptr) return false;
 
-	FRoadConnectionContainer RoadConnectionContainer;
-	
 	if(StartRoad == EndRoad)
 	{
-		RoadConnectionContainer.RoadSplines.Add(StartRoad);
-		RoadsToFollowMap.Emplace(InActor, RoadConnectionContainer);
-		for(FRoadInfo& RoadInfo : RoadInfos)
-		{
-			if (RoadInfo.RoadSpline.Get() == StartRoad)
-			{
-				OutRoadInfos.Emplace(RoadInfo);
-				break;
-			}
-		}
-
-		BaseAI->GetRoadNames().Empty();
-		TArray<FName> RoadNames;
-		for(const FRoadInfo& RoadInfo : OutRoadInfos)
-		{
-			RoadNames.AddUnique(RoadInfo.RoadSpline->RoadName);
-		}
-		BaseAI->SetRoadNames(RoadNames);
-		
-		return true;
+		return HandleStartEndRoadsAreSame(InActor, StartRoad, OutRoadInfos);
 	}
+
+	/**	Fill in the correct road information */
 	
 	FRoadInfo StartRoadInfo;
 	FRoadInfo EndRoadInfo;
@@ -46,22 +30,21 @@ bool UNavigationManager::CalculateRequiredRoads(AAIBase* InActor, ARoadSpline* S
 	{
 		if (RoadInfo.RoadSpline.Get() == StartRoad)
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("== StartRoad"))
 			StartRoadInfo = RoadInfo;
 		}
 		if (RoadInfo.RoadSpline.Get() == EndRoad)
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("== EndRoad"))
 			EndRoadInfo = RoadInfo;
 		}
 		if (StartRoadInfo.RoadSpline != nullptr && EndRoadInfo.RoadSpline != nullptr)
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("StartRoadInfo != nullptr && EndRoadInfo != nullptr"))
 			break;
 		}
 	}
 	
 	if (StartRoadInfo.RoadSpline == nullptr || EndRoadInfo.RoadSpline == nullptr) return false;
+
+	/**	BFS */
 	
 	// First FRoadInfo* is the road that was visited and the second one in the array is the FRoadInfo* that the road was visited from
 	TMap<FRoadInfo, FRoadInfo> VisitedRoads;
@@ -70,21 +53,26 @@ bool UNavigationManager::CalculateRequiredRoads(AAIBase* InActor, ARoadSpline* S
 
 	RoadsToVisit.Enqueue(StartRoadInfo);
 	VisitedRoads.Add(StartRoadInfo, StartRoadInfo);
+	
 	bool bFoundRoute = false;
+	
+	/* DEBUG
 	for(auto& Entry : RoadConnectionMap)
 	{
-		//if(Entry.Key.RoadSpline.Get()) UE_LOG(LogTemp, Warning, TEXT("RoadConnectionMap: RoadName: %s"), *Entry.Key.RoadSpline.Get()->GetName())
+		if(Entry.Key.RoadSpline.Get()) UE_LOG(LogTemp, Warning, TEXT("RoadConnectionMap: RoadName: %s"), *Entry.Key.RoadSpline.Get()->GetName())
 	}
+	*/
+	
 	while(!RoadsToVisit.IsEmpty())
 	{
 		FRoadInfo CurrentRoad;
 		RoadsToVisit.Dequeue(CurrentRoad);
-		//if(CurrentRoad.RoadSpline) UE_LOG(LogTemp, Warning, TEXT("CurrentRoad Name: %s"), *CurrentRoad.RoadSpline->GetName())
 		
 		bool bContains = false;
-		for(const auto& Temp : RoadConnectionMap)
+		//Makes sure road is part of the road network. Probably should be removed later.
+		for(const auto& Road : RoadConnectionMap)
 		{
-			if(Temp.Key.RoadSpline.Get() == CurrentRoad.RoadSpline.Get())
+			if(Road.Key.RoadSpline.Get() == CurrentRoad.RoadSpline.Get())
 			{
 				bContains = true;
 				break;
@@ -93,16 +81,14 @@ bool UNavigationManager::CalculateRequiredRoads(AAIBase* InActor, ARoadSpline* S
 		
 		if(bContains)
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("bContains"))
-			
 			FRoadInfo FirstRoadInfo;
 			FRoadInfoContainer FirstRoadInfoContainer;
-			for(const auto& Some : RoadConnectionMap)
+			for(const auto& Road : RoadConnectionMap)
 			{
-				if(Some.Key.RoadSpline == CurrentRoad.RoadSpline)
+				if(Road.Key.RoadSpline == CurrentRoad.RoadSpline)
 				{
-					FirstRoadInfo = Some.Key;
-					FirstRoadInfoContainer = Some.Value;
+					FirstRoadInfo = Road.Key;
+					FirstRoadInfoContainer = Road.Value;
 				}
 			}
 			
@@ -143,7 +129,7 @@ bool UNavigationManager::CalculateRequiredRoads(AAIBase* InActor, ARoadSpline* S
 			
 		}//else UE_LOG(LogTemp, Warning, TEXT("RoadConnectionMap.Contains(CurrentRoad) == false"))
 	}
-
+	/* DEBUG
 	for(const auto& Rood : OutRoads)
 	{
 		if(Rood.RoadSpline)
@@ -151,12 +137,41 @@ bool UNavigationManager::CalculateRequiredRoads(AAIBase* InActor, ARoadSpline* S
 			//UE_LOG(LogTemp, Warning, TEXT("Road Name: %s"), *Rood.RoadSpline->RoadName.ToString())
 		}
 	}
-	
+	*/
+
+	// No valid route found
 	if(OutRoads.IsEmpty()) return false;
 	
 	Algo::Reverse(OutRoads);
 	OutRoadInfos = OutRoads;
 	
+	InActor->GetRoadNames().Empty();
+	TArray<FName> RoadNames;
+	for(const FRoadInfo& RoadInfo : OutRoadInfos)
+	{
+		RoadNames.AddUnique(RoadInfo.RoadSpline->RoadName);
+	}
+	InActor->SetRoadNames(RoadNames);
+	
+	return true;
+	
+}
+
+bool UNavigationManager::HandleStartEndRoadsAreSame(AAIBase* BaseAI, ARoadSpline* StartRoad,
+	TArray<FRoadInfo>& OutRoadInfos)
+{
+	FRoadConnectionContainer RoadConnectionContainer;
+	RoadConnectionContainer.RoadSplines.Add(StartRoad);
+	RoadsToFollowMap.Emplace(BaseAI, RoadConnectionContainer);
+	for(FRoadInfo& RoadInfo : RoadInfos)
+	{
+		if (RoadInfo.RoadSpline.Get() == StartRoad)
+		{
+			OutRoadInfos.Emplace(RoadInfo);
+			break;
+		}
+	}
+
 	BaseAI->GetRoadNames().Empty();
 	TArray<FName> RoadNames;
 	for(const FRoadInfo& RoadInfo : OutRoadInfos)
@@ -164,9 +179,8 @@ bool UNavigationManager::CalculateRequiredRoads(AAIBase* InActor, ARoadSpline* S
 		RoadNames.AddUnique(RoadInfo.RoadSpline->RoadName);
 	}
 	BaseAI->SetRoadNames(RoadNames);
-	
+		
 	return true;
-	
 }
 
 bool UNavigationManager::InitRoads()
@@ -174,10 +188,11 @@ bool UNavigationManager::InitRoads()
 	const FString RoadInfoTablePath(TEXT("DataTable'/Game/Assets/Datatables/RoadInfoDataTable.RoadInfoDataTable'"));
 	// ReSharper disable once CppTooWideScope
 	const UDataTable* RoadInfoTableObject = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, *RoadInfoTablePath));
-	TArray<FRoadInfo*> TableRowArray;
-	TArray<FRoadInfo> TempRoadInfos;
 	if(RoadInfoTableObject)
 	{
+		TArray<FRoadInfo*> TableRowArray;
+		TArray<FRoadInfo> TempRoadInfos;
+		
 		const TCHAR* Context = TEXT("blablabla");
 		RoadInfoTableObject->GetAllRows<FRoadInfo>(Context, TableRowArray);
 		for(const auto& TempRoad : TableRowArray)
@@ -187,8 +202,6 @@ bool UNavigationManager::InitRoads()
 		for(const FRoadInfo Temp : TempRoadInfos)
 		{
 			//Storing for later use
-			//if(Temp.RoadSpline) UE_LOG(LogTemp, Warning, TEXT("Road to be added: %s"), *Temp.RoadSpline->GetName())
-			//else UE_LOG(LogTemp, Warning, TEXT("Road spline was nullptr"))
 			RoadInfos.Add(Temp);
 		}
 		for (FRoadInfo RoadInfo : TempRoadInfos)
@@ -199,7 +212,7 @@ bool UNavigationManager::InitRoads()
 			for (TSoftObjectPtr<ARoadSpline>& RoadSpline : RoadInfo.RoadConnections.RoadSplines)
 			{
 				//UE_LOG(LogTemp, Warning, TEXT("RoadInfo: %s, Connected Road: %s"), *RoadInfo.RoadSpline->GetName(), *RoadSpline.Get()->GetName())
-				TArray<FRoadInfo>::ElementType* ConnectedRoadInfo = TempRoadInfos.FindByPredicate([&](const FRoadInfo Info)
+				const TArray<FRoadInfo>::ElementType* ConnectedRoadInfo = TempRoadInfos.FindByPredicate([&](const FRoadInfo Info)
 				{
 					return Info.RoadSpline == RoadSpline;
 				});
@@ -212,18 +225,10 @@ bool UNavigationManager::InitRoads()
 			RoadInfoContainer.RoadInfos = ConnectedRoads;
 			RoadConnectionMap.Emplace(RoadInfo, RoadInfoContainer);
 		}
-	}
-	else
-	{
-		return false;
-	}
-
-	for(auto& Entry : RoadConnectionMap)
-	{
-		//if(Entry.Key.RoadSpline.Get()) UE_LOG(LogTemp, Warning, TEXT("RoadConnectionMap: RoadName: %s"), *Entry.Key.RoadSpline.Get()->GetName())
+		return true;
 	}
 	
-	return true;
+	return false;
 	
 }
 

@@ -56,7 +56,12 @@ public:
 	void OnHearingStimulusExpired_Delegate();
 	UFUNCTION()
 	void OnPerceptionUpdated_Delegate(const TArray<AActor*>& UpdatedActors);
-	
+
+
+	/**	Query for location using EQS
+	 *	
+	 *
+	 */
 	UFUNCTION(BlueprintCallable)
 	TArray<FVector>& QueryForLocations(const class UEnvQuery* const InEnvQuery, APawn* InPawn, EEnvQueryRunMode::Type QueryRunMode);
 	void HandleQueryRequest_Locations(TSharedPtr<FEnvQueryResult> Result);
@@ -114,10 +119,28 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Perception|Teams", meta = (AllowPrivateAccess = "true"))
 	TMap<TEnumAsByte<ETeamAttitude::Type>, bool> TeamAttitudeMap_Hearing;
 
-
+	/**
+	* Query for actors based on GameplayTags.
+	*
+	* Performs an EQS query to find actors that match the specified GameplayTags.
+	* 
+	* @param InGameplayTagContainer The GameplayTagContainer containing the tags to be tested.
+	* @param QueryType				The type of query to perform (AllTags, AnyTags, NoTags, SingleTag).
+	* @param InEnvQuery				The Environment Query to use for the query.
+	* @param InPawn					The pawn initiating the query.
+	* @param SearchRadius			The maximum search radius for the query.
+	* @param MinFindRadius			The minimum find radius for the query.
+	* @param MaxFindRadius			The maximum find radius for the query.
+	*/
 	UFUNCTION(BlueprintCallable)
 	void QueryForActors_GameplayTags(const struct FGameplayTagContainer& InGameplayTagContainer, const EQueryType QueryType, const UEnvQuery* const InEnvQuery, APawn* InPawn, const float SearchRadius, const float MinFindRadius, const float MaxFindRadius);
-
+	/**
+	* Handle the results of an EQS query from the QueryForActors_GameplayTags function
+	*
+	* This function processes the results of an EQS query and adds matching actors to a custom AI container.
+	*
+	* @param Result The result of the EQS query.
+	*/
 	void HandleQueryRequest(TSharedPtr<struct FEnvQueryResult> Result);
 
 	FGameplayTagContainer TagsToBeTested;
@@ -127,7 +150,14 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	class UCustomAIContainer* CustomAIContainer;
 
-	class UBehaviorTree* GetBehaviorTree(const FName BehaviorTreeName) const;
+	/**
+	 *	Returns the specified Behavior Tree from the Behavior Tree Data Table
+	 *
+	 *	@param BehaviorTreeName	Name of the desired Behavior Tree
+	 *
+	 *	@returns A pointer to a UBehaviorTree if found, otherwise nullptr
+	 */
+	UBehaviorTree* GetBehaviorTree(const FName BehaviorTreeName) const;
 
 	ELastStimulusType LastStimulusType{ELastStimulusType::ELST_MAX};
 

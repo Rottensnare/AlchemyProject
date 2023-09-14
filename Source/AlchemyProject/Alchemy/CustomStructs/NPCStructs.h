@@ -109,14 +109,13 @@ struct FRoadInfo : public FTableRowBase
 	}
 };
 
-FORCEINLINE uint32 GetTypeHash(const FRoadInfo& MidiTime)
+FORCEINLINE uint32 GetTypeHash(const FRoadInfo& Info)
 {
-	const uint32 Hash = UUserDefinedStruct::GetUserDefinedStructTypeHash(&MidiTime, FRoadInfo::StaticStruct());
-	//NOTE Maybe try MidiTime.RoadSpline.Get() for the FCrc::MemCrc32
-	//uint32 Hash = FCrc::MemCrc32(&MidiTime, sizeof(FRoadInfo));
+	const uint32 Hash = UUserDefinedStruct::GetUserDefinedStructTypeHash(&Info, FRoadInfo::StaticStruct());
 	return Hash;
 }
 
+//Used for road connections
 USTRUCT(BlueprintType)
 struct FRoadInfoContainer
 {

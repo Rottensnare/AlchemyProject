@@ -39,6 +39,7 @@ struct FWorldStateProperty
 	}
 	
 	uint32 PropertyID = 0;
+	
 	EWorldStateType WSType;
 	union
 	{

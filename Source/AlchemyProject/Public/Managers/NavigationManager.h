@@ -29,8 +29,25 @@ class ALCHEMYPROJECT_API UNavigationManager : public UObject
 
 public:
 
+	/**
+	 *	Calculates roads AI needs to take to reach EndRoad and saves them
+	 *
+	 *	Fills in the OutRoadInfos with the required roads. Sets road names for the AI that it needs to take.
+	 *	Uses BFS for searching the "shortest" path.
+	 *	NOTE: Needs to be reworked, or have other versions.
+	 *
+	 *	@param InActor		AI we are calculating the required roads for
+	 *	@param StartRoad	First road AI needs to take
+	 *	@param EndRoad		Last road AI needs to take
+	 *	@param OutRoadInfos	Info for roads that gets filled
+	 *
+	 *	@returns boolean if failed or succeeded
+	 */
 	UFUNCTION(BlueprintCallable)
 	bool CalculateRequiredRoads(class AAIBase* InActor, ARoadSpline* StartRoad, ARoadSpline* EndRoad, TArray<FRoadInfo>& OutRoadInfos);
+
+	
+	bool HandleStartEndRoadsAreSame(AAIBase* BaseAI, ARoadSpline* StartRoad, TArray<FRoadInfo>& OutRoadInfos);
 	
 	bool InitRoads();
 
