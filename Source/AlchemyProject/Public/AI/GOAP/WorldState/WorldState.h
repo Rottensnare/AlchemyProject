@@ -9,6 +9,7 @@
 class AAgentBase;
 class UBlackboardComponent;
 
+//Used to indicate how to interpret the union bits
 enum class EWorldStateType : uint8
 {
 	EWST_MAX,
@@ -33,9 +34,27 @@ struct FWorldStateProperty
 
 	inline static uint32 UniquePropertyID = 0;
 
-	uint32 GetUniquePropertyID()
+	/**	Increments the UniquePropertyID and then returns it */
+	static uint32 GetUniquePropertyID()
 	{
 		return ++UniquePropertyID;
+	}
+
+	/**	Returns current highest unique property ID without incrementing it */
+	/**	NOTE: NEVER ASSIGN USING THIS FUNCTION */
+	static uint32 PeekUniquePropertyID()
+	{
+		return UniquePropertyID;
+	}
+
+	//BUG: Possible bug due to TObjectPtr being 64-bits when in Editor
+	FWorldStateProperty& operator=(const FWorldStateProperty& OtherProp)
+	{
+		PropertyID = OtherProp.PropertyID;
+		WSType = OtherProp.WSType;
+		WS_Object = OtherProp.WS_Object;
+		
+		return *this;
 	}
 	
 	uint32 PropertyID = 0;
@@ -44,7 +63,7 @@ struct FWorldStateProperty
 	union
 	{
 		TObjectPtr<UObject> WS_Object;
-		FVector				WS_Location;
+		FVector_NetQuantize	WS_Location;
 		int32				WS_IntValue;
 		bool				WS_Boolean;
 	};
@@ -73,7 +92,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "World State")
 	TObjectPtr<UBlackboardComponent> WorldBlackboard;
 
-	TArray<FWorldStateProperty> PropList;
+	TArray<FWorldStateProperty> WSPropList;
 	
 	uint32 GetNumWorldStateDifferences(UWorldState* OtherWorldState);
 	uint32 GetNumUnsatisfiedWorldStateProps(UWorldState* OtherWorldState);

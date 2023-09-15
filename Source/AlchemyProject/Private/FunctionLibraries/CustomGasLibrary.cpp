@@ -22,3 +22,14 @@ FGameplayTagContainer UCustomGasLibrary::RemoveTagsFromGameplayTagContainer(
 	ReturnContainer.RemoveTags(TagsToRemove);
 	return ReturnContainer;
 }
+
+bool UCustomGasLibrary::IsCloseEnough(const FVector& CurrentLocation, const FVector& TargetLocation,
+	const float Threshold, const bool bIgnoreZAxis)
+{
+	if(bIgnoreZAxis == false)
+	{
+		return FVector::Dist(CurrentLocation, TargetLocation) <= Threshold;
+	}
+
+	return FVector::Dist2D(CurrentLocation, TargetLocation) < Threshold;
+}

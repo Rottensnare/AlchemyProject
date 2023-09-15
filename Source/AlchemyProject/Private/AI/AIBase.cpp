@@ -224,6 +224,8 @@ void AAIBase::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent
 
 void AAIBase::ToggleSpeechWidget(const FString InString)
 {
+	if(SpeechWidgetComp == nullptr) return;
+	
 	ClearSpeechWidgetTimer();
 	if(InString == FString() || InString == FString(""))
 	{
@@ -256,15 +258,13 @@ ETeamAttitude::Type AAIBase::GetFactionAttitude(const FNPCInfo& DetectedNPCInfo)
 				//TODO: Might need to create a system where it is not allowed to be part of 2 different factions that are hostile at each other
 				//TODO: This isn't an easy task, needs a lot of thought put into it, since player can be part of 2 factions that become hostile \
 				// after the player has joined them.
+				
 				for(const int32 FactionID : DetectedNPCInfo.JoinedFactionIDs)
 				{
 					if(TempFaction->GetFactionInfo().HostileFactions.Contains(FactionID)) return ETeamAttitude::Hostile;
 				}
 				for(const int32 FactionID : DetectedNPCInfo.JoinedFactionIDs)
 				{
-					//if(NPCInfo.JoinedFactionIDs.IsValidIndex(0)) UE_LOG(LogTemp, Warning, TEXT("Target FactionID: %d, Perceiver FactionID: %d"), FactionID, NPCInfo.JoinedFactionIDs[0])
-					//else  UE_LOG(LogTemp, Warning, TEXT("NPCInfo.JoinedFactionIDs.IsValidIndex(0) NOT A VALID INDEX"))
-					
 					//If part of a friendly faction, return Friendly
 					if(TempFaction->GetFactionInfo().FriendlyFactions.Contains(FactionID)) return ETeamAttitude::Friendly;
 					
@@ -314,6 +314,7 @@ void AAIBase::HideSpeechWidget()
 void AAIBase::OnESPBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	//TODO: Touch/proximity sense handling
 	bESPOverlapping = true;
 }
 
