@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <bitset>
+
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "WorldState.generated.h"
@@ -9,16 +11,31 @@
 class AAgentBase;
 class UBlackboardComponent;
 
+//Used for determining the type of world state effect an action can have
+enum class EWorldStateEffect : uint8
+{
+	EWSE_AtLocation,
+	EWSE_ObjectEquipped,
+	EWSE_ObjectInInventory,
+	EWSE_UsingAnObject,
+	EWSE_Idling,
+	EWSE_PlayingAnimation,
+
+	EWSE_MAX
+};
+
 //Used to indicate how to interpret the union bits
 enum class EWorldStateType : uint8
 {
-	EWST_MAX,
-
 	EWST_Object,
 	EWST_Location,
 	EWST_Integer,
-	EWST_Boolean
+	EWST_Boolean,
+
+	EWST_MAX
 };
+
+inline constexpr static uint8 WSEffectNum = static_cast<uint8>(EWorldStateEffect::EWSE_MAX);
 
 USTRUCT()
 struct FWorldStateProperty
@@ -28,10 +45,12 @@ struct FWorldStateProperty
 	FWorldStateProperty()
 	{
 		PropertyID = GetUniquePropertyID();
+		WSEffect = EWorldStateEffect::EWSE_MAX;
 		WSType = EWorldStateType::EWST_MAX;
 		WS_IntValue = 0;
 	}
 
+	//Maybe not necessary
 	inline static uint32 UniquePropertyID = 0;
 
 	/**	Increments the UniquePropertyID and then returns it */
@@ -51,6 +70,7 @@ struct FWorldStateProperty
 	FWorldStateProperty& operator=(const FWorldStateProperty& OtherProp)
 	{
 		PropertyID = OtherProp.PropertyID;
+		WSEffect = OtherProp.WSEffect;
 		WSType = OtherProp.WSType;
 		WS_Object = OtherProp.WS_Object;
 		
@@ -58,7 +78,7 @@ struct FWorldStateProperty
 	}
 	
 	uint32 PropertyID = 0;
-	
+	EWorldStateEffect WSEffect;
 	EWorldStateType WSType;
 	union
 	{
@@ -77,6 +97,8 @@ struct FFact
 	
 };
 
+typedef std::bitset< EWorldStateEffect::EWSE_MAX > FEffectFlags;
+
 /**
  * 
  */
@@ -92,8 +114,16 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "World State")
 	TObjectPtr<UBlackboardComponent> WorldBlackboard;
 
-	TArray<FWorldStateProperty> WSPropList;
+	
 	
 	uint32 GetNumWorldStateDifferences(UWorldState* OtherWorldState);
 	uint32 GetNumUnsatisfiedWorldStateProps(UWorldState* OtherWorldState);
+
+	FWorldStateProperty* GetWSProp(const uint8 Flag);
+	FWorldStateProperty* GetWSProp(const EWorldStateEffect Effect);
+
+protected:
+
+	FEffectFlags EffectFlags;
+	TArray<FWorldStateProperty> WSPropList;
 };
